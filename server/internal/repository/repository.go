@@ -5,6 +5,10 @@ import (
 	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 type Repository struct {
@@ -24,16 +28,19 @@ func (r *Repository) CloseDB() {
 	r.db.Close()
 }
 
-func (r *Repository) CreateBottlesTable() error {
-	if _, err := r.db.Exec(`
-		CREATE TABLE IF NOT EXISTS bottles (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-		);
-	`); err != nil {
-		return fmt.Errorf("CreateBottlesTable(): %v", err)
+func (r *Repository) RunMigrations() error {
+	driver, err := sqlite3.WithInstance(r.db, &sqlite3.Config{})
+	if err != nil {
+		return fmt.Errorf("failed to create migrate driver: %v", err)
+	}
+
+	m, err := migrate.NewWithDatabaseInstance("file://./internal/database/migrations", "sqlite3", driver)
+	if err != nil {
+		return fmt.Errorf("failed to create migrate instance: %v", err)
+	}
+
+	if err := m.Up(); err != nil {
+		return fmt.Errorf("failed to run migrations: %v", err)
 	}
 
 	return nil
