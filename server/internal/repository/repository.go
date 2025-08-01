@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -9,6 +11,7 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	"github.com/nguyenjessev/liquor-locker/internal/models"
 )
 
 type Repository struct {
@@ -44,4 +47,24 @@ func (r *Repository) RunMigrations() error {
 	}
 
 	return nil
+}
+
+var ErrNilBottle = errors.New("bottle cannot be nil")
+
+func (r *Repository) CreateBottle(ctx context.Context, bottle *models.Bottle) (*models.Bottle, error) {
+	if bottle == nil {
+		return nil, ErrNilBottle
+	}
+
+	query := `
+		INSERT INTO bottles (name, created_at, updated_at)
+		VALUES (?, NOW(), NOW())
+		RETURNING id, created_at, updated_at`
+
+	err := r.db.QueryRowContext(ctx, query, bottle.Name).Scan(&bottle.ID, &bottle.CreatedAt, &bottle.UpdatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create bottle: %v", err)
+	}
+
+	return bottle, nil
 }
