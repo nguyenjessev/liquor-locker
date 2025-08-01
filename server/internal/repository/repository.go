@@ -39,7 +39,7 @@ func (r *Repository) RunMigrations() error {
 		return fmt.Errorf("failed to create migrate instance: %v", err)
 	}
 
-	if err := m.Up(); err != nil {
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		return fmt.Errorf("failed to run migrations: %v", err)
 	}
 
