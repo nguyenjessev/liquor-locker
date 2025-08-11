@@ -20,8 +20,10 @@ func setupTestRepository(t *testing.T) *Repository {
 		CREATE TABLE bottles (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,
+			opened BOOLEAN NOT NULL DEFAULT FALSE,
 			created_at DATETIME NOT NULL,
-			updated_at DATETIME NOT NULL
+			updated_at DATETIME NOT NULL,
+			open_date DATETIME
 		)`
 
 	if _, err := db.Exec(createTableSQL); err != nil {

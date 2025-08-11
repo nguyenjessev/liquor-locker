@@ -33,7 +33,9 @@ func (h *BottleHandler) CreateBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bottle := &models.Bottle{
-		Name: req.Name,
+		Name:     req.Name,
+		Opened:   req.Opened,
+		OpenDate: req.OpenDate,
 	}
 
 	createdBottle, err := h.repo.CreateBottle(r.Context(), bottle)
@@ -50,6 +52,8 @@ func (h *BottleHandler) CreateBottle(w http.ResponseWriter, r *http.Request) {
 	response := models.BottleResponse{
 		ID:        createdBottle.ID,
 		Name:      createdBottle.Name,
+		Opened:    createdBottle.Opened,
+		OpenDate:  createdBottle.OpenDate,
 		CreatedAt: createdBottle.CreatedAt,
 		UpdatedAt: createdBottle.UpdatedAt,
 	}
@@ -95,6 +99,8 @@ func (h *BottleHandler) GetBottle(w http.ResponseWriter, r *http.Request) {
 	response := models.BottleResponse{
 		ID:        bottle.ID,
 		Name:      bottle.Name,
+		Opened:    bottle.Opened,
+		OpenDate:  bottle.OpenDate,
 		CreatedAt: bottle.CreatedAt,
 		UpdatedAt: bottle.UpdatedAt,
 	}
@@ -157,6 +163,8 @@ func (h *BottleHandler) GetAllBottles(w http.ResponseWriter, r *http.Request) {
 		responses = append(responses, models.BottleResponse{
 			ID:        bottle.ID,
 			Name:      bottle.Name,
+			Opened:    bottle.Opened,
+			OpenDate:  bottle.OpenDate,
 			CreatedAt: bottle.CreatedAt,
 			UpdatedAt: bottle.UpdatedAt,
 		})

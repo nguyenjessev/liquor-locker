@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { BottleCard } from "./BottleCard";
+import type { Bottle } from "@/types/bottle";
 import {
 	Card,
 	CardContent,
@@ -9,13 +13,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 
-interface Bottle {
-	id: number;
-	name: string;
-	created_at: string;
-	updated_at: string;
-}
-
 const API_BASE_URL =
 	import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 const API_KEY = import.meta.env.VITE_API_KEY || "";
@@ -23,6 +20,8 @@ const API_KEY = import.meta.env.VITE_API_KEY || "";
 export function BottleManager() {
 	const [bottles, setBottles] = useState<Bottle[]>([]);
 	const [newBottleName, setNewBottleName] = useState("");
+	const [isOpened, setIsOpened] = useState(false);
+	const [openDate, setOpenDate] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -73,10 +72,22 @@ export function BottleManager() {
 			if (API_KEY) {
 				headers["X-API-Key"] = API_KEY;
 			}
+
+			const requestBody: { name: string; opened: boolean; open_date?: string } =
+				{
+					name: newBottleName.trim(),
+					opened: isOpened,
+				};
+
+			// Only include open_date if the bottle is marked as opened and a date is provided
+			if (isOpened && openDate) {
+				requestBody.open_date = new Date(openDate).toISOString();
+			}
+
 			const response = await fetch(`${API_BASE_URL}/bottles`, {
 				method: "POST",
 				headers,
-				body: JSON.stringify({ name: newBottleName.trim() }),
+				body: JSON.stringify(requestBody),
 			});
 
 			if (!response.ok) {
@@ -87,6 +98,8 @@ export function BottleManager() {
 			const newBottle = await response.json();
 			setBottles([newBottle, ...bottles]);
 			setNewBottleName("");
+			setIsOpened(false);
+			setOpenDate("");
 		} catch (err) {
 			if (err instanceof Error) {
 				// Try to extract server error message
@@ -158,18 +171,50 @@ export function BottleManager() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<form onSubmit={addBottle} className="flex gap-4">
-						<Input
-							type="text"
-							placeholder="Enter bottle name..."
-							value={newBottleName}
-							onChange={(e) => setNewBottleName(e.target.value)}
-							className="flex-1"
-							disabled={loading}
-						/>
-						<Button type="submit" disabled={loading || !newBottleName.trim()}>
-							{loading ? "Adding..." : "Add Bottle"}
-						</Button>
+					<form onSubmit={addBottle} className="space-y-4">
+						<div className="flex gap-4">
+							<Input
+								type="text"
+								placeholder="Enter bottle name..."
+								value={newBottleName}
+								onChange={(e) => setNewBottleName(e.target.value)}
+								className="flex-1"
+								disabled={loading}
+							/>
+							<Button type="submit" disabled={loading || !newBottleName.trim()}>
+								{loading ? "Adding..." : "Add Bottle"}
+							</Button>
+						</div>
+
+						<div className="space-y-3">
+							<div className="flex items-center space-x-2">
+								<Checkbox
+									id="is-opened"
+									checked={isOpened}
+									onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+										setIsOpened(e.target.checked)
+									}
+									disabled={loading}
+								/>
+								<Label htmlFor="is-opened">This bottle is already opened</Label>
+							</div>
+
+							{isOpened && (
+								<div className="ml-6">
+									<Label htmlFor="open-date" className="block mb-2">
+										Open date (optional)
+									</Label>
+									<Input
+										id="open-date"
+										type="datetime-local"
+										value={openDate}
+										onChange={(e) => setOpenDate(e.target.value)}
+										disabled={loading}
+										className="w-full max-w-sm"
+									/>
+								</div>
+							)}
+						</div>
 					</form>
 				</CardContent>
 			</Card>
@@ -207,33 +252,16 @@ export function BottleManager() {
 						</p>
 					) : (
 						<div className="space-y-3">
-							{bottles.map((bottle) => (
-								<div
-									key={bottle.id}
-									className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-								>
-									<div className="flex-1">
-										<h3 className="font-medium">{bottle.name}</h3>
-										<p className="text-sm text-muted-foreground">
-											Added{" "}
-											{(() => {
-												const date = new Date(bottle.created_at);
-												return date.toString() === "Invalid Date"
-													? "Invalid Date"
-													: date.toLocaleDateString();
-											})()}
-										</p>
-									</div>
-									<Button
-										variant="destructive"
-										size="sm"
-										onClick={() => deleteBottle(bottle.id)}
-										disabled={loading}
-									>
-										Delete
-									</Button>
-								</div>
-							))}
+							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+								{bottles.map((bottle) => (
+									<BottleCard
+										key={bottle.id}
+										bottle={bottle}
+										onDelete={deleteBottle}
+										loading={loading}
+									/>
+								))}
+							</div>
 						</div>
 					)}
 				</CardContent>
