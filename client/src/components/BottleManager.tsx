@@ -196,7 +196,7 @@ export function BottleManager() {
 									}
 									disabled={loading}
 								/>
-								<Label htmlFor="is-opened">This bottle is already opened</Label>
+								<Label htmlFor="is-opened">Already opened</Label>
 							</div>
 
 							{isOpened && (

@@ -30,7 +30,7 @@ export function BottleCard({
 						<span className="text-sm font-medium">Status:</span>
 						<span
 							className={`text-sm font-medium ${
-								bottle.opened ? "text-green-500" : "text-red-600"
+								bottle.opened ? "text-green-700/80" : "text-red-700/80"
 							}`}
 						>
 							{bottle.opened ? "Opened" : "Unopened"}
