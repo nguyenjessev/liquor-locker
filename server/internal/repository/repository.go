@@ -68,3 +68,24 @@ func (r *Repository) CreateBottle(ctx context.Context, bottle *models.Bottle) (*
 
 	return bottle, nil
 }
+
+var ErrBottleNotFound = errors.New("bottle not found")
+
+func (r *Repository) GetBottleByID(ctx context.Context, id int) (*models.Bottle, error) {
+	query := `
+		SELECT id, name, created_at, updated_at
+		FROM bottles
+		WHERE id = ?`
+
+	var bottle models.Bottle
+	err := r.db.QueryRowContext(ctx, query, id).Scan(&bottle.ID, &bottle.Name, &bottle.CreatedAt, &bottle.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrBottleNotFound
+		}
+
+		return nil, fmt.Errorf("failed to get bottle by ID: %v", err)
+	}
+
+	return &bottle, nil
+}
