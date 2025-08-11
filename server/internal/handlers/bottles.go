@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -36,11 +38,12 @@ func (h *BottleHandler) CreateBottle(w http.ResponseWriter, r *http.Request) {
 
 	createdBottle, err := h.repo.CreateBottle(r.Context(), bottle)
 	if err != nil {
+		log.Printf("ERROR: CreateBottle failed - bottle=%+v, error=%v", bottle, err)
 		if err == repository.ErrNilBottle {
 			http.Error(w, "Invalid bottle data", http.StatusBadRequest)
 			return
 		}
-		http.Error(w, "Failed to create bottle", http.StatusInternalServerError)
+		http.Error(w, "Unable to save bottle. Please try again.", http.StatusInternalServerError)
 		return
 	}
 
@@ -80,11 +83,12 @@ func (h *BottleHandler) GetBottle(w http.ResponseWriter, r *http.Request) {
 
 	bottle, err := h.repo.GetBottleByID(r.Context(), id)
 	if err != nil {
+		log.Printf("ERROR: GetBottleByID failed - id=%d, error=%v", id, err)
 		if err == repository.ErrBottleNotFound {
-			http.Error(w, "Bottle not found", http.StatusNotFound)
+			http.Error(w, fmt.Sprintf("Bottle with ID %d not found", id), http.StatusNotFound)
 			return
 		}
-		http.Error(w, "Failed to get bottle", http.StatusInternalServerError)
+		http.Error(w, "Unable to retrieve bottle. Please try again.", http.StatusInternalServerError)
 		return
 	}
 
@@ -123,13 +127,44 @@ func (h *BottleHandler) DeleteBottle(w http.ResponseWriter, r *http.Request) {
 
 	err = h.repo.DeleteBottleByID(r.Context(), id)
 	if err != nil {
+		log.Printf("ERROR: DeleteBottleByID failed - id=%d, error=%v", id, err)
 		if err == repository.ErrBottleNotFound {
-			http.Error(w, "Bottle not found", http.StatusNotFound)
+			http.Error(w, fmt.Sprintf("Bottle with ID %d not found", id), http.StatusNotFound)
 			return
 		}
-		http.Error(w, "Failed to delete bottle", http.StatusInternalServerError)
+		http.Error(w, "Unable to delete bottle. Please try again.", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *BottleHandler) GetAllBottles(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	bottles, err := h.repo.GetAllBottles(r.Context())
+	if err != nil {
+		log.Printf("ERROR: GetAllBottles failed - error=%v", err)
+		http.Error(w, "Unable to load bottles. Please refresh the page.", http.StatusInternalServerError)
+		return
+	}
+
+	responses := make([]models.BottleResponse, 0)
+	for _, bottle := range bottles {
+		responses = append(responses, models.BottleResponse{
+			ID:        bottle.ID,
+			Name:      bottle.Name,
+			CreatedAt: bottle.CreatedAt,
+			UpdatedAt: bottle.UpdatedAt,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(responses); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }

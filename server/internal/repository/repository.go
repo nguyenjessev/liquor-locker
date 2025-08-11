@@ -109,3 +109,33 @@ func (r *Repository) DeleteBottleByID(ctx context.Context, id int) error {
 
 	return nil
 }
+
+func (r *Repository) GetAllBottles(ctx context.Context) ([]*models.Bottle, error) {
+	query := `
+		SELECT id, name, created_at, updated_at
+		FROM bottles
+		ORDER BY created_at DESC`
+
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get bottles: %v", err)
+	}
+	defer rows.Close()
+
+	var bottles []*models.Bottle
+	for rows.Next() {
+		var bottle models.Bottle
+		err := rows.Scan(&bottle.ID, &bottle.Name, &bottle.CreatedAt, &bottle.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan bottle: %v", err)
+		}
+
+		bottles = append(bottles, &bottle)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over bottles: %v", err)
+	}
+
+	return bottles, nil
+}
