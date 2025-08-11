@@ -58,7 +58,7 @@ func (r *Repository) CreateBottle(ctx context.Context, bottle *models.Bottle) (*
 
 	query := `
 		INSERT INTO bottles (name, created_at, updated_at)
-		VALUES (?, NOW(), NOW())
+		VALUES (?, datetime('now'), datetime('now'))
 		RETURNING id, created_at, updated_at`
 
 	err := r.db.QueryRowContext(ctx, query, bottle.Name).Scan(&bottle.ID, &bottle.CreatedAt, &bottle.UpdatedAt)
