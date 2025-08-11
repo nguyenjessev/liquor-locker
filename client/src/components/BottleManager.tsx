@@ -16,7 +16,9 @@ interface Bottle {
 	updated_at: string;
 }
 
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL =
+	import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_KEY = import.meta.env.VITE_API_KEY || "";
 
 export function BottleManager() {
 	const [bottles, setBottles] = useState<Bottle[]>([]);
@@ -29,7 +31,11 @@ export function BottleManager() {
 		try {
 			setLoading(true);
 			setError(null);
-			const response = await fetch(`${API_BASE_URL}/bottles`);
+			const headers: Record<string, string> = {};
+			if (API_KEY) {
+				headers["X-API-Key"] = API_KEY;
+			}
+			const response = await fetch(`${API_BASE_URL}/bottles`, { headers });
 			if (!response.ok) {
 				const errorText = await response.text();
 				throw new Error(errorText || `Server error: ${response.status}`);
@@ -61,11 +67,15 @@ export function BottleManager() {
 		try {
 			setLoading(true);
 			setError(null);
+			const headers: Record<string, string> = {
+				"Content-Type": "application/json",
+			};
+			if (API_KEY) {
+				headers["X-API-Key"] = API_KEY;
+			}
 			const response = await fetch(`${API_BASE_URL}/bottles`, {
 				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
+				headers,
 				body: JSON.stringify({ name: newBottleName.trim() }),
 			});
 
@@ -97,8 +107,13 @@ export function BottleManager() {
 		try {
 			setLoading(true);
 			setError(null);
+			const headers: Record<string, string> = {};
+			if (API_KEY) {
+				headers["X-API-Key"] = API_KEY;
+			}
 			const response = await fetch(`${API_BASE_URL}/bottles/${id}`, {
 				method: "DELETE",
+				headers,
 			});
 
 			if (!response.ok) {
