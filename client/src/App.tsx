@@ -1,8 +1,8 @@
-import { BottleManager } from "./components/BottleManager";
+import { Layout } from "./components/Layout";
 import "./App.css";
 
 function App() {
-	return <BottleManager />;
+	return <Layout />;
 }
 
 export default App;

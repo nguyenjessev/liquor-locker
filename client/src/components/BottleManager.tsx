@@ -8,7 +8,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface Bottle {
 	id: number;
@@ -146,10 +145,7 @@ export function BottleManager() {
 	return (
 		<div className="container mx-auto max-w-4xl p-6">
 			<div className="mb-8">
-				<div className="flex items-center justify-between mb-2">
-					<h1 className="text-3xl font-bold">Liquor Locker</h1>
-					<ThemeToggle />
-				</div>
+				<h1 className="text-3xl font-bold mb-2">Bottles</h1>
 				<p className="text-muted-foreground">Manage your bottle collection</p>
 			</div>
 
