@@ -163,3 +163,83 @@ func TestCreateBottle_MultipleBottles(t *testing.T) {
 		t.Errorf("Expected %d bottles in database, got %d", expectedCount, totalCount)
 	}
 }
+
+func TestGetBottleByID(t *testing.T) {
+	repo := setupTestRepository(t)
+	defer repo.CloseDB()
+
+	ctx := context.Background()
+
+	// First, create a test bottle to retrieve
+	bottle := &models.Bottle{Name: "Test Bottle"}
+	createdBottle, err := repo.CreateBottle(ctx, bottle)
+	if err != nil {
+		t.Fatalf("Failed to create test bottle: %v", err)
+	}
+
+	tests := []struct {
+		name       string
+		id         int
+		wantBottle *models.Bottle
+		wantErr    error
+	}{
+		{
+			name:       "existing bottle",
+			id:         int(createdBottle.ID),
+			wantBottle: createdBottle,
+			wantErr:    nil,
+		},
+		{
+			name:       "non-existent bottle",
+			id:         99999,
+			wantBottle: nil,
+			wantErr:    ErrBottleNotFound,
+		},
+		{
+			name:       "zero id",
+			id:         0,
+			wantBottle: nil,
+			wantErr:    ErrBottleNotFound,
+		},
+		{
+			name:       "negative id",
+			id:         -1,
+			wantBottle: nil,
+			wantErr:    ErrBottleNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := repo.GetBottleByID(ctx, tt.id)
+
+			if tt.wantErr != nil {
+				if err != tt.wantErr {
+					t.Errorf("GetBottleByID() error = %v, want %v", err, tt.wantErr)
+				}
+				if result != nil {
+					t.Errorf("GetBottleByID() result = %v, want nil", result)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("GetBottleByID() error = %v, want nil", err)
+				}
+				if result == nil {
+					t.Fatal("GetBottleByID() returned nil bottle")
+				}
+				if result.ID != tt.wantBottle.ID {
+					t.Errorf("GetBottleByID() ID = %v, want %v", result.ID, tt.wantBottle.ID)
+				}
+				if result.Name != tt.wantBottle.Name {
+					t.Errorf("GetBottleByID() Name = %v, want %v", result.Name, tt.wantBottle.Name)
+				}
+				if result.CreatedAt.IsZero() {
+					t.Error("GetBottleByID() did not populate CreatedAt")
+				}
+				if result.UpdatedAt.IsZero() {
+					t.Error("GetBottleByID() did not populate UpdatedAt")
+				}
+			}
+		})
+	}
+}
