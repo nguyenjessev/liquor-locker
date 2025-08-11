@@ -243,3 +243,102 @@ func TestGetBottleByID(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteBottleByID(t *testing.T) {
+	repo := setupTestRepository(t)
+	defer repo.CloseDB()
+
+	ctx := context.Background()
+
+	// First, create a test bottle to delete
+	bottle := &models.Bottle{Name: "Test Bottle to Delete"}
+	createdBottle, err := repo.CreateBottle(ctx, bottle)
+	if err != nil {
+		t.Fatalf("Failed to create test bottle: %v", err)
+	}
+
+	tests := []struct {
+		name    string
+		id      int
+		wantErr error
+	}{
+		{
+			name:    "existing bottle",
+			id:      int(createdBottle.ID),
+			wantErr: nil,
+		},
+		{
+			name:    "non-existent bottle",
+			id:      99999,
+			wantErr: ErrBottleNotFound,
+		},
+		{
+			name:    "zero id",
+			id:      0,
+			wantErr: ErrBottleNotFound,
+		},
+		{
+			name:    "negative id",
+			id:      -1,
+			wantErr: ErrBottleNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := repo.DeleteBottleByID(ctx, tt.id)
+
+			if tt.wantErr != nil {
+				if err != tt.wantErr {
+					t.Errorf("DeleteBottleByID() error = %v, want %v", err, tt.wantErr)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("DeleteBottleByID() error = %v, want nil", err)
+				}
+
+				// Verify the bottle was actually deleted
+				_, getErr := repo.GetBottleByID(ctx, tt.id)
+				if getErr != ErrBottleNotFound {
+					t.Errorf("Bottle should be deleted but still exists")
+				}
+
+				// Verify it's not in the database
+				var count int
+				countErr := repo.db.QueryRow("SELECT COUNT(*) FROM bottles WHERE id = ?", tt.id).Scan(&count)
+				if countErr != nil {
+					t.Fatalf("Failed to query database: %v", countErr)
+				}
+				if count != 0 {
+					t.Errorf("Expected 0 bottles with ID %d in database, got %d", tt.id, count)
+				}
+			}
+		})
+	}
+}
+
+func TestDeleteBottleByID_MultipleDeletes(t *testing.T) {
+	repo := setupTestRepository(t)
+	defer repo.CloseDB()
+
+	ctx := context.Background()
+
+	// Create a bottle and delete it
+	bottle := &models.Bottle{Name: "Test Bottle"}
+	createdBottle, err := repo.CreateBottle(ctx, bottle)
+	if err != nil {
+		t.Fatalf("Failed to create test bottle: %v", err)
+	}
+
+	// First delete should succeed
+	err = repo.DeleteBottleByID(ctx, int(createdBottle.ID))
+	if err != nil {
+		t.Fatalf("First delete failed: %v", err)
+	}
+
+	// Second delete should fail with ErrBottleNotFound
+	err = repo.DeleteBottleByID(ctx, int(createdBottle.ID))
+	if err != ErrBottleNotFound {
+		t.Errorf("Second delete error = %v, want %v", err, ErrBottleNotFound)
+	}
+}

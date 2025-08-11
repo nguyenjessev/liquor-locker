@@ -89,3 +89,23 @@ func (r *Repository) GetBottleByID(ctx context.Context, id int) (*models.Bottle,
 
 	return &bottle, nil
 }
+
+func (r *Repository) DeleteBottleByID(ctx context.Context, id int) error {
+	query := `DELETE FROM bottles WHERE id = ?`
+
+	result, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete bottle: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %v", err)
+	}
+
+	if rowsAffected == 0 {
+		return ErrBottleNotFound
+	}
+
+	return nil
+}

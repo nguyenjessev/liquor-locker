@@ -39,6 +39,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.bottleHandler.CreateBottle(w, r)
 	case strings.HasPrefix(path, "/bottles/") && r.Method == http.MethodGet:
 		s.bottleHandler.GetBottle(w, r)
+	case strings.HasPrefix(path, "/bottles/") && r.Method == http.MethodDelete:
+		s.bottleHandler.DeleteBottle(w, r)
 	case path == "/health":
 		s.handleHealth(w, r)
 	default:
