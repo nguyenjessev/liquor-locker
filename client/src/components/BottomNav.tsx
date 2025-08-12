@@ -22,7 +22,7 @@ export function BottomNav({ activeSection, onSectionChange }: BottomNavProps) {
 	];
 
 	return (
-		<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t shadow-lg">
+		<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t md:border-t-0 shadow-lg">
 			<div className="flex items-center justify-around p-1">
 				{sections.map((section) => {
 					const Icon = section.icon;

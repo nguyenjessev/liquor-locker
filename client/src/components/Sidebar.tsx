@@ -25,12 +25,12 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 	];
 
 	return (
-		<Card className="h-screen w-64 p-4 rounded-none border-r">
+		<Card className="h-screen w-64 p-4 rounded-none border-r flex flex-col">
 			<div className="mb-6">
 				<h2 className="text-lg font-semibold">Liquor Locker</h2>
 			</div>
 
-			<div className="flex flex-col h-[calc(100%-8rem)]">
+			<div className="flex-1 flex flex-col">
 				<nav className="space-y-2">
 					{mainSections.map((section) => {
 						const Icon = section.icon;
@@ -52,7 +52,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 					})}
 				</nav>
 
-				<nav className="mt-auto">
+				<nav className="mt-auto space-y-2">
 					{bottomSections.map((section) => {
 						const Icon = section.icon;
 						const isActive = activeSection === section.id;
@@ -75,12 +75,8 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 			</div>
 
 			{/* Version number at bottom */}
-			<div className="absolute bottom-0 left-0 right-0 p-4">
-				<div className="border-t pt-4">
-					<div className="text-xs text-muted-foreground">
-						Liquor Locker v1.0
-					</div>
-				</div>
+			<div className="border-t mt-4 pt-4">
+				<div className="text-xs text-muted-foreground">Liquor Locker v1.0</div>
 			</div>
 		</Card>
 	);

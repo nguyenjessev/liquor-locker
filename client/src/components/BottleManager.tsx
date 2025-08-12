@@ -205,7 +205,7 @@ export function BottleManager() {
 						</div>
 
 						<div className="space-y-3">
-							<div className="space-y-4">
+							<div>
 								<div>
 									<Label htmlFor="purchase-date" className="block mb-2">
 										Purchase date (optional)
@@ -220,7 +220,7 @@ export function BottleManager() {
 									/>
 								</div>
 
-								<div className="flex items-center space-x-2">
+								<div className="flex items-center space-x-2 mt-4">
 									<Checkbox
 										id="is-opened"
 										checked={isOpened}
@@ -232,11 +232,16 @@ export function BottleManager() {
 									<Label htmlFor="is-opened">Already opened</Label>
 								</div>
 
-								{isOpened && (
-									<div className="ml-6">
-										<Label htmlFor="open-date" className="block mb-2">
-											Open date (optional)
-										</Label>
+								<div
+									className="overflow-hidden transition-[max-height,opacity,margin] duration-300 ease-in-out"
+									style={{
+										maxHeight: isOpened ? "80px" : "0",
+										marginTop: isOpened ? "1rem" : "0",
+										opacity: isOpened ? 1 : 0,
+									}}
+								>
+									<div className="ml-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+										<Label htmlFor="open-date">Open date (optional)</Label>
 										<Input
 											id="open-date"
 											type="date"
@@ -246,7 +251,7 @@ export function BottleManager() {
 											className="w-48"
 										/>
 									</div>
-								)}
+								</div>
 							</div>
 						</div>
 					</form>
