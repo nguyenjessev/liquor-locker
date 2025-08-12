@@ -381,7 +381,7 @@ export function BottleManager() {
 					<CardDescription>
 						{bottles.length === 0
 							? "No bottles in your collection yet"
-							: "Click delete to remove a bottle from your collection"}
+							: "Click a bottle to edit its details"}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
