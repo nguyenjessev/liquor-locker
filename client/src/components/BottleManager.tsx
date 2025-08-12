@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { BottleCard } from "./BottleCard";
+import { BottleEditModal } from "./BottleEditModal";
 import type { Bottle } from "@/types/bottle";
 import {
 	Card,
@@ -25,6 +26,8 @@ export function BottleManager() {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [purchaseDate, setPurchaseDate] = useState("");
+	const [selectedBottle, setSelectedBottle] = useState<Bottle | null>(null);
+	const [editModalOpen, setEditModalOpen] = useState(false);
 
 	// Fetch all bottles
 	const fetchBottles = async () => {
@@ -297,6 +300,10 @@ export function BottleManager() {
 										key={bottle.id}
 										bottle={bottle}
 										onDelete={deleteBottle}
+										onEdit={(bottle) => {
+											setSelectedBottle(bottle);
+											setEditModalOpen(true);
+										}}
 										loading={loading}
 									/>
 								))}
@@ -305,6 +312,12 @@ export function BottleManager() {
 					)}
 				</CardContent>
 			</Card>
+
+			<BottleEditModal
+				bottle={selectedBottle}
+				open={editModalOpen}
+				onOpenChange={setEditModalOpen}
+			/>
 		</div>
 	);
 }

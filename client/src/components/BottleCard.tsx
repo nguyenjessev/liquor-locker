@@ -6,12 +6,14 @@ import type { Bottle } from "@/types/bottle";
 interface BottleCardProps {
 	bottle: Bottle;
 	onDelete: (id: number) => void;
+	onEdit: (bottle: Bottle) => void;
 	loading?: boolean;
 }
 
 export function BottleCard({
 	bottle,
 	onDelete,
+	onEdit,
 	loading = false,
 }: BottleCardProps) {
 	const formatDate = (dateString: string) => {
@@ -29,7 +31,10 @@ export function BottleCard({
 	};
 
 	return (
-		<Card className="hover:shadow-md transition-shadow relative">
+		<Card
+			className="hover:shadow-md transition-shadow relative cursor-pointer"
+			onClick={() => onEdit(bottle)}
+		>
 			<CardHeader>
 				<div className="flex justify-between items-start gap-2">
 					<div className="min-w-0 flex-1">
@@ -69,7 +74,10 @@ export function BottleCard({
 					<Button
 						variant="ghost"
 						size="sm"
-						onClick={() => onDelete(bottle.id)}
+						onClick={(e) => {
+							e.stopPropagation();
+							onDelete(bottle.id);
+						}}
 						disabled={loading}
 						className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive shrink-0 -mr-2"
 						aria-label={`Delete ${bottle.name}`}
