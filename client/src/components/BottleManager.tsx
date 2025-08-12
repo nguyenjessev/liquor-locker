@@ -81,7 +81,7 @@ export function BottleManager() {
 
 			// Only include open_date if the bottle is marked as opened and a date is provided
 			if (isOpened && openDate) {
-				requestBody.open_date = new Date(openDate).toISOString();
+				requestBody.open_date = openDate; // Use the date string directly (YYYY-MM-DD format)
 			}
 
 			const response = await fetch(`${API_BASE_URL}/bottles`, {
@@ -206,7 +206,7 @@ export function BottleManager() {
 									</Label>
 									<Input
 										id="open-date"
-										type="datetime-local"
+										type="date"
 										value={openDate}
 										onChange={(e) => setOpenDate(e.target.value)}
 										disabled={loading}

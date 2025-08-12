@@ -1,1 +1,1 @@
-ALTER TABLE bottles ADD COLUMN open_date DATETIME;
+ALTER TABLE bottles ADD COLUMN open_date DATE;
