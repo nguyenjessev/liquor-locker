@@ -131,7 +131,10 @@ export function BottleManager() {
 
 	// Delete a bottle
 	// Save bottle changes
-	const saveBottle = async (id: number, updates: { name: string }) => {
+	const saveBottle = async (
+		id: number,
+		updates: { name: string; opened: boolean; open_date?: string | null },
+	) => {
 		try {
 			setLoading(true);
 			setError(null);
@@ -145,7 +148,11 @@ export function BottleManager() {
 			const response = await fetch(`${API_BASE_URL}/bottles/${id}`, {
 				method: "PUT",
 				headers,
-				body: JSON.stringify(updates),
+				body: JSON.stringify({
+					name: updates.name,
+					opened: updates.opened,
+					open_date: updates.open_date,
+				}),
 			});
 
 			if (!response.ok) {

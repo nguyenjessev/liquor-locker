@@ -170,7 +170,9 @@ func (h *BottleHandler) UpdateBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bottle := &models.Bottle{
-		Name: req.Name,
+		Name:     req.Name,
+		Opened:   req.Opened,
+		OpenDate: req.OpenDate,
 	}
 
 	updatedBottle, err := h.repo.UpdateBottle(r.Context(), id, bottle)

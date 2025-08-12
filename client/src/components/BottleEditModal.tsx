@@ -14,7 +14,10 @@ interface BottleEditModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	onDelete: (id: number) => void;
-	onSave: (id: number, updates: { name: string }) => Promise<void>;
+	onSave: (
+		id: number,
+		updates: { name: string; opened: boolean; open_date?: string | null },
+	) => Promise<void>;
 	loading?: boolean;
 }
 
@@ -27,11 +30,13 @@ export function BottleEditModal({
 	loading = false,
 }: BottleEditModalProps) {
 	const [editedName, setEditedName] = useState("");
+	const [isOpened, setIsOpened] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 
 	useEffect(() => {
 		if (bottle) {
 			setEditedName(bottle.name);
+			setIsOpened(bottle.opened);
 		}
 	}, [bottle]);
 
@@ -40,7 +45,14 @@ export function BottleEditModal({
 
 		try {
 			setIsSaving(true);
-			await onSave(bottle.id, { name: editedName.trim() });
+			await onSave(bottle.id, {
+				name: editedName.trim(),
+				opened: isOpened,
+				open_date:
+					isOpened && !bottle.opened
+						? new Date().toISOString().split("T")[0]
+						: null,
+			});
 			onOpenChange(false);
 		} catch (error) {
 			console.error("Failed to save bottle:", error);
@@ -69,17 +81,47 @@ export function BottleEditModal({
 						<>
 							<div className="grid grid-cols-4 items-center gap-4">
 								<p className="font-medium">Status</p>
-								<p className="col-span-3">
-									<span
-										className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-											bottle.opened
-												? "bg-emerald-100/80 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-200"
-												: "bg-rose-100/80 text-rose-700 dark:bg-rose-800/50 dark:text-rose-200"
+								<button
+									onClick={() => setIsOpened(!isOpened)}
+									disabled={loading || isSaving}
+									className={`col-span-3 relative inline-flex h-9 w-[160px] items-center rounded-full border-2 border-border transition-colors duration-300 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+										isOpened ? "bg-secondary" : "bg-muted"
+									}`}
+									role="switch"
+									aria-checked={isOpened}
+								>
+									{/* Sliding thumb with text */}
+									<div
+										className={`relative z-10 flex h-7 w-[72px] items-center justify-center rounded-full bg-background shadow-md transition-all duration-300 ease-in-out ${
+											isOpened ? "translate-x-[80px]" : "translate-x-1"
 										}`}
 									>
-										{bottle.opened ? "Opened" : "Unopened"}
+										<span className="text-xs font-medium">
+											{isOpened ? "Opened" : "Unopened"}
+										</span>
+									</div>
+
+									{/* Background text */}
+									<div className="absolute inset-0 flex items-center justify-between px-4">
+										<span
+											className={`text-xs font-medium transition-opacity duration-300 ${
+												isOpened ? "opacity-50" : "opacity-0"
+											}`}
+										>
+											Unopened
+										</span>
+										<span
+											className={`text-xs font-medium transition-opacity duration-300 ${
+												isOpened ? "opacity-0" : "opacity-50"
+											}`}
+										>
+											Opened
+										</span>
+									</div>
+									<span className="sr-only">
+										{isOpened ? "Mark as unopened" : "Mark as opened"}
 									</span>
-								</p>
+								</button>
 							</div>
 							{bottle.purchase_date && (
 								<div className="grid grid-cols-4 items-center gap-4">
@@ -120,7 +162,7 @@ export function BottleEditModal({
 								loading ||
 								isSaving ||
 								!editedName.trim() ||
-								editedName === bottle.name
+								(editedName === bottle.name && isOpened === bottle.opened)
 							}
 						>
 							{isSaving ? "Saving..." : "Save Changes"}
