@@ -144,6 +144,65 @@ func (h *BottleHandler) DeleteBottle(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func (h *BottleHandler) UpdateBottle(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract ID from URL path
+	path := strings.TrimPrefix(r.URL.Path, "/bottles/")
+	if path == "" {
+		http.Error(w, "Bottle ID is required", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(path)
+	if err != nil {
+		http.Error(w, "Invalid bottle ID", http.StatusBadRequest)
+		return
+	}
+
+	var req models.UpdateBottleRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	bottle := &models.Bottle{
+		Name: req.Name,
+	}
+
+	updatedBottle, err := h.repo.UpdateBottle(r.Context(), id, bottle)
+	if err != nil {
+		log.Printf("ERROR: UpdateBottle failed - id=%d, updates=%+v, error=%v", id, bottle, err)
+		if err == repository.ErrBottleNotFound {
+			http.Error(w, fmt.Sprintf("Bottle with ID %d not found", id), http.StatusNotFound)
+			return
+		}
+		if err == repository.ErrNilBottle {
+			http.Error(w, "Invalid bottle data", http.StatusBadRequest)
+			return
+		}
+		http.Error(w, "Unable to update bottle. Please try again.", http.StatusInternalServerError)
+		return
+	}
+
+	response := models.BottleResponse{
+		ID:           updatedBottle.ID,
+		Name:         updatedBottle.Name,
+		Opened:       updatedBottle.Opened,
+		OpenDate:     updatedBottle.OpenDate,
+		PurchaseDate: updatedBottle.PurchaseDate,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+}
+
 func (h *BottleHandler) GetAllBottles(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { Bottle } from "@/types/bottle";
 import {
 	Dialog,
@@ -5,18 +7,47 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
 
 interface BottleEditModalProps {
 	bottle: Bottle | null;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	onDelete: (id: number) => void;
+	onSave: (id: number, updates: { name: string }) => Promise<void>;
+	loading?: boolean;
 }
 
 export function BottleEditModal({
 	bottle,
 	open,
 	onOpenChange,
+	onDelete,
+	onSave,
+	loading = false,
 }: BottleEditModalProps) {
+	const [editedName, setEditedName] = useState("");
+	const [isSaving, setIsSaving] = useState(false);
+
+	useEffect(() => {
+		if (bottle) {
+			setEditedName(bottle.name);
+		}
+	}, [bottle]);
+
+	const handleSave = async () => {
+		if (!bottle || !editedName.trim()) return;
+
+		try {
+			setIsSaving(true);
+			await onSave(bottle.id, { name: editedName.trim() });
+			onOpenChange(false);
+		} catch (error) {
+			console.error("Failed to save bottle:", error);
+		} finally {
+			setIsSaving(false);
+		}
+	};
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-[425px]">
@@ -26,7 +57,13 @@ export function BottleEditModal({
 				<div className="grid gap-4 py-4">
 					<div className="grid grid-cols-4 items-center gap-4">
 						<p className="font-medium">Name</p>
-						<p className="col-span-3">{bottle?.name}</p>
+						<div className="col-span-3">
+							<Input
+								value={editedName}
+								onChange={(e) => setEditedName(e.target.value)}
+								disabled={loading || isSaving}
+							/>
+						</div>
 					</div>
 					{bottle && (
 						<>
@@ -63,6 +100,33 @@ export function BottleEditModal({
 						</>
 					)}
 				</div>
+				{bottle && (
+					<div className="mt-4 flex justify-end gap-2">
+						<Button
+							variant="ghost"
+							onClick={() => {
+								onDelete(bottle.id);
+								onOpenChange(false);
+							}}
+							disabled={loading || isSaving}
+							className="text-destructive hover:text-destructive hover:bg-destructive/10"
+						>
+							Delete Bottle
+						</Button>
+						<Button
+							variant="default"
+							onClick={handleSave}
+							disabled={
+								loading ||
+								isSaving ||
+								!editedName.trim() ||
+								editedName === bottle.name
+							}
+						>
+							{isSaving ? "Saving..." : "Save Changes"}
+						</Button>
+					</div>
+				)}
 			</DialogContent>
 		</Dialog>
 	);

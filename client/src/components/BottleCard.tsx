@@ -1,21 +1,12 @@
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Bottle } from "@/types/bottle";
 
 interface BottleCardProps {
 	bottle: Bottle;
-	onDelete: (id: number) => void;
 	onEdit: (bottle: Bottle) => void;
-	loading?: boolean;
 }
 
-export function BottleCard({
-	bottle,
-	onDelete,
-	onEdit,
-	loading = false,
-}: BottleCardProps) {
+export function BottleCard({ bottle, onEdit }: BottleCardProps) {
 	const formatDate = (dateString: string) => {
 		// If the string is already in YYYY-MM-DD format, just return it formatted
 		if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
@@ -37,7 +28,7 @@ export function BottleCard({
 		>
 			<CardHeader>
 				<div className="flex justify-between items-start gap-2">
-					<div className="min-w-0 flex-1">
+					<div>
 						<div className="flex items-center gap-2 mb-2">
 							<div className="flex flex-wrap items-center gap-2">
 								<CardTitle className="text-lg break-words">
@@ -71,19 +62,6 @@ export function BottleCard({
 							</div>
 						)}
 					</div>
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={(e) => {
-							e.stopPropagation();
-							onDelete(bottle.id);
-						}}
-						disabled={loading}
-						className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive shrink-0 -mr-2"
-						aria-label={`Delete ${bottle.name}`}
-					>
-						<Trash2 className="h-4 w-4" />
-					</Button>
 				</div>
 			</CardHeader>
 		</Card>

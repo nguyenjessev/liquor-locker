@@ -130,6 +130,46 @@ export function BottleManager() {
 	};
 
 	// Delete a bottle
+	// Save bottle changes
+	const saveBottle = async (id: number, updates: { name: string }) => {
+		try {
+			setLoading(true);
+			setError(null);
+			const headers: Record<string, string> = {
+				"Content-Type": "application/json",
+			};
+			if (API_KEY) {
+				headers["X-API-Key"] = API_KEY;
+			}
+
+			const response = await fetch(`${API_BASE_URL}/bottles/${id}`, {
+				method: "PUT",
+				headers,
+				body: JSON.stringify(updates),
+			});
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(errorText || `Server error: ${response.status}`);
+			}
+
+			const updatedBottle = await response.json();
+			setBottles(bottles.map((b) => (b.id === id ? updatedBottle : b)));
+		} catch (err) {
+			if (err instanceof Error) {
+				const errorMessage = err.message.includes("Failed to update bottle")
+					? "Unable to update bottle. Please try again."
+					: err.message;
+				setError(errorMessage);
+			} else {
+				setError("Unable to update bottle. Please try again.");
+			}
+			throw err;
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const deleteBottle = async (id: number) => {
 		try {
 			setLoading(true);
@@ -299,12 +339,10 @@ export function BottleManager() {
 									<BottleCard
 										key={bottle.id}
 										bottle={bottle}
-										onDelete={deleteBottle}
 										onEdit={(bottle) => {
 											setSelectedBottle(bottle);
 											setEditModalOpen(true);
 										}}
-										loading={loading}
 									/>
 								))}
 							</div>
@@ -317,6 +355,9 @@ export function BottleManager() {
 				bottle={selectedBottle}
 				open={editModalOpen}
 				onOpenChange={setEditModalOpen}
+				onDelete={deleteBottle}
+				onSave={saveBottle}
+				loading={loading}
 			/>
 		</div>
 	);

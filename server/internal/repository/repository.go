@@ -139,3 +139,34 @@ func (r *Repository) GetAllBottles(ctx context.Context) ([]*models.Bottle, error
 
 	return bottles, nil
 }
+
+func (r *Repository) UpdateBottle(ctx context.Context, id int, updates *models.Bottle) (*models.Bottle, error) {
+	if updates == nil {
+		return nil, ErrNilBottle
+	}
+
+	query := `
+		UPDATE bottles
+		SET name = ?, updated_at = datetime('now')
+		WHERE id = ?
+		RETURNING id, name, opened, open_date, purchase_date, created_at, updated_at`
+
+	var bottle models.Bottle
+	err := r.db.QueryRowContext(ctx, query, updates.Name, id).Scan(
+		&bottle.ID,
+		&bottle.Name,
+		&bottle.Opened,
+		&bottle.OpenDate,
+		&bottle.PurchaseDate,
+		&bottle.CreatedAt,
+		&bottle.UpdatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrBottleNotFound
+		}
+		return nil, fmt.Errorf("failed to update bottle: %v", err)
+	}
+
+	return &bottle, nil
+}
