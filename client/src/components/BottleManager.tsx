@@ -210,7 +210,7 @@ export function BottleManager() {
 										value={openDate}
 										onChange={(e) => setOpenDate(e.target.value)}
 										disabled={loading}
-										className="w-full max-w-sm"
+										className="w-48"
 									/>
 								</div>
 							)}
