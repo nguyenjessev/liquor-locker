@@ -29,40 +29,46 @@ export function BottleCard({
 	};
 
 	return (
-		<Card className="hover:shadow-md transition-shadow relative flex flex-col">
-			<CardHeader className="pb-3 flex-1">
-				<CardTitle className="text-lg pr-8">{bottle.name}</CardTitle>
-				<div className="space-y-2">
-					<div className="grid grid-cols-[80px_1fr] items-center">
-						<span className="text-sm font-medium">Status</span>
-						<span
-							className={`text-sm font-medium ${
-								bottle.opened ? "text-green-700/80" : "text-red-700/80"
-							}`}
-						>
-							{bottle.opened ? "Opened" : "Unopened"}
-						</span>
+		<Card className="hover:shadow-md transition-shadow relative">
+			<CardHeader className="pb-3">
+				<div className="flex justify-between items-start gap-2">
+					<div className="min-w-0 flex-1">
+						<CardTitle className="text-lg pr-2 break-words">
+							{bottle.name}
+						</CardTitle>
+						<div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">
+							<div className="flex items-center gap-2 min-w-[140px]">
+								<span className="text-sm font-medium">Status:</span>
+								<span
+									className={`text-sm font-medium ${
+										bottle.opened ? "text-green-700/80" : "text-red-700/80"
+									}`}
+								>
+									{bottle.opened ? "Opened" : "Unopened"}
+								</span>
+							</div>
+							<div className="flex items-center gap-2">
+								<span className="text-sm font-medium">Opened:</span>
+								<span className="text-sm text-muted-foreground">
+									{bottle.opened && bottle.open_date
+										? formatDate(bottle.open_date)
+										: "—"}
+								</span>
+							</div>
+						</div>
 					</div>
-					<div className="grid grid-cols-[80px_1fr] items-center">
-						<span className="text-sm font-medium">Opened</span>
-						<span className="text-sm text-muted-foreground">
-							{bottle.opened && bottle.open_date
-								? formatDate(bottle.open_date)
-								: "—"}
-						</span>
-					</div>
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={() => onDelete(bottle.id)}
+						disabled={loading}
+						className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive shrink-0 -mr-2"
+						aria-label={`Delete ${bottle.name}`}
+					>
+						<Trash2 className="h-4 w-4" />
+					</Button>
 				</div>
 			</CardHeader>
-			<Button
-				variant="ghost"
-				size="sm"
-				onClick={() => onDelete(bottle.id)}
-				disabled={loading}
-				className="absolute bottom-2 right-2 h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-				aria-label={`Delete ${bottle.name}`}
-			>
-				<Trash2 className="h-4 w-4" />
-			</Button>
 		</Card>
 	);
 }

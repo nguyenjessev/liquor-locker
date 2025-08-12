@@ -161,9 +161,6 @@ export function BottleManager() {
 			<div className="mb-8">
 				<div className="flex items-center justify-between mb-2">
 					<h1 className="text-2xl md:text-3xl font-bold">Bottles</h1>
-					<div className="md:hidden">
-						<ThemeToggle />
-					</div>
 				</div>
 				<p className="text-muted-foreground">Manage your bottle collection</p>
 			</div>
@@ -263,7 +260,7 @@ export function BottleManager() {
 						</p>
 					) : (
 						<div className="space-y-3">
-							<div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+							<div className="flex flex-col gap-3">
 								{bottles.map((bottle) => (
 									<BottleCard
 										key={bottle.id}
