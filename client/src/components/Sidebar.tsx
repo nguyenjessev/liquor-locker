@@ -14,9 +14,6 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 			label: "Bottles",
 			icon: BottleWine,
 		},
-	];
-
-	const bottomSections = [
 		{
 			id: "settings",
 			label: "Settings",
@@ -33,27 +30,6 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 			<div className="flex-1 flex flex-col">
 				<nav className="space-y-2">
 					{mainSections.map((section) => {
-						const Icon = section.icon;
-						const isActive = activeSection === section.id;
-
-						return (
-							<Button
-								key={section.id}
-								variant={isActive ? "default" : "ghost"}
-								className={`w-full justify-start gap-3 ${
-									isActive ? "" : "hover:bg-accent hover:text-accent-foreground"
-								}`}
-								onClick={() => onSectionChange(section.id)}
-							>
-								<Icon className="h-4 w-4" />
-								{section.label}
-							</Button>
-						);
-					})}
-				</nav>
-
-				<nav className="mt-auto space-y-2">
-					{bottomSections.map((section) => {
 						const Icon = section.icon;
 						const isActive = activeSection === section.id;
 
