@@ -49,6 +49,14 @@ export function BottleCard({
 								</span>
 							</div>
 						</div>
+						{bottle.purchase_date && (
+							<div className="flex items-center gap-2">
+								<span className="text-sm font-medium">Purchased:</span>
+								<span className="text-sm text-muted-foreground">
+									{formatDate(bottle.purchase_date)}
+								</span>
+							</div>
+						)}
 						{bottle.opened && bottle.open_date && (
 							<div className="flex items-center gap-2">
 								<span className="text-sm font-medium">Opened:</span>

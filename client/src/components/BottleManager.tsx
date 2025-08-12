@@ -24,6 +24,7 @@ export function BottleManager() {
 	const [openDate, setOpenDate] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [purchaseDate, setPurchaseDate] = useState("");
 
 	// Fetch all bottles
 	const fetchBottles = async () => {
@@ -73,15 +74,24 @@ export function BottleManager() {
 				headers["X-API-Key"] = API_KEY;
 			}
 
-			const requestBody: { name: string; opened: boolean; open_date?: string } =
-				{
-					name: newBottleName.trim(),
-					opened: isOpened,
-				};
+			const requestBody: {
+				name: string;
+				opened: boolean;
+				open_date?: string;
+				purchase_date?: string;
+			} = {
+				name: newBottleName.trim(),
+				opened: isOpened,
+			};
 
 			// Only include open_date if the bottle is marked as opened and a date is provided
 			if (isOpened && openDate) {
 				requestBody.open_date = openDate; // Use the date string directly (YYYY-MM-DD format)
+			}
+
+			// Include purchase_date if provided
+			if (purchaseDate) {
+				requestBody.purchase_date = purchaseDate;
 			}
 
 			const response = await fetch(`${API_BASE_URL}/bottles`, {
@@ -100,6 +110,7 @@ export function BottleManager() {
 			setNewBottleName("");
 			setIsOpened(false);
 			setOpenDate("");
+			setPurchaseDate("");
 		} catch (err) {
 			if (err instanceof Error) {
 				// Try to extract server error message
@@ -194,33 +205,49 @@ export function BottleManager() {
 						</div>
 
 						<div className="space-y-3">
-							<div className="flex items-center space-x-2">
-								<Checkbox
-									id="is-opened"
-									checked={isOpened}
-									onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-										setIsOpened(e.target.checked)
-									}
-									disabled={loading}
-								/>
-								<Label htmlFor="is-opened">Already opened</Label>
-							</div>
-
-							{isOpened && (
-								<div className="ml-6">
-									<Label htmlFor="open-date" className="block mb-2">
-										Open date (optional)
+							<div className="space-y-4">
+								<div>
+									<Label htmlFor="purchase-date" className="block mb-2">
+										Purchase date (optional)
 									</Label>
 									<Input
-										id="open-date"
+										id="purchase-date"
 										type="date"
-										value={openDate}
-										onChange={(e) => setOpenDate(e.target.value)}
+										value={purchaseDate}
+										onChange={(e) => setPurchaseDate(e.target.value)}
 										disabled={loading}
 										className="w-48"
 									/>
 								</div>
-							)}
+
+								<div className="flex items-center space-x-2">
+									<Checkbox
+										id="is-opened"
+										checked={isOpened}
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+											setIsOpened(e.target.checked)
+										}
+										disabled={loading}
+									/>
+									<Label htmlFor="is-opened">Already opened</Label>
+								</div>
+
+								{isOpened && (
+									<div className="ml-6">
+										<Label htmlFor="open-date" className="block mb-2">
+											Open date (optional)
+										</Label>
+										<Input
+											id="open-date"
+											type="date"
+											value={openDate}
+											onChange={(e) => setOpenDate(e.target.value)}
+											disabled={loading}
+											className="w-48"
+										/>
+									</div>
+								)}
+							</div>
 						</div>
 					</form>
 				</CardContent>

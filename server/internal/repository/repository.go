@@ -57,11 +57,11 @@ func (r *Repository) CreateBottle(ctx context.Context, bottle *models.Bottle) (*
 	}
 
 	query := `
-		INSERT INTO bottles (name, opened, open_date, created_at, updated_at)
-		VALUES (?, ?, ?, datetime('now'), datetime('now'))
+		INSERT INTO bottles (name, opened, open_date, purchase_date, created_at, updated_at)
+		VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
 		RETURNING id, created_at, updated_at`
 
-	err := r.db.QueryRowContext(ctx, query, bottle.Name, bottle.Opened, bottle.OpenDate).Scan(&bottle.ID, &bottle.CreatedAt, &bottle.UpdatedAt)
+	err := r.db.QueryRowContext(ctx, query, bottle.Name, bottle.Opened, bottle.OpenDate, bottle.PurchaseDate).Scan(&bottle.ID, &bottle.CreatedAt, &bottle.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create bottle: %v", err)
 	}
@@ -73,12 +73,12 @@ var ErrBottleNotFound = errors.New("bottle not found")
 
 func (r *Repository) GetBottleByID(ctx context.Context, id int) (*models.Bottle, error) {
 	query := `
-		SELECT id, name, opened, open_date, created_at, updated_at
+		SELECT id, name, opened, open_date, purchase_date, created_at, updated_at
 		FROM bottles
 		WHERE id = ?`
 
 	var bottle models.Bottle
-	err := r.db.QueryRowContext(ctx, query, id).Scan(&bottle.ID, &bottle.Name, &bottle.Opened, &bottle.OpenDate, &bottle.CreatedAt, &bottle.UpdatedAt)
+	err := r.db.QueryRowContext(ctx, query, id).Scan(&bottle.ID, &bottle.Name, &bottle.Opened, &bottle.OpenDate, &bottle.PurchaseDate, &bottle.CreatedAt, &bottle.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrBottleNotFound
@@ -112,7 +112,7 @@ func (r *Repository) DeleteBottleByID(ctx context.Context, id int) error {
 
 func (r *Repository) GetAllBottles(ctx context.Context) ([]*models.Bottle, error) {
 	query := `
-		SELECT id, name, opened, open_date, created_at, updated_at
+		SELECT id, name, opened, open_date, purchase_date, created_at, updated_at
 		FROM bottles
 		ORDER BY created_at DESC`
 
@@ -125,7 +125,7 @@ func (r *Repository) GetAllBottles(ctx context.Context) ([]*models.Bottle, error
 	var bottles []*models.Bottle
 	for rows.Next() {
 		var bottle models.Bottle
-		err := rows.Scan(&bottle.ID, &bottle.Name, &bottle.Opened, &bottle.OpenDate, &bottle.CreatedAt, &bottle.UpdatedAt)
+		err := rows.Scan(&bottle.ID, &bottle.Name, &bottle.Opened, &bottle.OpenDate, &bottle.PurchaseDate, &bottle.CreatedAt, &bottle.UpdatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan bottle: %v", err)
 		}
