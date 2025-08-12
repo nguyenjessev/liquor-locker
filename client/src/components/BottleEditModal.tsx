@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Bottle } from "@/types/bottle";
+import { format, parseISO } from "date-fns";
 import {
 	Dialog,
 	DialogContent,
@@ -127,7 +128,7 @@ export function BottleEditModal({
 								<div className="grid grid-cols-4 items-center gap-4">
 									<p className="font-medium">Purchased</p>
 									<p className="col-span-3">
-										{new Date(bottle.purchase_date).toLocaleDateString()}
+										{format(parseISO(bottle.purchase_date), "PPP")}
 									</p>
 								</div>
 							)}
@@ -135,7 +136,7 @@ export function BottleEditModal({
 								<div className="grid grid-cols-4 items-center gap-4">
 									<p className="font-medium">Opened</p>
 									<p className="col-span-3">
-										{new Date(bottle.open_date).toLocaleDateString()}
+										{format(parseISO(bottle.open_date), "PPP")}
 									</p>
 								</div>
 							)}

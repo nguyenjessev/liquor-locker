@@ -1,4 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { format, parseISO, startOfDay } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -260,14 +268,36 @@ export function BottleManager() {
 									<Label htmlFor="purchase-date" className="block mb-2">
 										Purchase date (optional)
 									</Label>
-									<Input
-										id="purchase-date"
-										type="date"
-										value={purchaseDate}
-										onChange={(e) => setPurchaseDate(e.target.value)}
-										disabled={loading}
-										className="w-48"
-									/>
+									<Popover>
+										<PopoverTrigger asChild>
+											<Button
+												variant="outline"
+												className={`w-48 justify-start text-left font-normal ${!purchaseDate && "text-muted-foreground"}`}
+												disabled={loading}
+											>
+												<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+												{purchaseDate
+													? format(parseISO(purchaseDate), "PPP")
+													: "Pick a date"}
+											</Button>
+										</PopoverTrigger>
+										<PopoverContent className="w-auto p-0" align="start">
+											<Calendar
+												mode="single"
+												selected={
+													purchaseDate
+														? startOfDay(parseISO(purchaseDate))
+														: undefined
+												}
+												onSelect={(date) =>
+													setPurchaseDate(
+														date ? format(startOfDay(date), "yyyy-MM-dd") : "",
+													)
+												}
+												initialFocus
+											/>
+										</PopoverContent>
+									</Popover>
 								</div>
 
 								<div className="flex items-center space-x-2 mt-4">
@@ -292,14 +322,38 @@ export function BottleManager() {
 								>
 									<div className="ml-6 flex flex-wrap items-center gap-x-4 gap-y-2">
 										<Label htmlFor="open-date">Open date (optional)</Label>
-										<Input
-											id="open-date"
-											type="date"
-											value={openDate}
-											onChange={(e) => setOpenDate(e.target.value)}
-											disabled={loading}
-											className="w-48"
-										/>
+										<Popover>
+											<PopoverTrigger asChild>
+												<Button
+													variant="outline"
+													className={`w-48 justify-start text-left font-normal ${!openDate && "text-muted-foreground"}`}
+													disabled={loading}
+												>
+													<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+													{openDate
+														? format(parseISO(openDate), "PPP")
+														: "Pick a date"}
+												</Button>
+											</PopoverTrigger>
+											<PopoverContent className="w-auto p-0" align="start">
+												<Calendar
+													mode="single"
+													selected={
+														openDate
+															? startOfDay(parseISO(openDate))
+															: undefined
+													}
+													onSelect={(date) =>
+														setOpenDate(
+															date
+																? format(startOfDay(date), "yyyy-MM-dd")
+																: "",
+														)
+													}
+													initialFocus
+												/>
+											</PopoverContent>
+										</Popover>
 									</div>
 								</div>
 							</div>

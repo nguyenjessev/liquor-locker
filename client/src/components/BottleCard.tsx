@@ -1,5 +1,6 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Bottle } from "@/types/bottle";
+import { format, parseISO } from "date-fns";
 
 interface BottleCardProps {
 	bottle: Bottle;
@@ -8,17 +9,11 @@ interface BottleCardProps {
 
 export function BottleCard({ bottle, onEdit }: BottleCardProps) {
 	const formatDate = (dateString: string) => {
-		// If the string is already in YYYY-MM-DD format, just return it formatted
-		if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-			const [year, month, day] = dateString.split("-");
-			return new Date(`${year}-${month}-${day}T00:00:00`).toLocaleDateString();
+		try {
+			return format(parseISO(dateString), "PPP");
+		} catch {
+			return "Unknown date";
 		}
-
-		// Otherwise treat as a full timestamp
-		const date = new Date(dateString);
-		return date.toString() === "Invalid Date"
-			? "Unknown date"
-			: date.toLocaleDateString();
 	};
 
 	return (
