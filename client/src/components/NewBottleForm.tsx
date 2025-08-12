@@ -107,7 +107,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 											onSelect={(date) =>
 												setPurchaseDate(date ? startOfDay(date) : undefined)
 											}
-											initialFocus
+											autoFocus
 										/>
 									</PopoverContent>
 								</Popover>
@@ -153,7 +153,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 												onSelect={(date) =>
 													setOpenDate(date ? startOfDay(date) : undefined)
 												}
-												initialFocus
+												autoFocus
 											/>
 										</PopoverContent>
 									</Popover>

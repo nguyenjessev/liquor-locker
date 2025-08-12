@@ -32,14 +32,7 @@ export function BottleManager() {
 				throw new Error(errorText || `Server error: ${response.status}`);
 			}
 			const data = await response.json();
-			const bottlesWithDates = (data || []).map((bottle: Bottle) => ({
-				...bottle,
-				open_date: bottle.open_date ? new Date(bottle.open_date) : null,
-				purchase_date: bottle.purchase_date
-					? new Date(bottle.purchase_date)
-					: null,
-			}));
-			setBottles(bottlesWithDates);
+			setBottles(data || []);
 		} catch (err) {
 			if (err instanceof Error) {
 				const errorMessage = err.message.includes("Failed to fetch bottles")
@@ -76,11 +69,7 @@ export function BottleManager() {
 			const response = await fetch(`${API_BASE_URL}/bottles`, {
 				method: "POST",
 				headers,
-				body: JSON.stringify({
-					...bottle,
-					open_date: bottle.open_date?.toISOString(),
-					purchase_date: bottle.purchase_date?.toISOString(),
-				}),
+				body: JSON.stringify(bottle),
 			});
 
 			if (!response.ok) {
@@ -89,14 +78,7 @@ export function BottleManager() {
 			}
 
 			const newBottle = await response.json();
-			const bottleWithDates = {
-				...newBottle,
-				open_date: newBottle.open_date ? new Date(newBottle.open_date) : null,
-				purchase_date: newBottle.purchase_date
-					? new Date(newBottle.purchase_date)
-					: null,
-			};
-			setBottles([bottleWithDates, ...bottles]);
+			setBottles([newBottle, ...bottles]);
 		} catch (err) {
 			if (err instanceof Error) {
 				const errorMessage = err.message.includes("Failed to create bottle")
@@ -142,16 +124,7 @@ export function BottleManager() {
 			}
 
 			const updatedBottle = await response.json();
-			const bottleWithDates = {
-				...updatedBottle,
-				open_date: updatedBottle.open_date
-					? new Date(updatedBottle.open_date)
-					: null,
-				purchase_date: updatedBottle.purchase_date
-					? new Date(updatedBottle.purchase_date)
-					: null,
-			};
-			setBottles(bottles.map((b) => (b.id === id ? bottleWithDates : b)));
+			setBottles(bottles.map((b) => (b.id === id ? updatedBottle : b)));
 		} catch (err) {
 			if (err instanceof Error) {
 				const errorMessage = err.message.includes("Failed to update bottle")

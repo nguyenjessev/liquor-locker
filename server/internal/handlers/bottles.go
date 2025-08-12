@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/nguyenjessev/liquor-locker/internal/models"
 	"github.com/nguyenjessev/liquor-locker/internal/repository"
@@ -39,21 +38,11 @@ func (h *BottleHandler) CreateBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.OpenDate != nil {
-		parsedOpenDate, err := time.Parse(time.RFC3339, *req.OpenDate)
-		if err != nil {
-			http.Error(w, "invalid open_date format", http.StatusBadRequest)
-			return
-		}
-		bottle.OpenDate = &parsedOpenDate
+		bottle.OpenDate = req.OpenDate
 	}
 
 	if req.PurchaseDate != nil {
-		parsedPurchaseDate, err := time.Parse(time.RFC3339, *req.PurchaseDate)
-		if err != nil {
-			http.Error(w, "invalid purchase_date format", http.StatusBadRequest)
-			return
-		}
-		bottle.PurchaseDate = &parsedPurchaseDate
+		bottle.PurchaseDate = req.PurchaseDate
 	}
 
 	createdBottle, err := h.repo.CreateBottle(r.Context(), bottle)
@@ -192,12 +181,7 @@ func (h *BottleHandler) UpdateBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.OpenDate != nil {
-		parsedOpenDate, err := time.Parse(time.RFC3339, *req.OpenDate)
-		if err != nil {
-			http.Error(w, "invalid open_date format", http.StatusBadRequest)
-			return
-		}
-		updates.OpenDate = &parsedOpenDate
+		updates.OpenDate = req.OpenDate
 	}
 
 	updatedBottle, err := h.repo.UpdateBottle(r.Context(), id, updates)
