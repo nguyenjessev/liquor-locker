@@ -30,32 +30,33 @@ export function BottleCard({
 
 	return (
 		<Card className="hover:shadow-md transition-shadow relative">
-			<CardHeader className="pb-3">
+			<CardHeader>
 				<div className="flex justify-between items-start gap-2">
 					<div className="min-w-0 flex-1">
-						<CardTitle className="text-lg pr-2 break-words">
-							{bottle.name}
-						</CardTitle>
-						<div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">
-							<div className="flex items-center gap-2 min-w-[140px]">
-								<span className="text-sm font-medium">Status:</span>
+						<div className="flex items-center gap-2 mb-2">
+							<div className="flex flex-wrap items-center gap-2">
+								<CardTitle className="text-lg break-words">
+									{bottle.name}
+								</CardTitle>
 								<span
-									className={`text-sm font-medium ${
-										bottle.opened ? "text-green-700/80" : "text-red-700/80"
+									className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+										bottle.opened
+											? "bg-emerald-100/80 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-200"
+											: "bg-rose-100/80 text-rose-700 dark:bg-rose-800/50 dark:text-rose-200"
 									}`}
 								>
 									{bottle.opened ? "Opened" : "Unopened"}
 								</span>
 							</div>
+						</div>
+						{bottle.opened && bottle.open_date && (
 							<div className="flex items-center gap-2">
 								<span className="text-sm font-medium">Opened:</span>
 								<span className="text-sm text-muted-foreground">
-									{bottle.opened && bottle.open_date
-										? formatDate(bottle.open_date)
-										: "—"}
+									{formatDate(bottle.open_date)}
 								</span>
 							</div>
-						</div>
+						)}
 					</div>
 					<Button
 						variant="ghost"
