@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Bottle } from "@/types/bottle";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 
 interface BottleCardProps {
 	bottle: Bottle;
@@ -8,11 +8,11 @@ interface BottleCardProps {
 }
 
 export function BottleCard({ bottle, onEdit }: BottleCardProps) {
-	const formatDate = (dateString: string) => {
+	const formatDate = (date: Date | null) => {
 		try {
-			return format(parseISO(dateString), "PPP");
+			return date ? format(date, "PPP") : "Invalid date";
 		} catch {
-			return "Unknown date";
+			return "Invalid date";
 		}
 	};
 

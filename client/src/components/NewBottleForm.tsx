@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { format, parseISO, startOfDay } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import {
 	Popover,
@@ -23,8 +23,8 @@ interface NewBottleFormProps {
 	onSubmit: (bottle: {
 		name: string;
 		opened: boolean;
-		open_date?: string;
-		purchase_date?: string;
+		open_date?: Date;
+		purchase_date?: Date;
 	}) => Promise<void>;
 	loading: boolean;
 }
@@ -32,8 +32,8 @@ interface NewBottleFormProps {
 export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 	const [newBottleName, setNewBottleName] = useState("");
 	const [isOpened, setIsOpened] = useState(false);
-	const [openDate, setOpenDate] = useState("");
-	const [purchaseDate, setPurchaseDate] = useState("");
+	const [openDate, setOpenDate] = useState<Date | undefined>(undefined);
+	const [purchaseDate, setPurchaseDate] = useState<Date | undefined>(undefined);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -43,14 +43,14 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 			name: newBottleName.trim(),
 			opened: isOpened,
 			open_date: isOpened && openDate ? openDate : undefined,
-			purchase_date: purchaseDate || undefined,
+			purchase_date: purchaseDate,
 		});
 
 		// Reset form
 		setNewBottleName("");
 		setIsOpened(false);
-		setOpenDate("");
-		setPurchaseDate("");
+		setOpenDate(undefined);
+		setPurchaseDate(undefined);
 	};
 
 	return (
@@ -94,7 +94,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 										>
 											<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
 											{purchaseDate
-												? format(parseISO(purchaseDate), "PPP")
+												? format(purchaseDate, "PPP")
 												: "Pick a date"}
 										</Button>
 									</PopoverTrigger>
@@ -102,14 +102,10 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 										<Calendar
 											mode="single"
 											selected={
-												purchaseDate
-													? startOfDay(parseISO(purchaseDate))
-													: undefined
+												purchaseDate ? startOfDay(purchaseDate) : undefined
 											}
 											onSelect={(date) =>
-												setPurchaseDate(
-													date ? format(startOfDay(date), "yyyy-MM-dd") : "",
-												)
+												setPurchaseDate(date ? startOfDay(date) : undefined)
 											}
 											initialFocus
 										/>
@@ -147,21 +143,15 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 												disabled={loading}
 											>
 												<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-												{openDate
-													? format(parseISO(openDate), "PPP")
-													: "Pick a date"}
+												{openDate ? format(openDate, "PPP") : "Pick a date"}
 											</Button>
 										</PopoverTrigger>
 										<PopoverContent className="w-auto p-0" align="start">
 											<Calendar
 												mode="single"
-												selected={
-													openDate ? startOfDay(parseISO(openDate)) : undefined
-												}
+												selected={openDate ? startOfDay(openDate) : undefined}
 												onSelect={(date) =>
-													setOpenDate(
-														date ? format(startOfDay(date), "yyyy-MM-dd") : "",
-													)
+													setOpenDate(date ? startOfDay(date) : undefined)
 												}
 												initialFocus
 											/>

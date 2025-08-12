@@ -1,17 +1,15 @@
 package models
 
-import (
-	"time"
-)
+import "time"
 
 type Bottle struct {
-	ID           int64     `json:"id"`
-	Name         string    `json:"name"`
-	Opened       bool      `json:"opened"`
-	OpenDate     *string   `json:"open_date"`
-	PurchaseDate *string   `json:"purchase_date"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           int64      `json:"id"`
+	Name         string     `json:"name"`
+	Opened       bool       `json:"opened"`
+	OpenDate     *time.Time `json:"open_date"`
+	PurchaseDate *time.Time `json:"purchase_date"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
 type CreateBottleRequest struct {
@@ -28,9 +26,9 @@ type UpdateBottleRequest struct {
 }
 
 type BottleResponse struct {
-	ID           int64   `json:"id"`
-	Name         string  `json:"name"`
-	Opened       bool    `json:"opened"`
-	OpenDate     *string `json:"open_date"`
-	PurchaseDate *string `json:"purchase_date"`
+	ID           int64      `json:"id"`
+	Name         string     `json:"name"`
+	Opened       bool       `json:"opened"`
+	OpenDate     *time.Time `json:"open_date"`
+	PurchaseDate *time.Time `json:"purchase_date"`
 }

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/nguyenjessev/liquor-locker/internal/models"
 	"github.com/nguyenjessev/liquor-locker/internal/repository"
@@ -33,10 +34,26 @@ func (h *BottleHandler) CreateBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bottle := &models.Bottle{
-		Name:         req.Name,
-		Opened:       req.Opened,
-		OpenDate:     req.OpenDate,
-		PurchaseDate: req.PurchaseDate,
+		Name:   req.Name,
+		Opened: req.Opened,
+	}
+
+	if req.OpenDate != nil {
+		parsedOpenDate, err := time.Parse(time.RFC3339, *req.OpenDate)
+		if err != nil {
+			http.Error(w, "invalid open_date format", http.StatusBadRequest)
+			return
+		}
+		bottle.OpenDate = &parsedOpenDate
+	}
+
+	if req.PurchaseDate != nil {
+		parsedPurchaseDate, err := time.Parse(time.RFC3339, *req.PurchaseDate)
+		if err != nil {
+			http.Error(w, "invalid purchase_date format", http.StatusBadRequest)
+			return
+		}
+		bottle.PurchaseDate = &parsedPurchaseDate
 	}
 
 	createdBottle, err := h.repo.CreateBottle(r.Context(), bottle)
@@ -169,15 +186,23 @@ func (h *BottleHandler) UpdateBottle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bottle := &models.Bottle{
-		Name:     req.Name,
-		Opened:   req.Opened,
-		OpenDate: req.OpenDate,
+	updates := &models.Bottle{
+		Name:   req.Name,
+		Opened: req.Opened,
 	}
 
-	updatedBottle, err := h.repo.UpdateBottle(r.Context(), id, bottle)
+	if req.OpenDate != nil {
+		parsedOpenDate, err := time.Parse(time.RFC3339, *req.OpenDate)
+		if err != nil {
+			http.Error(w, "invalid open_date format", http.StatusBadRequest)
+			return
+		}
+		updates.OpenDate = &parsedOpenDate
+	}
+
+	updatedBottle, err := h.repo.UpdateBottle(r.Context(), id, updates)
 	if err != nil {
-		log.Printf("ERROR: UpdateBottle failed - id=%d, updates=%+v, error=%v", id, bottle, err)
+		log.Printf("ERROR: UpdateBottle failed - id=%d, updates=%+v, error=%v", id, updates, err)
 		if err == repository.ErrBottleNotFound {
 			http.Error(w, fmt.Sprintf("Bottle with ID %d not found", id), http.StatusNotFound)
 			return

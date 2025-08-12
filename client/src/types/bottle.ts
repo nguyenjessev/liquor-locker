@@ -2,13 +2,13 @@ export interface Bottle {
 	id: number;
 	name: string;
 	opened: boolean;
-	open_date?: string | null;
-	purchase_date?: string | null;
+	open_date?: Date | null;
+	purchase_date?: Date | null;
 }
 
 export interface CreateBottleRequest {
 	name: string;
 	opened: boolean;
-	open_date?: string;
-	purchase_date?: string;
+	open_date?: Date;
+	purchase_date?: Date;
 }

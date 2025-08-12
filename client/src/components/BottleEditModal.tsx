@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Bottle } from "@/types/bottle";
-import { format, parseISO } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import {
 	Dialog,
 	DialogContent,
@@ -17,7 +17,7 @@ interface BottleEditModalProps {
 	onDelete: (id: number) => void;
 	onSave: (
 		id: number,
-		updates: { name: string; opened: boolean; open_date?: string | null },
+		updates: { name: string; opened: boolean; open_date?: Date | null },
 	) => Promise<void>;
 	loading?: boolean;
 }
@@ -49,10 +49,7 @@ export function BottleEditModal({
 			await onSave(bottle.id, {
 				name: editedName.trim(),
 				opened: isOpened,
-				open_date:
-					isOpened && !bottle.opened
-						? new Date().toISOString().split("T")[0]
-						: null,
+				open_date: isOpened && !bottle.opened ? startOfDay(new Date()) : null,
 			});
 			onOpenChange(false);
 		} catch (error) {
@@ -128,7 +125,7 @@ export function BottleEditModal({
 								<div className="grid grid-cols-4 items-center gap-4">
 									<p className="font-medium">Purchased</p>
 									<p className="col-span-3">
-										{format(parseISO(bottle.purchase_date), "PPP")}
+										{format(bottle.purchase_date, "PPP")}
 									</p>
 								</div>
 							)}
@@ -136,7 +133,7 @@ export function BottleEditModal({
 								<div className="grid grid-cols-4 items-center gap-4">
 									<p className="font-medium">Opened</p>
 									<p className="col-span-3">
-										{format(parseISO(bottle.open_date), "PPP")}
+										{format(bottle.open_date, "PPP")}
 									</p>
 								</div>
 							)}

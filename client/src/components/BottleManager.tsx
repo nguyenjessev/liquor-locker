@@ -32,7 +32,14 @@ export function BottleManager() {
 				throw new Error(errorText || `Server error: ${response.status}`);
 			}
 			const data = await response.json();
-			setBottles(data || []);
+			const bottlesWithDates = (data || []).map((bottle: Bottle) => ({
+				...bottle,
+				open_date: bottle.open_date ? new Date(bottle.open_date) : null,
+				purchase_date: bottle.purchase_date
+					? new Date(bottle.purchase_date)
+					: null,
+			}));
+			setBottles(bottlesWithDates);
 		} catch (err) {
 			if (err instanceof Error) {
 				const errorMessage = err.message.includes("Failed to fetch bottles")
@@ -53,8 +60,8 @@ export function BottleManager() {
 	const addBottle = async (bottle: {
 		name: string;
 		opened: boolean;
-		open_date?: string;
-		purchase_date?: string;
+		open_date?: Date;
+		purchase_date?: Date;
 	}) => {
 		try {
 			setLoading(true);
@@ -69,7 +76,11 @@ export function BottleManager() {
 			const response = await fetch(`${API_BASE_URL}/bottles`, {
 				method: "POST",
 				headers,
-				body: JSON.stringify(bottle),
+				body: JSON.stringify({
+					...bottle,
+					open_date: bottle.open_date?.toISOString(),
+					purchase_date: bottle.purchase_date?.toISOString(),
+				}),
 			});
 
 			if (!response.ok) {
@@ -78,7 +89,14 @@ export function BottleManager() {
 			}
 
 			const newBottle = await response.json();
-			setBottles([newBottle, ...bottles]);
+			const bottleWithDates = {
+				...newBottle,
+				open_date: newBottle.open_date ? new Date(newBottle.open_date) : null,
+				purchase_date: newBottle.purchase_date
+					? new Date(newBottle.purchase_date)
+					: null,
+			};
+			setBottles([bottleWithDates, ...bottles]);
 		} catch (err) {
 			if (err instanceof Error) {
 				const errorMessage = err.message.includes("Failed to create bottle")
@@ -97,7 +115,7 @@ export function BottleManager() {
 	// Save bottle changes
 	const saveBottle = async (
 		id: number,
-		updates: { name: string; opened: boolean; open_date?: string | null },
+		updates: { name: string; opened: boolean; open_date?: Date | null },
 	) => {
 		try {
 			setLoading(true);
@@ -112,7 +130,10 @@ export function BottleManager() {
 			const response = await fetch(`${API_BASE_URL}/bottles/${id}`, {
 				method: "PUT",
 				headers,
-				body: JSON.stringify(updates),
+				body: JSON.stringify({
+					...updates,
+					open_date: updates.open_date?.toISOString(),
+				}),
 			});
 
 			if (!response.ok) {
@@ -121,7 +142,16 @@ export function BottleManager() {
 			}
 
 			const updatedBottle = await response.json();
-			setBottles(bottles.map((b) => (b.id === id ? updatedBottle : b)));
+			const bottleWithDates = {
+				...updatedBottle,
+				open_date: updatedBottle.open_date
+					? new Date(updatedBottle.open_date)
+					: null,
+				purchase_date: updatedBottle.purchase_date
+					? new Date(updatedBottle.purchase_date)
+					: null,
+			};
+			setBottles(bottles.map((b) => (b.id === id ? bottleWithDates : b)));
 		} catch (err) {
 			if (err instanceof Error) {
 				const errorMessage = err.message.includes("Failed to update bottle")
