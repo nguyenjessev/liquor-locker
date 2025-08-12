@@ -1,26 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { format, parseISO, startOfDay } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { BottleCard } from "./BottleCard";
+import { NewBottleForm } from "./NewBottleForm";
+import { BottleList } from "./BottleList";
 import { BottleEditModal } from "./BottleEditModal";
 import type { Bottle } from "@/types/bottle";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 const API_BASE_URL =
 	import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
@@ -28,12 +12,8 @@ const API_KEY = import.meta.env.VITE_API_KEY || "";
 
 export function BottleManager() {
 	const [bottles, setBottles] = useState<Bottle[]>([]);
-	const [newBottleName, setNewBottleName] = useState("");
-	const [isOpened, setIsOpened] = useState(false);
-	const [openDate, setOpenDate] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [purchaseDate, setPurchaseDate] = useState("");
 	const [selectedBottle, setSelectedBottle] = useState<Bottle | null>(null);
 	const [editModalOpen, setEditModalOpen] = useState(false);
 
@@ -55,7 +35,6 @@ export function BottleManager() {
 			setBottles(data || []);
 		} catch (err) {
 			if (err instanceof Error) {
-				// Try to extract server error message
 				const errorMessage = err.message.includes("Failed to fetch bottles")
 					? "Unable to load bottles. Please check your connection and try again."
 					: err.message;
@@ -71,10 +50,12 @@ export function BottleManager() {
 	};
 
 	// Add a new bottle
-	const addBottle = async (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!newBottleName.trim()) return;
-
+	const addBottle = async (bottle: {
+		name: string;
+		opened: boolean;
+		open_date?: string;
+		purchase_date?: string;
+	}) => {
 		try {
 			setLoading(true);
 			setError(null);
@@ -85,30 +66,10 @@ export function BottleManager() {
 				headers["X-API-Key"] = API_KEY;
 			}
 
-			const requestBody: {
-				name: string;
-				opened: boolean;
-				open_date?: string;
-				purchase_date?: string;
-			} = {
-				name: newBottleName.trim(),
-				opened: isOpened,
-			};
-
-			// Only include open_date if the bottle is marked as opened and a date is provided
-			if (isOpened && openDate) {
-				requestBody.open_date = openDate; // Use the date string directly (YYYY-MM-DD format)
-			}
-
-			// Include purchase_date if provided
-			if (purchaseDate) {
-				requestBody.purchase_date = purchaseDate;
-			}
-
 			const response = await fetch(`${API_BASE_URL}/bottles`, {
 				method: "POST",
 				headers,
-				body: JSON.stringify(requestBody),
+				body: JSON.stringify(bottle),
 			});
 
 			if (!response.ok) {
@@ -118,13 +79,8 @@ export function BottleManager() {
 
 			const newBottle = await response.json();
 			setBottles([newBottle, ...bottles]);
-			setNewBottleName("");
-			setIsOpened(false);
-			setOpenDate("");
-			setPurchaseDate("");
 		} catch (err) {
 			if (err instanceof Error) {
-				// Try to extract server error message
 				const errorMessage = err.message.includes("Failed to create bottle")
 					? "Unable to save bottle. Please try again."
 					: err.message;
@@ -132,12 +88,12 @@ export function BottleManager() {
 			} else {
 				setError("Unable to save bottle. Please try again.");
 			}
+			throw err;
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	// Delete a bottle
 	// Save bottle changes
 	const saveBottle = async (
 		id: number,
@@ -156,11 +112,7 @@ export function BottleManager() {
 			const response = await fetch(`${API_BASE_URL}/bottles/${id}`, {
 				method: "PUT",
 				headers,
-				body: JSON.stringify({
-					name: updates.name,
-					opened: updates.opened,
-					open_date: updates.open_date,
-				}),
+				body: JSON.stringify(updates),
 			});
 
 			if (!response.ok) {
@@ -185,6 +137,7 @@ export function BottleManager() {
 		}
 	};
 
+	// Delete a bottle
 	const deleteBottle = async (id: number) => {
 		try {
 			setLoading(true);
@@ -206,7 +159,6 @@ export function BottleManager() {
 			setBottles(bottles.filter((bottle) => bottle.id !== id));
 		} catch (err) {
 			if (err instanceof Error) {
-				// Try to extract server error message
 				const errorMessage = err.message.includes("Failed to delete bottle")
 					? "Unable to delete bottle. Please try again."
 					: err.message;
@@ -233,136 +185,7 @@ export function BottleManager() {
 				<p className="text-muted-foreground">Manage your bottle collection</p>
 			</div>
 
-			{/* Add new bottle form */}
-			<Card className="mb-8">
-				<CardHeader>
-					<CardTitle>Add New Bottle</CardTitle>
-					<CardDescription>
-						Enter the name of the bottle you'd like to add to your collection
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<form onSubmit={addBottle} className="space-y-4">
-						<div className="flex gap-4">
-							<div className="flex flex-col sm:flex-row gap-2">
-								<Input
-									type="text"
-									placeholder="Enter bottle name..."
-									value={newBottleName}
-									onChange={(e) => setNewBottleName(e.target.value)}
-									className="flex-1"
-									disabled={loading}
-								/>
-								<Button
-									type="submit"
-									disabled={loading || !newBottleName.trim()}
-								>
-									{loading ? "Adding..." : "Add Bottle"}
-								</Button>
-							</div>
-						</div>
-
-						<div className="space-y-3">
-							<div>
-								<div>
-									<Label htmlFor="purchase-date" className="block mb-2">
-										Purchase date (optional)
-									</Label>
-									<Popover>
-										<PopoverTrigger asChild>
-											<Button
-												variant="outline"
-												className={`w-48 justify-start text-left font-normal ${!purchaseDate && "text-muted-foreground"}`}
-												disabled={loading}
-											>
-												<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-												{purchaseDate
-													? format(parseISO(purchaseDate), "PPP")
-													: "Pick a date"}
-											</Button>
-										</PopoverTrigger>
-										<PopoverContent className="w-auto p-0" align="start">
-											<Calendar
-												mode="single"
-												selected={
-													purchaseDate
-														? startOfDay(parseISO(purchaseDate))
-														: undefined
-												}
-												onSelect={(date) =>
-													setPurchaseDate(
-														date ? format(startOfDay(date), "yyyy-MM-dd") : "",
-													)
-												}
-												initialFocus
-											/>
-										</PopoverContent>
-									</Popover>
-								</div>
-
-								<div className="flex items-center space-x-2 mt-4">
-									<div className="flex items-center space-x-2">
-										<Checkbox
-											id="is-opened"
-											checked={isOpened}
-											onCheckedChange={(checked) =>
-												setIsOpened(checked === true)
-											}
-											disabled={loading}
-										/>
-										<Label htmlFor="is-opened">Already opened</Label>
-									</div>
-								</div>
-
-								<div
-									className="overflow-hidden transition-[max-height,opacity,margin] duration-300 ease-in-out"
-									style={{
-										maxHeight: isOpened ? "80px" : "0",
-										marginTop: isOpened ? "1rem" : "0",
-										opacity: isOpened ? 1 : 0,
-									}}
-								>
-									<div className="ml-6 flex flex-wrap items-center gap-x-4 gap-y-2">
-										<Label htmlFor="open-date">Open date (optional)</Label>
-										<Popover>
-											<PopoverTrigger asChild>
-												<Button
-													variant="outline"
-													className={`w-48 justify-start text-left font-normal ${!openDate && "text-muted-foreground"}`}
-													disabled={loading}
-												>
-													<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-													{openDate
-														? format(parseISO(openDate), "PPP")
-														: "Pick a date"}
-												</Button>
-											</PopoverTrigger>
-											<PopoverContent className="w-auto p-0" align="start">
-												<Calendar
-													mode="single"
-													selected={
-														openDate
-															? startOfDay(parseISO(openDate))
-															: undefined
-													}
-													onSelect={(date) =>
-														setOpenDate(
-															date
-																? format(startOfDay(date), "yyyy-MM-dd")
-																: "",
-														)
-													}
-													initialFocus
-												/>
-											</PopoverContent>
-										</Popover>
-									</div>
-								</div>
-							</div>
-						</div>
-					</form>
-				</CardContent>
-			</Card>
+			<NewBottleForm onSubmit={addBottle} loading={loading} />
 
 			{/* Error display */}
 			{error && (
@@ -376,43 +199,14 @@ export function BottleManager() {
 				</Card>
 			)}
 
-			{/* Bottles list */}
-			<Card>
-				<CardHeader>
-					<CardTitle>Your Bottles ({bottles.length})</CardTitle>
-					<CardDescription>
-						{bottles.length === 0
-							? "No bottles in your collection yet"
-							: "Click a bottle to edit its details"}
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					{loading && bottles.length === 0 ? (
-						<p className="text-muted-foreground text-center py-8">
-							Loading bottles...
-						</p>
-					) : bottles.length === 0 ? (
-						<p className="text-muted-foreground text-center py-8">
-							Your collection is empty. Add your first bottle above!
-						</p>
-					) : (
-						<div className="space-y-3">
-							<div className="flex flex-col gap-3">
-								{bottles.map((bottle) => (
-									<BottleCard
-										key={bottle.id}
-										bottle={bottle}
-										onEdit={(bottle) => {
-											setSelectedBottle(bottle);
-											setEditModalOpen(true);
-										}}
-									/>
-								))}
-							</div>
-						</div>
-					)}
-				</CardContent>
-			</Card>
+			<BottleList
+				bottles={bottles}
+				loading={loading}
+				onEditBottle={(bottle) => {
+					setSelectedBottle(bottle);
+					setEditModalOpen(true);
+				}}
+			/>
 
 			<BottleEditModal
 				bottle={selectedBottle}
