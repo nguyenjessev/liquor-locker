@@ -301,15 +301,17 @@ export function BottleManager() {
 								</div>
 
 								<div className="flex items-center space-x-2 mt-4">
-									<Checkbox
-										id="is-opened"
-										checked={isOpened}
-										onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-											setIsOpened(e.target.checked)
-										}
-										disabled={loading}
-									/>
-									<Label htmlFor="is-opened">Already opened</Label>
+									<div className="flex items-center space-x-2">
+										<Checkbox
+											id="is-opened"
+											checked={isOpened}
+											onCheckedChange={(checked) =>
+												setIsOpened(checked === true)
+											}
+											disabled={loading}
+										/>
+										<Label htmlFor="is-opened">Already opened</Label>
+									</div>
 								</div>
 
 								<div
