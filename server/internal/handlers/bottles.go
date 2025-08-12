@@ -50,12 +50,10 @@ func (h *BottleHandler) CreateBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := models.BottleResponse{
-		ID:        createdBottle.ID,
-		Name:      createdBottle.Name,
-		Opened:    createdBottle.Opened,
-		OpenDate:  createdBottle.OpenDate,
-		CreatedAt: createdBottle.CreatedAt,
-		UpdatedAt: createdBottle.UpdatedAt,
+		ID:       createdBottle.ID,
+		Name:     createdBottle.Name,
+		Opened:   createdBottle.Opened,
+		OpenDate: createdBottle.OpenDate,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -97,12 +95,10 @@ func (h *BottleHandler) GetBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := models.BottleResponse{
-		ID:        bottle.ID,
-		Name:      bottle.Name,
-		Opened:    bottle.Opened,
-		OpenDate:  bottle.OpenDate,
-		CreatedAt: bottle.CreatedAt,
-		UpdatedAt: bottle.UpdatedAt,
+		ID:       bottle.ID,
+		Name:     bottle.Name,
+		Opened:   bottle.Opened,
+		OpenDate: bottle.OpenDate,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -161,12 +157,10 @@ func (h *BottleHandler) GetAllBottles(w http.ResponseWriter, r *http.Request) {
 	responses := make([]models.BottleResponse, 0)
 	for _, bottle := range bottles {
 		responses = append(responses, models.BottleResponse{
-			ID:        bottle.ID,
-			Name:      bottle.Name,
-			Opened:    bottle.Opened,
-			OpenDate:  bottle.OpenDate,
-			CreatedAt: bottle.CreatedAt,
-			UpdatedAt: bottle.UpdatedAt,
+			ID:       bottle.ID,
+			Name:     bottle.Name,
+			Opened:   bottle.Opened,
+			OpenDate: bottle.OpenDate,
 		})
 	}
 

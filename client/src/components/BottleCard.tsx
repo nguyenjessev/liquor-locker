@@ -32,9 +32,9 @@ export function BottleCard({
 		<Card className="hover:shadow-md transition-shadow relative flex flex-col">
 			<CardHeader className="pb-3 flex-1">
 				<CardTitle className="text-lg pr-8">{bottle.name}</CardTitle>
-				<div className="space-y-1">
-					<div className="flex items-center gap-2">
-						<span className="text-sm font-medium">Status:</span>
+				<div className="space-y-2">
+					<div className="grid grid-cols-[80px_1fr] items-center">
+						<span className="text-sm font-medium">Status</span>
 						<span
 							className={`text-sm font-medium ${
 								bottle.opened ? "text-green-700/80" : "text-red-700/80"
@@ -43,14 +43,14 @@ export function BottleCard({
 							{bottle.opened ? "Opened" : "Unopened"}
 						</span>
 					</div>
-					{bottle.opened && bottle.open_date && (
-						<p className="text-sm text-muted-foreground">
-							Opened: {formatDate(bottle.open_date)}
-						</p>
-					)}
-					<p className="text-sm text-muted-foreground">
-						Added: {formatDate(bottle.created_at)}
-					</p>
+					<div className="grid grid-cols-[80px_1fr] items-center">
+						<span className="text-sm font-medium">Opened</span>
+						<span className="text-sm text-muted-foreground">
+							{bottle.opened && bottle.open_date
+								? formatDate(bottle.open_date)
+								: "—"}
+						</span>
+					</div>
 				</div>
 			</CardHeader>
 			<Button

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -156,9 +157,14 @@ export function BottleManager() {
 	}, []);
 
 	return (
-		<div className="container mx-auto max-w-4xl p-6">
+		<div className="container mx-auto max-w-4xl p-4 md:p-6 mt-0">
 			<div className="mb-8">
-				<h1 className="text-3xl font-bold mb-2">Bottles</h1>
+				<div className="flex items-center justify-between mb-2">
+					<h1 className="text-2xl md:text-3xl font-bold">Bottles</h1>
+					<div className="md:hidden">
+						<ThemeToggle />
+					</div>
+				</div>
 				<p className="text-muted-foreground">Manage your bottle collection</p>
 			</div>
 
@@ -173,17 +179,22 @@ export function BottleManager() {
 				<CardContent>
 					<form onSubmit={addBottle} className="space-y-4">
 						<div className="flex gap-4">
-							<Input
-								type="text"
-								placeholder="Enter bottle name..."
-								value={newBottleName}
-								onChange={(e) => setNewBottleName(e.target.value)}
-								className="flex-1"
-								disabled={loading}
-							/>
-							<Button type="submit" disabled={loading || !newBottleName.trim()}>
-								{loading ? "Adding..." : "Add Bottle"}
-							</Button>
+							<div className="flex flex-col sm:flex-row gap-2">
+								<Input
+									type="text"
+									placeholder="Enter bottle name..."
+									value={newBottleName}
+									onChange={(e) => setNewBottleName(e.target.value)}
+									className="flex-1"
+									disabled={loading}
+								/>
+								<Button
+									type="submit"
+									disabled={loading || !newBottleName.trim()}
+								>
+									{loading ? "Adding..." : "Add Bottle"}
+								</Button>
+							</div>
 						</div>
 
 						<div className="space-y-3">
@@ -252,7 +263,7 @@ export function BottleManager() {
 						</p>
 					) : (
 						<div className="space-y-3">
-							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+							<div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
 								{bottles.map((bottle) => (
 									<BottleCard
 										key={bottle.id}
