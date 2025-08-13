@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Bottle } from "@/types/bottle";
 import { format, startOfDay } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, X } from "lucide-react";
 import {
 	Dialog,
 	DialogContent,
@@ -46,6 +46,7 @@ export function BottleEditModal({
 	const [isOpened, setIsOpened] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [purchaseDate, setPurchaseDate] = useState<Date | null>(null);
+	const [openDate, setOpenDate] = useState<Date | null>(null);
 	const [hasChanges, setHasChanges] = useState(false);
 
 	useEffect(() => {
@@ -53,6 +54,7 @@ export function BottleEditModal({
 			setEditedName(bottle.name);
 			setIsOpened(bottle.opened);
 			setPurchaseDate(bottle.purchase_date || null);
+			setOpenDate(bottle.open_date || null);
 			setHasChanges(false);
 		}
 	}, [open, bottle]);
@@ -65,7 +67,7 @@ export function BottleEditModal({
 			await onSave(bottle.id, {
 				name: editedName.trim(),
 				opened: isOpened,
-				open_date: isOpened && !bottle.opened ? startOfDay(new Date()) : null,
+				open_date: isOpened ? openDate : null,
 				purchase_date: purchaseDate,
 			});
 			onOpenChange(false);
@@ -131,7 +133,13 @@ export function BottleEditModal({
 								<p className="font-medium">Status</p>
 								<button
 									onClick={() => {
-										setIsOpened(!isOpened);
+										const newOpenedState = !isOpened;
+										setIsOpened(newOpenedState);
+										if (newOpenedState) {
+											setOpenDate(startOfDay(new Date()));
+										} else {
+											setOpenDate(null);
+										}
 										setHasChanges(true);
 									}}
 									disabled={loading || isSaving}
@@ -174,12 +182,48 @@ export function BottleEditModal({
 									</span>
 								</button>
 							</div>
-							{bottle.opened && bottle.open_date && (
+							{isOpened && (
 								<div className="grid grid-cols-4 items-center gap-4">
-									<p className="font-medium">Opened</p>
-									<p className="col-span-3">
-										{format(bottle.open_date, "PPP")}
-									</p>
+									<p className="font-medium">Open Date</p>
+									<div className="col-span-3 flex items-center gap-2">
+										<Popover>
+											<PopoverTrigger asChild>
+												<Button
+													variant="outline"
+													className={`w-48 justify-start text-left font-normal ${!openDate && "text-muted-foreground"}`}
+													disabled={loading || isSaving}
+												>
+													<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+													{openDate ? format(openDate, "PPP") : "No date set"}
+												</Button>
+											</PopoverTrigger>
+											<PopoverContent className="w-auto p-0" align="start">
+												<Calendar
+													mode="single"
+													selected={openDate ? startOfDay(openDate) : undefined}
+													onSelect={(date) => {
+														setOpenDate(date ? startOfDay(date) : null);
+														setHasChanges(true);
+													}}
+													autoFocus
+												/>
+											</PopoverContent>
+										</Popover>
+										{openDate && (
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-9 w-9 text-muted-foreground hover:text-destructive"
+												onClick={() => {
+													setOpenDate(null);
+													setHasChanges(true);
+												}}
+												disabled={loading || isSaving}
+											>
+												<X className="h-4 w-4" />
+											</Button>
+										)}
+									</div>
 								</div>
 							)}
 						</>
