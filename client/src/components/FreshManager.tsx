@@ -8,7 +8,7 @@ export function FreshManager() {
 					<h1 className="text-2xl md:text-3xl font-bold">Fresh</h1>
 				</div>
 				<p className="text-muted-foreground">
-					House-made syrups, infusions, and juices
+					Fruit, herbs, dairy, eggs, and more
 				</p>
 			</div>
 
