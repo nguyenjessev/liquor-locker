@@ -209,7 +209,14 @@ export function BottleEditModal({
 									</span>
 								</button>
 							</div>
-							{isOpened && (
+							<div
+								className="overflow-hidden transition-[max-height,opacity,margin] duration-300 ease-in-out"
+								style={{
+									maxHeight: isOpened ? "80px" : "0",
+									marginTop: isOpened ? "1rem" : "0",
+									opacity: isOpened ? 1 : 0,
+								}}
+							>
 								<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
 									<p className="font-medium">Open Date</p>
 									<div className="sm:col-span-3 flex items-center gap-2">
@@ -264,7 +271,7 @@ export function BottleEditModal({
 										)}
 									</div>
 								</div>
-							)}
+							</div>
 						</>
 					)}
 				</div>
