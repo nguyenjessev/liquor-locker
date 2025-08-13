@@ -4,6 +4,7 @@ import { BottleManager } from "./BottleManager";
 import { FreshManager } from "./FreshManager";
 import { Settings } from "./Settings";
 import { BottomNav } from "./BottomNav";
+import { Toaster } from "sonner";
 
 export function Layout() {
 	const [activeSection, setActiveSection] = useState("bottles");
@@ -44,6 +45,7 @@ export function Layout() {
 				activeSection={activeSection}
 				onSectionChange={setActiveSection}
 			/>
+			<Toaster />
 		</div>
 	);
 }

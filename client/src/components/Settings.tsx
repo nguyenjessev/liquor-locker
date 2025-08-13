@@ -7,8 +7,30 @@ import {
 } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export function Settings() {
+	const [apiUrl, setApiUrl] = useState("");
+	const [apiKey, setApiKey] = useState("");
+
+	useEffect(() => {
+		const savedApiUrl = localStorage.getItem("apiUrl");
+		const savedApiKey = localStorage.getItem("apiKey");
+		if (savedApiUrl) setApiUrl(savedApiUrl);
+		if (savedApiKey) setApiKey(savedApiKey);
+	}, []);
+
+	const saveSettings = () => {
+		localStorage.setItem("apiUrl", apiUrl);
+		localStorage.setItem("apiKey", apiKey);
+		toast("Settings saved", {
+			description: "Your API settings have been saved successfully.",
+		});
+	};
+
 	return (
 		<div className="container mx-auto max-w-4xl p-4 md:p-6 mt-0">
 			<div className="mb-8">
@@ -27,6 +49,44 @@ export function Settings() {
 						<div className="flex items-center justify-between">
 							<Label htmlFor="theme-toggle">Theme</Label>
 							<ThemeToggle />
+						</div>
+					</div>
+				</CardContent>
+			</Card>
+
+			<Card className="mt-6">
+				<CardHeader>
+					<CardTitle>Recommendation API Settings</CardTitle>
+					<CardDescription>
+						Configure your connection to the recommendation service
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<div className="space-y-6">
+						<div className="space-y-4">
+							<div className="grid w-full gap-1.5">
+								<Label htmlFor="apiUrl">API URL</Label>
+								<Input
+									id="apiUrl"
+									placeholder="Enter API URL"
+									type="text"
+									value={apiUrl}
+									onChange={(e) => setApiUrl(e.target.value)}
+								/>
+							</div>
+							<div className="grid w-full gap-1.5">
+								<Label htmlFor="apiKey">API Key</Label>
+								<Input
+									id="apiKey"
+									placeholder="Enter API Key"
+									type="password"
+									value={apiKey}
+									onChange={(e) => setApiKey(e.target.value)}
+								/>
+							</div>
+							<Button onClick={saveSettings} className="w-auto">
+								Save Settings
+							</Button>
 						</div>
 					</div>
 				</CardContent>
