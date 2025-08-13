@@ -13,6 +13,7 @@ import (
 type Server struct {
 	repo           *repository.Repository
 	bottleHandler  *BottleHandler
+	freshHandler   *FreshHandler
 	allowedOrigins []string
 	apiKey         string
 }
@@ -33,6 +34,7 @@ func NewServer(repo *repository.Repository) *Server {
 	return &Server{
 		repo:           repo,
 		bottleHandler:  NewBottleHandler(repo),
+		freshHandler:   NewFreshHandler(repo),
 		allowedOrigins: allowedOrigins,
 		apiKey:         apiKey,
 	}
@@ -58,6 +60,16 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.bottleHandler.DeleteBottle(w, r)
 	case strings.HasPrefix(path, "/bottles/") && r.Method == http.MethodPut:
 		s.bottleHandler.UpdateBottle(w, r)
+	case path == "/fresh" && r.Method == http.MethodPost:
+		s.freshHandler.CreateFresh(w, r)
+	case path == "/fresh" && r.Method == http.MethodGet:
+		s.freshHandler.GetAllFresh(w, r)
+	case strings.HasPrefix(path, "/fresh/") && r.Method == http.MethodGet:
+		s.freshHandler.GetFresh(w, r)
+	case strings.HasPrefix(path, "/fresh/") && r.Method == http.MethodDelete:
+		s.freshHandler.DeleteFresh(w, r)
+	case strings.HasPrefix(path, "/fresh/") && r.Method == http.MethodPut:
+		s.freshHandler.UpdateFresh(w, r)
 	case path == "/health":
 		s.handleHealth(w, r)
 	default:

@@ -31,6 +31,12 @@ func main() {
 	fmt.Println("  POST /bottles - Create a new bottle")
 	fmt.Println("  GET /bottles/{id} - Get bottle by ID")
 	fmt.Println("  DELETE /bottles/{id} - Delete bottle by ID")
+	fmt.Println("  PUT /bottles/{id} - Update bottle by ID")
+	fmt.Println("  GET /fresh - Get all fresh items")
+	fmt.Println("  POST /fresh - Create a new fresh item")
+	fmt.Println("  GET /fresh/{id} - Get fresh item by ID")
+	fmt.Println("  DELETE /fresh/{id} - Delete fresh item by ID")
+	fmt.Println("  PUT /fresh/{id} - Update fresh item by ID")
 	fmt.Println("  GET /health - Health check")
 
 	if err := server.Start(port); err != nil {

@@ -49,7 +49,11 @@ func (r *Repository) RunMigrations() error {
 	return nil
 }
 
-var ErrNilBottle = errors.New("bottle cannot be nil")
+var (
+	ErrNilBottle     = errors.New("bottle cannot be nil")
+	ErrNilFresh      = errors.New("fresh item cannot be nil")
+	ErrFreshNotFound = errors.New("fresh item not found")
+)
 
 func (r *Repository) CreateBottle(ctx context.Context, bottle *models.Bottle) (*models.Bottle, error) {
 	if bottle == nil {
@@ -169,4 +173,121 @@ func (r *Repository) UpdateBottle(ctx context.Context, id int, updates *models.B
 	}
 
 	return &bottle, nil
+}
+
+func (r *Repository) CreateFresh(ctx context.Context, fresh *models.Fresh) (*models.Fresh, error) {
+	if fresh == nil {
+		return nil, ErrNilFresh
+	}
+
+	query := `
+		INSERT INTO fresh (name, prepared_date, purchase_date, created_at, updated_at)
+		VALUES (?, ?, ?, datetime('now'), datetime('now'))
+		RETURNING id, created_at, updated_at`
+
+	err := r.db.QueryRowContext(ctx, query, fresh.Name, fresh.PreparedDate, fresh.PurchaseDate).Scan(&fresh.ID, &fresh.CreatedAt, &fresh.UpdatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create fresh item: %v", err)
+	}
+
+	return fresh, nil
+}
+
+func (r *Repository) GetFreshByID(ctx context.Context, id int) (*models.Fresh, error) {
+	query := `
+		SELECT id, name, prepared_date, purchase_date, created_at, updated_at
+		FROM fresh
+		WHERE id = ?`
+
+	var fresh models.Fresh
+	err := r.db.QueryRowContext(ctx, query, id).Scan(&fresh.ID, &fresh.Name, &fresh.PreparedDate, &fresh.PurchaseDate, &fresh.CreatedAt, &fresh.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrFreshNotFound
+		}
+
+		return nil, fmt.Errorf("failed to get fresh item by ID: %v", err)
+	}
+
+	return &fresh, nil
+}
+
+func (r *Repository) DeleteFreshByID(ctx context.Context, id int) error {
+	query := `DELETE FROM fresh WHERE id = ?`
+
+	result, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete fresh item: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %v", err)
+	}
+
+	if rowsAffected == 0 {
+		return ErrFreshNotFound
+	}
+
+	return nil
+}
+
+func (r *Repository) GetAllFresh(ctx context.Context) ([]*models.Fresh, error) {
+	query := `
+		SELECT id, name, prepared_date, purchase_date, created_at, updated_at
+		FROM fresh
+		ORDER BY created_at DESC`
+
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get fresh items: %v", err)
+	}
+	defer rows.Close()
+
+	var freshItems []*models.Fresh
+	for rows.Next() {
+		var fresh models.Fresh
+		err := rows.Scan(&fresh.ID, &fresh.Name, &fresh.PreparedDate, &fresh.PurchaseDate, &fresh.CreatedAt, &fresh.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan fresh item: %v", err)
+		}
+
+		freshItems = append(freshItems, &fresh)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over fresh items: %v", err)
+	}
+
+	return freshItems, nil
+}
+
+func (r *Repository) UpdateFresh(ctx context.Context, id int, updates *models.Fresh) (*models.Fresh, error) {
+	if updates == nil {
+		return nil, ErrNilFresh
+	}
+
+	query := `
+		UPDATE fresh
+		SET name = ?, prepared_date = ?, purchase_date = ?, updated_at = datetime('now')
+		WHERE id = ?
+		RETURNING id, name, prepared_date, purchase_date, created_at, updated_at`
+
+	var fresh models.Fresh
+	err := r.db.QueryRowContext(ctx, query, updates.Name, updates.PreparedDate, updates.PurchaseDate, id).Scan(
+		&fresh.ID,
+		&fresh.Name,
+		&fresh.PreparedDate,
+		&fresh.PurchaseDate,
+		&fresh.CreatedAt,
+		&fresh.UpdatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrFreshNotFound
+		}
+		return nil, fmt.Errorf("failed to update fresh item: %v", err)
+	}
+
+	return &fresh, nil
 }
