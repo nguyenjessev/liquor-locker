@@ -48,6 +48,8 @@ export function BottleEditModal({
 	const [purchaseDate, setPurchaseDate] = useState<Date | null>(null);
 	const [openDate, setOpenDate] = useState<Date | null>(null);
 	const [hasChanges, setHasChanges] = useState(false);
+	const [purchaseDateOpen, setPurchaseDateOpen] = useState(false);
+	const [openDateOpen, setOpenDateOpen] = useState(false);
 
 	useEffect(() => {
 		if (open && bottle) {
@@ -102,7 +104,10 @@ export function BottleEditModal({
 						<p className="font-medium">Purchase Date</p>
 						<div className="sm:col-span-3 flex items-center gap-2">
 							<div className="flex items-center gap-2 min-w-0 flex-1">
-								<Popover>
+								<Popover
+									open={purchaseDateOpen}
+									onOpenChange={setPurchaseDateOpen}
+								>
 									<PopoverTrigger asChild className="min-w-0 flex-1">
 										<Button
 											variant="outline"
@@ -126,6 +131,7 @@ export function BottleEditModal({
 											onSelect={(date) => {
 												setPurchaseDate(date ? startOfDay(date) : null);
 												setHasChanges(true);
+												setPurchaseDateOpen(false);
 											}}
 											autoFocus
 										/>
@@ -208,7 +214,10 @@ export function BottleEditModal({
 									<p className="font-medium">Open Date</p>
 									<div className="sm:col-span-3 flex items-center gap-2">
 										<div className="flex items-center gap-2 min-w-0 flex-1">
-											<Popover>
+											<Popover
+												open={openDateOpen}
+												onOpenChange={setOpenDateOpen}
+											>
 												<PopoverTrigger asChild className="min-w-0 flex-1">
 													<Button
 														variant="outline"
@@ -232,6 +241,7 @@ export function BottleEditModal({
 														onSelect={(date) => {
 															setOpenDate(date ? startOfDay(date) : null);
 															setHasChanges(true);
+															setOpenDateOpen(false);
 														}}
 														autoFocus
 													/>

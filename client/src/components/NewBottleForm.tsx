@@ -34,6 +34,8 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 	const [isOpened, setIsOpened] = useState(false);
 	const [openDate, setOpenDate] = useState<Date | undefined>(undefined);
 	const [purchaseDate, setPurchaseDate] = useState<Date | undefined>(undefined);
+	const [purchaseDateOpen, setPurchaseDateOpen] = useState(false);
+	const [openDateOpen, setOpenDateOpen] = useState(false);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -85,7 +87,10 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 								<Label htmlFor="purchase-date" className="block mb-2">
 									Purchase date (optional)
 								</Label>
-								<Popover>
+								<Popover
+									open={purchaseDateOpen}
+									onOpenChange={setPurchaseDateOpen}
+								>
 									<PopoverTrigger asChild>
 										<Button
 											variant="outline"
@@ -104,9 +109,10 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 											selected={
 												purchaseDate ? startOfDay(purchaseDate) : undefined
 											}
-											onSelect={(date) =>
-												setPurchaseDate(date ? startOfDay(date) : undefined)
-											}
+											onSelect={(date) => {
+												setPurchaseDate(date ? startOfDay(date) : undefined);
+												setPurchaseDateOpen(false);
+											}}
 											autoFocus
 										/>
 									</PopoverContent>
@@ -135,7 +141,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 							>
 								<div className="ml-6 flex flex-wrap items-center gap-x-4 gap-y-2">
 									<Label htmlFor="open-date">Open date (optional)</Label>
-									<Popover>
+									<Popover open={openDateOpen} onOpenChange={setOpenDateOpen}>
 										<PopoverTrigger asChild>
 											<Button
 												variant="outline"
@@ -150,9 +156,10 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 											<Calendar
 												mode="single"
 												selected={openDate ? startOfDay(openDate) : undefined}
-												onSelect={(date) =>
-													setOpenDate(date ? startOfDay(date) : undefined)
-												}
+												onSelect={(date) => {
+													setOpenDate(date ? startOfDay(date) : undefined);
+													setOpenDateOpen(false);
+												}}
 												autoFocus
 											/>
 										</PopoverContent>
