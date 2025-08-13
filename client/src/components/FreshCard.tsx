@@ -24,7 +24,7 @@ export function FreshCard({ fresh, onEdit }: FreshCardProps) {
 			<CardHeader>
 				<div className="flex justify-between items-start gap-2">
 					<div>
-						<div className="flex items-center gap-2 mb-2">
+						<div className="flex items-center gap-2">
 							<div className="flex flex-wrap items-center gap-2">
 								<CardTitle className="text-lg break-words">
 									{fresh.name}
@@ -32,7 +32,7 @@ export function FreshCard({ fresh, onEdit }: FreshCardProps) {
 							</div>
 						</div>
 						{fresh.purchase_date && (
-							<div className="flex items-center gap-2">
+							<div className="flex items-center gap-2 mt-2">
 								<span className="text-sm font-medium">Purchased:</span>
 								<span className="text-sm text-muted-foreground">
 									{formatDate(fresh.purchase_date)}
@@ -40,7 +40,7 @@ export function FreshCard({ fresh, onEdit }: FreshCardProps) {
 							</div>
 						)}
 						{fresh.prepared_date && (
-							<div className="flex items-center gap-2">
+							<div className="flex items-center gap-2 mt-2">
 								<span className="text-sm font-medium">Prepared:</span>
 								<span className="text-sm text-muted-foreground">
 									{formatDate(fresh.prepared_date)}

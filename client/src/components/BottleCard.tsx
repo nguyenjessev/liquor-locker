@@ -24,7 +24,7 @@ export function BottleCard({ bottle, onEdit }: BottleCardProps) {
 			<CardHeader>
 				<div className="flex justify-between items-start gap-2">
 					<div>
-						<div className="flex items-center gap-2 mb-2">
+						<div className="flex items-center gap-2">
 							<div className="flex flex-wrap items-center gap-2">
 								<CardTitle className="text-lg break-words">
 									{bottle.name}
@@ -41,7 +41,7 @@ export function BottleCard({ bottle, onEdit }: BottleCardProps) {
 							</div>
 						</div>
 						{bottle.purchase_date && (
-							<div className="flex items-center gap-2">
+							<div className="flex items-center gap-2 mt-2">
 								<span className="text-sm font-medium">Purchased:</span>
 								<span className="text-sm text-muted-foreground">
 									{formatDate(bottle.purchase_date)}
@@ -49,7 +49,7 @@ export function BottleCard({ bottle, onEdit }: BottleCardProps) {
 							</div>
 						)}
 						{bottle.opened && bottle.open_date && (
-							<div className="flex items-center gap-2">
+							<div className="flex items-center gap-2 mt-2">
 								<span className="text-sm font-medium">Opened:</span>
 								<span className="text-sm text-muted-foreground">
 									{formatDate(bottle.open_date)}
