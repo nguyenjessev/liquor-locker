@@ -174,14 +174,6 @@ export function BottleEditModal({
 									</span>
 								</button>
 							</div>
-							{bottle.purchase_date && (
-								<div className="grid grid-cols-4 items-center gap-4">
-									<p className="font-medium">Purchased</p>
-									<p className="col-span-3">
-										{format(bottle.purchase_date, "PPP")}
-									</p>
-								</div>
-							)}
 							{bottle.opened && bottle.open_date && (
 								<div className="grid grid-cols-4 items-center gap-4">
 									<p className="font-medium">Opened</p>
