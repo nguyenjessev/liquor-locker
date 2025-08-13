@@ -24,8 +24,10 @@ export function Settings() {
 	}, []);
 
 	const saveSettings = () => {
-		localStorage.setItem("apiUrl", apiUrl);
+		const sanitizedApiUrl = apiUrl.replace(/\/+$/, "");
+		localStorage.setItem("apiUrl", sanitizedApiUrl);
 		localStorage.setItem("apiKey", apiKey);
+		setApiUrl(sanitizedApiUrl);
 		toast("Settings saved", {
 			description: "Your API settings have been saved successfully.",
 		});
