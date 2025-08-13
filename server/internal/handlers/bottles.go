@@ -184,6 +184,10 @@ func (h *BottleHandler) UpdateBottle(w http.ResponseWriter, r *http.Request) {
 		updates.OpenDate = req.OpenDate
 	}
 
+	if req.PurchaseDate != nil {
+		updates.PurchaseDate = req.PurchaseDate
+	}
+
 	updatedBottle, err := h.repo.UpdateBottle(r.Context(), id, updates)
 	if err != nil {
 		log.Printf("ERROR: UpdateBottle failed - id=%d, updates=%+v, error=%v", id, updates, err)

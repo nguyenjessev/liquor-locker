@@ -147,12 +147,12 @@ func (r *Repository) UpdateBottle(ctx context.Context, id int, updates *models.B
 
 	query := `
 		UPDATE bottles
-		SET name = ?, opened = ?, open_date = ?, updated_at = datetime('now')
+		SET name = ?, opened = ?, open_date = ?, purchase_date = ?, updated_at = datetime('now')
 		WHERE id = ?
 		RETURNING id, name, opened, open_date, purchase_date, created_at, updated_at`
 
 	var bottle models.Bottle
-	err := r.db.QueryRowContext(ctx, query, updates.Name, updates.Opened, updates.OpenDate, id).Scan(
+	err := r.db.QueryRowContext(ctx, query, updates.Name, updates.Opened, updates.OpenDate, updates.PurchaseDate, id).Scan(
 		&bottle.ID,
 		&bottle.Name,
 		&bottle.Opened,

@@ -20,9 +20,10 @@ type CreateBottleRequest struct {
 }
 
 type UpdateBottleRequest struct {
-	Name     string     `json:"name"`
-	Opened   bool       `json:"opened"`
-	OpenDate *time.Time `json:"open_date"`
+	Name         string     `json:"name"`
+	Opened       bool       `json:"opened"`
+	OpenDate     *time.Time `json:"open_date"`
+	PurchaseDate *time.Time `json:"purchase_date"`
 }
 
 type BottleResponse struct {
