@@ -240,7 +240,7 @@ export function BottleManager() {
 				<div className="flex items-center justify-between mb-2">
 					<h1 className="text-2xl md:text-3xl font-bold">Bottles</h1>
 				</div>
-				<p className="text-muted-foreground">Manage your bottle collection</p>
+				<p className="text-muted-foreground">Spirits, liqueurs, and wines</p>
 			</div>
 
 			<NewBottleForm onSubmit={addBottle} loading={loading} />
