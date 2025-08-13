@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { BottleManager } from "./BottleManager";
+import { FreshManager } from "./FreshManager";
 import { Settings } from "./Settings";
 import { BottomNav } from "./BottomNav";
 
@@ -11,6 +12,8 @@ export function Layout() {
 		switch (activeSection) {
 			case "bottles":
 				return <BottleManager />;
+			case "fresh":
+				return <FreshManager />;
 			case "settings":
 				return <Settings />;
 			default:
