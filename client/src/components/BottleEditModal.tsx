@@ -83,11 +83,12 @@ export function BottleEditModal({
 				<DialogHeader>
 					<DialogTitle>Edit Bottle: {bottle?.name}</DialogTitle>
 				</DialogHeader>
-				<div className="grid gap-4 py-4">
-					<div className="grid grid-cols-4 items-center gap-4">
+				<div className="grid gap-4 py-4 max-w-full">
+					<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
 						<p className="font-medium">Name</p>
-						<div className="col-span-3">
+						<div className="sm:col-span-3">
 							<Input
+								className="w-full"
 								value={editedName}
 								onChange={(e) => {
 									setEditedName(e.target.value);
@@ -97,39 +98,59 @@ export function BottleEditModal({
 							/>
 						</div>
 					</div>
-					<div className="grid grid-cols-4 items-center gap-4">
+					<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
 						<p className="font-medium">Purchase Date</p>
-						<div className="col-span-3">
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button
-										variant="outline"
-										className={`w-48 justify-start text-left font-normal ${!purchaseDate && "text-muted-foreground"}`}
-										disabled={loading || isSaving}
-									>
-										<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-										{purchaseDate ? format(purchaseDate, "PPP") : "Pick a date"}
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										mode="single"
-										selected={
-											purchaseDate ? startOfDay(purchaseDate) : undefined
-										}
-										onSelect={(date) => {
-											setPurchaseDate(date ? startOfDay(date) : null);
-											setHasChanges(true);
-										}}
-										autoFocus
-									/>
-								</PopoverContent>
-							</Popover>
+						<div className="sm:col-span-3 flex items-center gap-2">
+							<div className="flex items-center gap-2 min-w-0 flex-1">
+								<Popover>
+									<PopoverTrigger asChild className="min-w-0 flex-1">
+										<Button
+											variant="outline"
+											className={`min-w-0 flex-1 justify-start text-left font-normal whitespace-nowrap overflow-hidden ${!purchaseDate && "text-muted-foreground"}`}
+											disabled={loading || isSaving}
+										>
+											<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+											<span className="truncate">
+												{purchaseDate
+													? format(purchaseDate, "PPP")
+													: "No date set"}
+											</span>
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent className="w-auto p-0" align="start">
+										<Calendar
+											mode="single"
+											selected={
+												purchaseDate ? startOfDay(purchaseDate) : undefined
+											}
+											onSelect={(date) => {
+												setPurchaseDate(date ? startOfDay(date) : null);
+												setHasChanges(true);
+											}}
+											autoFocus
+										/>
+									</PopoverContent>
+								</Popover>
+							</div>
+							{purchaseDate && (
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-9 w-9 text-muted-foreground hover:text-destructive shrink-0"
+									onClick={() => {
+										setPurchaseDate(null);
+										setHasChanges(true);
+									}}
+									disabled={loading || isSaving}
+								>
+									<X className="h-4 w-4" />
+								</Button>
+							)}
 						</div>
 					</div>
 					{bottle && (
 						<>
-							<div className="grid grid-cols-4 items-center gap-4">
+							<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
 								<p className="font-medium">Status</p>
 								<button
 									onClick={() => {
@@ -183,37 +204,45 @@ export function BottleEditModal({
 								</button>
 							</div>
 							{isOpened && (
-								<div className="grid grid-cols-4 items-center gap-4">
+								<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
 									<p className="font-medium">Open Date</p>
-									<div className="col-span-3 flex items-center gap-2">
-										<Popover>
-											<PopoverTrigger asChild>
-												<Button
-													variant="outline"
-													className={`w-48 justify-start text-left font-normal ${!openDate && "text-muted-foreground"}`}
-													disabled={loading || isSaving}
-												>
-													<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-													{openDate ? format(openDate, "PPP") : "No date set"}
-												</Button>
-											</PopoverTrigger>
-											<PopoverContent className="w-auto p-0" align="start">
-												<Calendar
-													mode="single"
-													selected={openDate ? startOfDay(openDate) : undefined}
-													onSelect={(date) => {
-														setOpenDate(date ? startOfDay(date) : null);
-														setHasChanges(true);
-													}}
-													autoFocus
-												/>
-											</PopoverContent>
-										</Popover>
+									<div className="sm:col-span-3 flex items-center gap-2">
+										<div className="flex items-center gap-2 min-w-0 flex-1">
+											<Popover>
+												<PopoverTrigger asChild className="min-w-0 flex-1">
+													<Button
+														variant="outline"
+														className={`min-w-0 flex-1 justify-start text-left font-normal whitespace-nowrap overflow-hidden ${!openDate && "text-muted-foreground"}`}
+														disabled={loading || isSaving}
+													>
+														<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+														<span className="truncate">
+															{openDate
+																? format(openDate, "PPP")
+																: "No date set"}
+														</span>
+													</Button>
+												</PopoverTrigger>
+												<PopoverContent className="w-auto p-0" align="start">
+													<Calendar
+														mode="single"
+														selected={
+															openDate ? startOfDay(openDate) : undefined
+														}
+														onSelect={(date) => {
+															setOpenDate(date ? startOfDay(date) : null);
+															setHasChanges(true);
+														}}
+														autoFocus
+													/>
+												</PopoverContent>
+											</Popover>
+										</div>
 										{openDate && (
 											<Button
 												variant="ghost"
 												size="icon"
-												className="h-9 w-9 text-muted-foreground hover:text-destructive"
+												className="h-9 w-9 text-muted-foreground hover:text-destructive shrink-0"
 												onClick={() => {
 													setOpenDate(null);
 													setHasChanges(true);
@@ -230,7 +259,7 @@ export function BottleEditModal({
 					)}
 				</div>
 				{bottle && (
-					<div className="mt-4 flex justify-end gap-2">
+					<div className="mt-4 flex flex-wrap-reverse justify-end gap-2">
 						<Button
 							variant="ghost"
 							onClick={() => {

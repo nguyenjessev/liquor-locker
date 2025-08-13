@@ -32,7 +32,22 @@ export function BottleManager() {
 				throw new Error(errorText || `Server error: ${response.status}`);
 			}
 			const data = await response.json();
-			setBottles(data || []);
+			const parsedData = (data || []).map(
+				(bottle: {
+					id: number;
+					name: string;
+					opened: boolean;
+					open_date: string | null;
+					purchase_date: string | null;
+				}) => ({
+					...bottle,
+					open_date: bottle.open_date ? new Date(bottle.open_date) : null,
+					purchase_date: bottle.purchase_date
+						? new Date(bottle.purchase_date)
+						: null,
+				}),
+			);
+			setBottles(parsedData);
 		} catch (err) {
 			if (err instanceof Error) {
 				const errorMessage = err.message.includes("Failed to fetch bottles")
@@ -77,8 +92,21 @@ export function BottleManager() {
 				throw new Error(errorText || `Server error: ${response.status}`);
 			}
 
-			const newBottle = await response.json();
-			setBottles([newBottle, ...bottles]);
+			const newBottle: {
+				id: number;
+				name: string;
+				opened: boolean;
+				open_date: string | null;
+				purchase_date: string | null;
+			} = await response.json();
+			const parsedBottle = {
+				...newBottle,
+				open_date: newBottle.open_date ? new Date(newBottle.open_date) : null,
+				purchase_date: newBottle.purchase_date
+					? new Date(newBottle.purchase_date)
+					: null,
+			};
+			setBottles([parsedBottle, ...bottles]);
 		} catch (err) {
 			if (err instanceof Error) {
 				const errorMessage = err.message.includes("Failed to create bottle")
@@ -97,7 +125,12 @@ export function BottleManager() {
 	// Save bottle changes
 	const saveBottle = async (
 		id: number,
-		updates: { name: string; opened: boolean; open_date?: Date | null },
+		updates: {
+			name: string;
+			opened: boolean;
+			open_date?: Date | null;
+			purchase_date?: Date | null;
+		},
 	) => {
 		try {
 			setLoading(true);
@@ -114,7 +147,14 @@ export function BottleManager() {
 				headers,
 				body: JSON.stringify({
 					...updates,
-					open_date: updates.open_date?.toISOString(),
+					open_date:
+						updates.open_date instanceof Date
+							? updates.open_date.toISOString()
+							: null,
+					purchase_date:
+						updates.purchase_date instanceof Date
+							? updates.purchase_date.toISOString()
+							: null,
 				}),
 			});
 
@@ -123,8 +163,23 @@ export function BottleManager() {
 				throw new Error(errorText || `Server error: ${response.status}`);
 			}
 
-			const updatedBottle = await response.json();
-			setBottles(bottles.map((b) => (b.id === id ? updatedBottle : b)));
+			const updatedBottle: {
+				id: number;
+				name: string;
+				opened: boolean;
+				open_date: string | null;
+				purchase_date: string | null;
+			} = await response.json();
+			const parsedBottle = {
+				...updatedBottle,
+				open_date: updatedBottle.open_date
+					? new Date(updatedBottle.open_date)
+					: null,
+				purchase_date: updatedBottle.purchase_date
+					? new Date(updatedBottle.purchase_date)
+					: null,
+			};
+			setBottles(bottles.map((b) => (b.id === id ? parsedBottle : b)));
 		} catch (err) {
 			if (err instanceof Error) {
 				const errorMessage = err.message.includes("Failed to update bottle")

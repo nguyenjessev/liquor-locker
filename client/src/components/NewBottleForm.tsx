@@ -95,7 +95,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 											<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
 											{purchaseDate
 												? format(purchaseDate, "PPP")
-												: "Pick a date"}
+												: "No date set"}
 										</Button>
 									</PopoverTrigger>
 									<PopoverContent className="w-auto p-0" align="start">
@@ -143,7 +143,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 												disabled={loading}
 											>
 												<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-												{openDate ? format(openDate, "PPP") : "Pick a date"}
+												{openDate ? format(openDate, "PPP") : "No date set"}
 											</Button>
 										</PopoverTrigger>
 										<PopoverContent className="w-auto p-0" align="start">
