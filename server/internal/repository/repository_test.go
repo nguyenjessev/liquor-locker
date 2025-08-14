@@ -24,13 +24,14 @@ func setupTestRepository(t *testing.T) *Repository {
 			created_at DATETIME NOT NULL,
 			updated_at DATETIME NOT NULL,
 			open_date DATETIME
+			purchase_date DATETIME
 		)`
 
 	if _, err := db.Exec(createTableSQL); err != nil {
 		t.Fatalf("Failed to create bottles table: %v", err)
 	}
 
-	return &Repository{db: db}
+	return &Repository{DB: db}
 }
 
 func TestCreateBottle_Success(t *testing.T) {
@@ -68,7 +69,7 @@ func TestCreateBottle_Success(t *testing.T) {
 	}
 
 	var count int
-	err = repo.db.QueryRow("SELECT COUNT(*) FROM bottles WHERE name = ? AND id = ?", result.Name, result.ID).Scan(&count)
+	err = repo.DB.QueryRow("SELECT COUNT(*) FROM bottles WHERE name = ? AND id = ?", result.Name, result.ID).Scan(&count)
 	if err != nil {
 		t.Fatalf("Failed to query database: %v", err)
 	}
@@ -155,7 +156,7 @@ func TestCreateBottle_MultipleBottles(t *testing.T) {
 
 	// Verify all bottles exist in database
 	var totalCount int
-	err := repo.db.QueryRow("SELECT COUNT(*) FROM bottles").Scan(&totalCount)
+	err := repo.DB.QueryRow("SELECT COUNT(*) FROM bottles").Scan(&totalCount)
 	if err != nil {
 		t.Fatalf("Failed to query database: %v", err)
 	}
@@ -307,7 +308,7 @@ func TestDeleteBottleByID(t *testing.T) {
 
 				// Verify it's not in the database
 				var count int
-				countErr := repo.db.QueryRow("SELECT COUNT(*) FROM bottles WHERE id = ?", tt.id).Scan(&count)
+				countErr := repo.DB.QueryRow("SELECT COUNT(*) FROM bottles WHERE id = ?", tt.id).Scan(&count)
 				if countErr != nil {
 					t.Fatalf("Failed to query database: %v", countErr)
 				}

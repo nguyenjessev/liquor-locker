@@ -15,7 +15,7 @@ import (
 )
 
 type Repository struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
 func New() *Repository {
@@ -24,15 +24,15 @@ func New() *Repository {
 		panic(err)
 	}
 
-	return &Repository{db: db}
+	return &Repository{DB: db}
 }
 
 func (r *Repository) CloseDB() {
-	r.db.Close()
+	r.DB.Close()
 }
 
 func (r *Repository) RunMigrations() error {
-	driver, err := sqlite3.WithInstance(r.db, &sqlite3.Config{})
+	driver, err := sqlite3.WithInstance(r.DB, &sqlite3.Config{})
 	if err != nil {
 		return fmt.Errorf("failed to create migrate driver: %v", err)
 	}
@@ -65,7 +65,7 @@ func (r *Repository) CreateBottle(ctx context.Context, bottle *models.Bottle) (*
 		VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
 		RETURNING id, created_at, updated_at`
 
-	err := r.db.QueryRowContext(ctx, query, bottle.Name, bottle.Opened, bottle.OpenDate, bottle.PurchaseDate).Scan(&bottle.ID, &bottle.CreatedAt, &bottle.UpdatedAt)
+	err := r.DB.QueryRowContext(ctx, query, bottle.Name, bottle.Opened, bottle.OpenDate, bottle.PurchaseDate).Scan(&bottle.ID, &bottle.CreatedAt, &bottle.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create bottle: %v", err)
 	}
@@ -82,7 +82,7 @@ func (r *Repository) GetBottleByID(ctx context.Context, id int) (*models.Bottle,
 		WHERE id = ?`
 
 	var bottle models.Bottle
-	err := r.db.QueryRowContext(ctx, query, id).Scan(&bottle.ID, &bottle.Name, &bottle.Opened, &bottle.OpenDate, &bottle.PurchaseDate, &bottle.CreatedAt, &bottle.UpdatedAt)
+	err := r.DB.QueryRowContext(ctx, query, id).Scan(&bottle.ID, &bottle.Name, &bottle.Opened, &bottle.OpenDate, &bottle.PurchaseDate, &bottle.CreatedAt, &bottle.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrBottleNotFound
@@ -97,7 +97,7 @@ func (r *Repository) GetBottleByID(ctx context.Context, id int) (*models.Bottle,
 func (r *Repository) DeleteBottleByID(ctx context.Context, id int) error {
 	query := `DELETE FROM bottles WHERE id = ?`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := r.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete bottle: %v", err)
 	}
@@ -120,7 +120,7 @@ func (r *Repository) GetAllBottles(ctx context.Context) ([]*models.Bottle, error
 		FROM bottles
 		ORDER BY created_at DESC`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get bottles: %v", err)
 	}
@@ -156,7 +156,7 @@ func (r *Repository) UpdateBottle(ctx context.Context, id int, updates *models.B
 		RETURNING id, name, opened, open_date, purchase_date, created_at, updated_at`
 
 	var bottle models.Bottle
-	err := r.db.QueryRowContext(ctx, query, updates.Name, updates.Opened, updates.OpenDate, updates.PurchaseDate, id).Scan(
+	err := r.DB.QueryRowContext(ctx, query, updates.Name, updates.Opened, updates.OpenDate, updates.PurchaseDate, id).Scan(
 		&bottle.ID,
 		&bottle.Name,
 		&bottle.Opened,
@@ -185,7 +185,7 @@ func (r *Repository) CreateFresh(ctx context.Context, fresh *models.Fresh) (*mod
 		VALUES (?, ?, ?, datetime('now'), datetime('now'))
 		RETURNING id, created_at, updated_at`
 
-	err := r.db.QueryRowContext(ctx, query, fresh.Name, fresh.PreparedDate, fresh.PurchaseDate).Scan(&fresh.ID, &fresh.CreatedAt, &fresh.UpdatedAt)
+	err := r.DB.QueryRowContext(ctx, query, fresh.Name, fresh.PreparedDate, fresh.PurchaseDate).Scan(&fresh.ID, &fresh.CreatedAt, &fresh.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create fresh item: %v", err)
 	}
@@ -200,7 +200,7 @@ func (r *Repository) GetFreshByID(ctx context.Context, id int) (*models.Fresh, e
 		WHERE id = ?`
 
 	var fresh models.Fresh
-	err := r.db.QueryRowContext(ctx, query, id).Scan(&fresh.ID, &fresh.Name, &fresh.PreparedDate, &fresh.PurchaseDate, &fresh.CreatedAt, &fresh.UpdatedAt)
+	err := r.DB.QueryRowContext(ctx, query, id).Scan(&fresh.ID, &fresh.Name, &fresh.PreparedDate, &fresh.PurchaseDate, &fresh.CreatedAt, &fresh.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrFreshNotFound
@@ -215,7 +215,7 @@ func (r *Repository) GetFreshByID(ctx context.Context, id int) (*models.Fresh, e
 func (r *Repository) DeleteFreshByID(ctx context.Context, id int) error {
 	query := `DELETE FROM fresh WHERE id = ?`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := r.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete fresh item: %v", err)
 	}
@@ -238,7 +238,7 @@ func (r *Repository) GetAllFresh(ctx context.Context) ([]*models.Fresh, error) {
 		FROM fresh
 		ORDER BY created_at DESC`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get fresh items: %v", err)
 	}
@@ -274,7 +274,7 @@ func (r *Repository) UpdateFresh(ctx context.Context, id int, updates *models.Fr
 		RETURNING id, name, prepared_date, purchase_date, created_at, updated_at`
 
 	var fresh models.Fresh
-	err := r.db.QueryRowContext(ctx, query, updates.Name, updates.PreparedDate, updates.PurchaseDate, id).Scan(
+	err := r.DB.QueryRowContext(ctx, query, updates.Name, updates.PreparedDate, updates.PurchaseDate, id).Scan(
 		&fresh.ID,
 		&fresh.Name,
 		&fresh.PreparedDate,
