@@ -4,6 +4,7 @@ import { BottleManager } from "./BottleManager";
 import { FreshManager } from "./FreshManager";
 import { Settings } from "./Settings";
 import { BottomNav } from "./BottomNav";
+import { MagicBartender } from "./MagicBartender";
 import { Toaster } from "sonner";
 
 export function Layout() {
@@ -15,6 +16,8 @@ export function Layout() {
 				return <BottleManager />;
 			case "fresh":
 				return <FreshManager />;
+			case "magic-bartender":
+				return <MagicBartender />;
 			case "settings":
 				return <Settings />;
 			default:

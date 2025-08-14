@@ -1,4 +1,4 @@
-import { Apple, BottleWine, Settings } from "lucide-react";
+import { Apple, BottleWine, Settings, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,11 @@ export function BottomNav({ activeSection, onSectionChange }: BottomNavProps) {
 			id: "fresh",
 			label: "Fresh",
 			icon: Apple,
+		},
+		{
+			id: "magic-bartender",
+			label: "Magic Bartender",
+			icon: Wand2,
 		},
 		{
 			id: "settings",
