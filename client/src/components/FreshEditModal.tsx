@@ -70,7 +70,7 @@ export function FreshEditModal({
 			});
 			onOpenChange(false);
 		} catch (error) {
-			console.error("Failed to save bottle:", error);
+			console.error("Failed to save ingredient:", error);
 		} finally {
 			setIsSaving(false);
 		}
@@ -79,7 +79,7 @@ export function FreshEditModal({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
-					<DialogTitle>Edit Bottle: {fresh?.name}</DialogTitle>
+					<DialogTitle>Edit Ingredient: {fresh?.name}</DialogTitle>
 				</DialogHeader>
 				<div className="grid gap-4 py-4 max-w-full">
 					<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
