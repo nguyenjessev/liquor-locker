@@ -1,93 +1,33 @@
+import { useEffect, useState } from "react";
+
+const API_BASE_URL =
+	import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { useAI } from "@/hooks/useAI";
-import { toast } from "sonner";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-	Command,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-} from "@/components/ui/command";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
 
 export function MagicBartender() {
-	const [loading, setLoading] = useState(false);
-	const [recommendation, setRecommendation] = useState<string | null>(null);
-	const {
-		isConfigured,
-		models,
-		selectedModel,
-		setSelectedModel,
-		configureService,
-		isConfigured: serviceConfigured,
-		configError,
-	} = useAI();
+	const [serviceStatus, setServiceStatus] = useState<null | boolean>(null);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		const apiUrl = localStorage.getItem("apiUrl");
-		const apiKey = localStorage.getItem("apiKey");
-
-		if (!apiUrl || !apiKey) {
-			toast.error("Missing API settings", {
-				description:
-					"Please configure your API URL and key in the settings page.",
-			});
-			return;
-		}
-
-		configureService().catch(() => {});
-	}, [configureService]);
-
-	const getRecommendation = async () => {
-		if (!serviceConfigured || !selectedModel) {
-			return;
-		}
-		if (configError) {
-			toast.error("Cannot get recommendations", {
-				description: "Please check your API settings and try again.",
-			});
-			return;
-		}
-
-		setLoading(true);
-		try {
-			const response = await fetch(
-				"http://localhost:8080/cocktails/recommendation",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"X-API-Key": localStorage.getItem("apiKey") || "",
-					},
-					body: JSON.stringify({
-						model: selectedModel,
-					}),
-				},
-			);
-
-			if (!response.ok) {
-				throw new Error("Failed to get recommendation");
+		const fetchStatus = async () => {
+			try {
+				const res = await fetch(`${API_BASE_URL}/ai/service`);
+				if (!res.ok) {
+					setServiceStatus(null);
+				} else {
+					const data = await res.json();
+					setServiceStatus(data.initialized);
+				}
+			} catch {
+				setServiceStatus(null);
+			} finally {
+				setLoading(false);
 			}
+		};
+		fetchStatus();
+	}, []);
 
-			const data = await response.json();
-			setRecommendation(data.recommendation || "");
-		} catch (error) {
-			toast.error("Error getting recommendation", {
-				description:
-					error instanceof Error ? error.message : "An unknown error occurred",
-			});
-		} finally {
-			setLoading(false);
-		}
-	};
 	return (
 		<div className="container mx-auto max-w-4xl p-4 md:p-6 mt-0">
 			<div className="mb-8">
@@ -98,91 +38,33 @@ export function MagicBartender() {
 					Get personalized cocktail recommendations from our AI-powered
 					bartender based on your inventory
 				</p>
+				<div className="mt-2">
+					{loading ? (
+						<span className="text-sm text-muted-foreground">
+							Checking AI service status...
+						</span>
+					) : serviceStatus === true ? (
+						<span className="text-sm text-green-600">
+							AI service is initialized and ready!
+						</span>
+					) : (
+						<span className="text-sm text-red-600">
+							AI service is not initialized.
+						</span>
+					)}
+				</div>
 			</div>
 
 			<Card>
 				<CardContent>
-					{!isConfigured ? (
-						<p className="text-muted-foreground mb-4">
-							Please configure your API settings in the settings page to use the
-							Magic Bartender.
+					<div className="space-y-4">
+						<p className="text-muted-foreground">
+							Ready to discover new cocktails? Click below to get started.
 						</p>
-					) : (
-						<div className="space-y-4">
-							<p className="text-muted-foreground">
-								Ready to discover new cocktails? Click below to get started.
-							</p>
-							{models.length > 0 && (
-								<div className="mb-6">
-									<div className="space-y-2">
-										<p className="text-sm font-medium">Select a Model:</p>
-										<Popover>
-											<PopoverTrigger asChild>
-												<Button
-													variant="outline"
-													role="combobox"
-													className="w-full justify-between"
-												>
-													{selectedModel
-														? models.find((model) => model === selectedModel)
-														: "Select model..."}
-													<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-												</Button>
-											</PopoverTrigger>
-											<PopoverContent className="w-full p-0">
-												<Command>
-													<CommandInput placeholder="Search models..." />
-													<CommandEmpty>No model found.</CommandEmpty>
-													<CommandGroup>
-														{models.map((model) => (
-															<CommandItem
-																key={model}
-																value={model}
-																onSelect={(currentValue) => {
-																	setSelectedModel(
-																		currentValue === selectedModel
-																			? undefined
-																			: currentValue,
-																	);
-																}}
-															>
-																<Check
-																	className={cn(
-																		"mr-2 h-4 w-4",
-																		selectedModel === model
-																			? "opacity-100"
-																			: "opacity-0",
-																	)}
-																/>
-																{model}
-															</CommandItem>
-														))}
-													</CommandGroup>
-												</Command>
-											</PopoverContent>
-										</Popover>
-									</div>
-								</div>
-							)}
-							<Button
-								onClick={getRecommendation}
-								disabled={loading || !selectedModel}
-							>
-								{loading ? "Getting recommendation..." : "Get Recommendations"}
-							</Button>
-						</div>
-					)}
+						<Button>Get Recommendations</Button>
+					</div>
 				</CardContent>
 			</Card>
-
-			{/* Recommendation Card below main card */}
-			{recommendation && (
-				<Card className="mt-6">
-					<CardContent>
-						<p className="whitespace-pre-wrap mb-4">{recommendation}</p>
-					</CardContent>
-				</Card>
-			)}
 		</div>
 	);
 }

@@ -93,6 +93,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.aiHandler.Configure(w, r)
 	case path == "/ai/models":
 		s.aiHandler.ListModels(w, r)
+	case path == "/ai/service" && r.Method == http.MethodGet:
+		s.aiHandler.ServiceStatusHandler(w, r)
 	case path == "/cocktails/recommendation" && r.Method == http.MethodPost:
 		s.aiHandler.RecommendCocktailHandler(s.repo)(w, r)
 	default:

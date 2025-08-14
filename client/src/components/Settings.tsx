@@ -23,14 +23,52 @@ export function Settings() {
 		if (savedApiKey) setApiKey(savedApiKey);
 	}, []);
 
-	const saveSettings = () => {
-		const sanitizedApiUrl = apiUrl.replace(/\/+$/, "");
-		localStorage.setItem("apiUrl", sanitizedApiUrl);
-		localStorage.setItem("apiKey", apiKey);
-		setApiUrl(sanitizedApiUrl);
-		toast("Settings saved", {
-			description: "Your API settings have been saved successfully.",
-		});
+	const saveSettings = async () => {
+		const API_BASE_URL =
+			import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+		try {
+			const sanitizedApiUrl = apiUrl.replace(/\/+$/, "");
+
+			// Validate API configuration
+			const configureResponse = await fetch(`${API_BASE_URL}/ai/configure`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					base_url: sanitizedApiUrl,
+					api_key: apiKey,
+				}),
+			});
+
+			if (!configureResponse.ok) {
+				throw new Error(
+					"Failed to configure API. Please check your URL and key.",
+				);
+			}
+
+			const modelsResponse = await fetch(`${API_BASE_URL}/ai/models`, {
+				method: "GET",
+			});
+
+			if (!modelsResponse.ok || (await modelsResponse.json()).length === 0) {
+				throw new Error(
+					"No models found. Please verify your API configuration.",
+				);
+			}
+
+			// Save settings if validation succeeds
+			localStorage.setItem("apiUrl", sanitizedApiUrl);
+			localStorage.setItem("apiKey", apiKey);
+			setApiUrl(sanitizedApiUrl);
+			toast("Settings saved", {
+				description: "Your API settings have been saved successfully.",
+			});
+		} catch {
+			toast("Error saving settings", {
+				description: "Could not validate API configuration.",
+			});
+		}
 	};
 
 	return (

@@ -133,3 +133,24 @@ func (h *AIHandler) Configure(w http.ResponseWriter, r *http.Request) {
 func (h *AIHandler) GetAIService() *services.OpenAIService {
 	return h.aiService
 }
+
+// ServiceStatusHandler handles GET /ai/service requests to check if AI service is initialized
+func (h *AIHandler) ServiceStatusHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	status := map[string]bool{
+		"initialized": h.aiService != nil,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(status); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
