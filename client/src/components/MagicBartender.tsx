@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useAI } from "@/hooks/useAI";
 import { toast } from "sonner";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,100 +21,63 @@ import {
 export function MagicBartender() {
 	const [loading, setLoading] = useState(false);
 	const [recommendation, setRecommendation] = useState<string | null>(null);
-	const [settingsValid, setSettingsValid] = useState<boolean | null>(null);
-	const [models, setModels] = useState<string[]>([]);
-	const [selectedModel, setSelectedModel] = useState<string>();
-	const [loadingModels, setLoadingModels] = useState(false);
-	const hasShownToast = useRef(false);
-	const hasConfigured = useRef(false);
+	const {
+		isConfigured,
+		models,
+		selectedModel,
+		setSelectedModel,
+		configureService,
+		lastConfigured,
+		isConfigured: serviceConfigured,
+		configError,
+	} = useAI();
 
-	const settings = useMemo(() => {
-		const apiUrl = localStorage.getItem("apiUrl");
-		const apiKey = localStorage.getItem("apiKey");
-		return { apiUrl, apiKey };
-	}, []);
+	const hasAttemptedConfig = useRef(false);
+	const configAttemptTimestamp = useRef<number>(0);
 
 	useEffect(() => {
-		if (!settings.apiUrl || !settings.apiKey) {
-			setSettingsValid(false);
-			if (!hasShownToast.current) {
+		const apiUrl = localStorage.getItem("apiUrl");
+		const apiKey = localStorage.getItem("apiKey");
+
+		if (!apiUrl || !apiKey) {
+			if (!hasAttemptedConfig.current) {
 				toast.error("Missing API settings", {
 					description:
 						"Please configure your API URL and key in the settings page.",
 				});
-				hasShownToast.current = true;
+				hasAttemptedConfig.current = true;
 			}
 			return;
 		}
 
-		const configureAI = async () => {
-			if (hasConfigured.current) return;
-			try {
-				const response = await fetch("http://localhost:8080/ai/configure", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"X-API-Key": localStorage.getItem("apiKey") || "",
-					},
-					body: JSON.stringify({
-						base_url: settings.apiUrl,
-						api_key: settings.apiKey,
-					}),
-				});
+		// Store current settings to detect changes
+		const currentSettings = JSON.stringify({ apiUrl, apiKey });
+		const lastSettings = localStorage.getItem("lastAISettings");
 
-				if (!response.ok) {
-					throw new Error("Failed to configure AI service");
-				}
+		// Prevent rapid retries on failure
+		const now = Date.now();
+		const timeSinceLastAttempt = now - configAttemptTimestamp.current;
+		const minimumRetryInterval = 5000; // 5 seconds
 
-				setSettingsValid(true);
-				if (!hasConfigured.current) {
-					toast.success("AI service configured successfully", {
-						description: "Ready to provide cocktail recommendations!",
-					});
-					hasConfigured.current = true;
-					fetchModels();
-				}
-			} catch (error) {
-				toast.error("Error configuring AI service", {
-					description:
-						error instanceof Error
-							? error.message
-							: "An unknown error occurred",
-				});
-				setSettingsValid(false);
-			}
-		};
-
-		configureAI();
-	}, [settings]);
-
-	const fetchModels = async () => {
-		setLoadingModels(true);
-		try {
-			const response = await fetch("http://localhost:8080/ai/models", {
-				headers: {
-					"X-API-Key": localStorage.getItem("apiKey") || "",
-				},
-			});
-
-			if (!response.ok) {
-				throw new Error("Failed to fetch models");
-			}
-
-			const data = await response.json();
-			setModels(data);
-		} catch (error) {
-			toast.error("Error fetching models", {
-				description:
-					error instanceof Error ? error.message : "An unknown error occurred",
-			});
-		} finally {
-			setLoadingModels(false);
+		// Reconfigure if settings have changed or service isn't configured
+		if (
+			(!serviceConfigured || currentSettings !== lastSettings) &&
+			timeSinceLastAttempt >= minimumRetryInterval
+		) {
+			configAttemptTimestamp.current = now;
+			configureService().catch(() => {});
+			localStorage.setItem("lastAISettings", currentSettings);
 		}
-	};
+	}, [configureService, serviceConfigured, lastConfigured]);
 
 	const getRecommendation = async () => {
-		if (!settingsValid || !selectedModel) {
+		if (!serviceConfigured || !selectedModel) {
+			return;
+		}
+		if (configError) {
+			toast.error("Cannot get recommendations", {
+				description: "Please check your API settings and try again.",
+			});
 			return;
 		}
 
@@ -159,7 +123,7 @@ export function MagicBartender() {
 
 			<Card>
 				<CardContent>
-					{!settingsValid ? (
+					{!isConfigured ? (
 						<p className="text-muted-foreground mb-4">
 							Please configure your API settings in the settings page to use the
 							Magic Bartender.
@@ -179,9 +143,7 @@ export function MagicBartender() {
 								<p className="text-muted-foreground">
 									Ready to discover new cocktails? Click below to get started.
 								</p>
-								{loadingModels ? (
-									<p>Loading available models...</p>
-								) : models.length > 0 ? (
+								{models.length > 0 ? (
 									<div>
 										<div className="space-y-2">
 											<p className="text-sm font-medium">Select a Model:</p>
