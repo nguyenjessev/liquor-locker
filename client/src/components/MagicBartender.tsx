@@ -4,6 +4,21 @@ const API_BASE_URL =
 	import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+	Popover,
+	PopoverTrigger,
+	PopoverContent,
+} from "@/components/ui/popover";
+import {
+	Command,
+	CommandInput,
+	CommandList,
+	CommandEmpty,
+	CommandGroup,
+	CommandItem,
+} from "@/components/ui/command";
+import { ChevronsUpDown, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function MagicBartender() {
 	const [serviceStatus, setServiceStatus] = useState<null | boolean>(null);
@@ -117,25 +132,21 @@ export function MagicBartender() {
 								<p className="text-muted-foreground">
 									Ready to discover new cocktails? Click below to get started.
 								</p>
-								<Button>Get Recommendations</Button>
-								<div className="mt-6">
+								<div className="mb-6">
 									<h2 className="text-lg font-semibold mb-2">
 										Available Models
 									</h2>
 									{modelsLoading ? (
 										<p className="text-muted-foreground">Loading models...</p>
 									) : models.length > 0 ? (
-										<ul className="list-disc pl-5">
-											{models.map((model) => (
-												<li key={model}>{model}</li>
-											))}
-										</ul>
+										<ModelCombobox models={models} />
 									) : (
 										<p className="text-muted-foreground">
 											No models available.
 										</p>
 									)}
 								</div>
+								<Button>Get Recommendations</Button>
 							</>
 						) : (
 							<p className="text-muted-foreground">
@@ -147,5 +158,82 @@ export function MagicBartender() {
 				</CardContent>
 			</Card>
 		</div>
+	);
+}
+
+// Combobox for models
+function ModelCombobox({ models }: { models: string[] }) {
+	const [open, setOpen] = useState(false);
+	const [value, setValue] = useState("");
+
+	const options = models.map((model) => ({
+		value: model,
+		label: model,
+	}));
+
+	// Persist selected model in localStorage
+	const LOCAL_STORAGE_KEY = "selectedModel";
+
+	// On mount, load selected model from localStorage if valid
+	useEffect(() => {
+		const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+		if (stored && models.includes(stored)) {
+			setValue(stored);
+		}
+	}, [models]);
+
+	// When value changes, persist to localStorage
+	useEffect(() => {
+		if (value && models.includes(value)) {
+			localStorage.setItem(LOCAL_STORAGE_KEY, value);
+		} else if (value === "") {
+			localStorage.removeItem(LOCAL_STORAGE_KEY);
+		}
+	}, [value, models]);
+
+	return (
+		<Popover open={open} onOpenChange={setOpen}>
+			<PopoverTrigger asChild>
+				<Button
+					variant="outline"
+					role="combobox"
+					aria-expanded={open}
+					className={cn("w-auto justify-between")}
+				>
+					{value
+						? options.find((option) => option.value === value)?.label
+						: "Select model..."}
+					<ChevronsUpDown className="opacity-50 ml-2 h-4 w-4 shrink-0" />
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent className="w-auto p-0">
+				<Command>
+					<CommandInput placeholder="Search model..." className="h-9" />
+					<CommandList>
+						<CommandEmpty>No model found.</CommandEmpty>
+						<CommandGroup>
+							{options.map((option) => (
+								<CommandItem
+									key={option.value}
+									value={option.value}
+									onSelect={(currentValue) => {
+										setValue(currentValue === value ? "" : currentValue);
+										setOpen(false);
+									}}
+								>
+									{option.label}
+									<Check
+										className={cn(
+											"ml-auto",
+											value === option.value ? "opacity-100" : "opacity-0",
+										)}
+									/>
+								</CommandItem>
+							))}
+						</CommandGroup>
+					</CommandList>
+				</Command>
+			</PopoverContent>
+		</Popover>
 	);
 }
