@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 export function MagicBartender() {
 	const [serviceStatus, setServiceStatus] = useState<null | boolean>(null);
 	const [loading, setLoading] = useState(true);
+	const [models, setModels] = useState<string[]>([]);
+	const [modelsLoading, setModelsLoading] = useState(false);
 
 	useEffect(() => {
 		const fetchStatus = async () => {
@@ -17,7 +19,48 @@ export function MagicBartender() {
 					setServiceStatus(null);
 				} else {
 					const data = await res.json();
-					setServiceStatus(data.initialized);
+					if (!data.initialized) {
+						// Try to auto-initialize if API settings exist
+						const apiUrl = localStorage.getItem("apiUrl");
+						const apiKey = localStorage.getItem("apiKey");
+						if (apiUrl && apiKey) {
+							try {
+								const sanitizedApiUrl = apiUrl.replace(/\/+$/, "");
+								const configureResponse = await fetch(
+									`${API_BASE_URL}/ai/configure`,
+									{
+										method: "POST",
+										headers: {
+											"Content-Type": "application/json",
+											"X-API-Key": apiKey,
+										},
+										body: JSON.stringify({
+											base_url: sanitizedApiUrl,
+											api_key: apiKey,
+										}),
+									},
+								);
+								if (configureResponse.ok) {
+									// Re-check service status after successful configure
+									const res2 = await fetch(`${API_BASE_URL}/ai/service`);
+									if (res2.ok) {
+										const data2 = await res2.json();
+										setServiceStatus(data2.initialized);
+									} else {
+										setServiceStatus(null);
+									}
+								} else {
+									setServiceStatus(null);
+								}
+							} catch {
+								setServiceStatus(null);
+							}
+						} else {
+							setServiceStatus(false);
+						}
+					} else {
+						setServiceStatus(true);
+					}
 				}
 			} catch {
 				setServiceStatus(null);
@@ -27,6 +70,28 @@ export function MagicBartender() {
 		};
 		fetchStatus();
 	}, []);
+
+	// Fetch models when serviceStatus becomes true
+	useEffect(() => {
+		if (serviceStatus) {
+			setModelsLoading(true);
+			(async () => {
+				try {
+					const modelsRes = await fetch(`${API_BASE_URL}/ai/models`);
+					if (modelsRes.ok) {
+						const modelsData = await modelsRes.json();
+						setModels(Array.isArray(modelsData) ? modelsData : []);
+					} else {
+						setModels([]);
+					}
+				} catch {
+					setModels([]);
+				} finally {
+					setModelsLoading(false);
+				}
+			})();
+		}
+	}, [serviceStatus]);
 
 	return (
 		<div className="container mx-auto max-w-4xl p-4 md:p-6 mt-0">
@@ -38,30 +103,46 @@ export function MagicBartender() {
 					Get personalized cocktail recommendations from our AI-powered
 					bartender based on your inventory
 				</p>
-				<div className="mt-2">
-					{loading ? (
-						<span className="text-sm text-muted-foreground">
-							Checking AI service status...
-						</span>
-					) : serviceStatus === true ? (
-						<span className="text-sm text-green-600">
-							AI service is initialized and ready!
-						</span>
-					) : (
-						<span className="text-sm text-red-600">
-							AI service is not initialized.
-						</span>
-					)}
-				</div>
 			</div>
 
 			<Card>
 				<CardContent>
 					<div className="space-y-4">
-						<p className="text-muted-foreground">
-							Ready to discover new cocktails? Click below to get started.
-						</p>
-						<Button>Get Recommendations</Button>
+						{loading ? (
+							<p className="text-muted-foreground">
+								Checking service status...
+							</p>
+						) : serviceStatus ? (
+							<>
+								<p className="text-muted-foreground">
+									Ready to discover new cocktails? Click below to get started.
+								</p>
+								<Button>Get Recommendations</Button>
+								<div className="mt-6">
+									<h2 className="text-lg font-semibold mb-2">
+										Available Models
+									</h2>
+									{modelsLoading ? (
+										<p className="text-muted-foreground">Loading models...</p>
+									) : models.length > 0 ? (
+										<ul className="list-disc pl-5">
+											{models.map((model) => (
+												<li key={model}>{model}</li>
+											))}
+										</ul>
+									) : (
+										<p className="text-muted-foreground">
+											No models available.
+										</p>
+									)}
+								</div>
+							</>
+						) : (
+							<p className="text-muted-foreground">
+								To use Magic Bartender, please configure your API in your{" "}
+								<strong>Settings</strong>.
+							</p>
+						)}
 					</div>
 				</CardContent>
 			</Card>
