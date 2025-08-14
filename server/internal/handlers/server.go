@@ -76,6 +76,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.handleHealth(w, r)
 	case path == "/ai/configure":
 		s.aiHandler.Configure(w, r)
+	case path == "/ai/models":
+		s.aiHandler.ListModels(w, r)
 	default:
 		http.NotFound(w, r)
 	}

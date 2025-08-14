@@ -7,6 +7,8 @@ export function MagicBartender() {
 	const [loading, setLoading] = useState(false);
 	const [recommendation, setRecommendation] = useState<string | null>(null);
 	const [settingsValid, setSettingsValid] = useState<boolean | null>(null);
+	const [models, setModels] = useState<string[]>([]);
+	const [loadingModels, setLoadingModels] = useState(false);
 	const hasShownToast = useRef(false);
 	const hasConfigured = useRef(false);
 
@@ -54,6 +56,7 @@ export function MagicBartender() {
 						description: "Ready to provide cocktail recommendations!",
 					});
 					hasConfigured.current = true;
+					fetchModels();
 				}
 			} catch (error) {
 				toast.error("Error configuring AI service", {
@@ -68,6 +71,31 @@ export function MagicBartender() {
 
 		configureAI();
 	}, [settings]);
+
+	const fetchModels = async () => {
+		setLoadingModels(true);
+		try {
+			const response = await fetch("http://localhost:8080/ai/models", {
+				headers: {
+					"X-API-Key": localStorage.getItem("apiKey") || "",
+				},
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to fetch models");
+			}
+
+			const data = await response.json();
+			setModels(data);
+		} catch (error) {
+			toast.error("Error fetching models", {
+				description:
+					error instanceof Error ? error.message : "An unknown error occurred",
+			});
+		} finally {
+			setLoadingModels(false);
+		}
+	};
 
 	const getRecommendation = async () => {
 		if (!settingsValid) {
@@ -131,12 +159,30 @@ export function MagicBartender() {
 						</>
 					) : (
 						<>
-							<p className="text-muted-foreground mb-4">
-								Ready to discover new cocktails? Click below to get started.
-							</p>
-							<Button onClick={getRecommendation} disabled={loading}>
-								{loading ? "Getting recommendation..." : "Get Recommendations"}
-							</Button>
+							<div className="space-y-4">
+								<p className="text-muted-foreground">
+									Ready to discover new cocktails? Click below to get started.
+								</p>
+								{loadingModels ? (
+									<p>Loading available models...</p>
+								) : models.length > 0 ? (
+									<div>
+										<p className="text-sm font-medium mb-2">
+											Available Models:
+										</p>
+										<ul className="list-disc list-inside text-sm text-muted-foreground">
+											{models.map((model) => (
+												<li key={model}>{model}</li>
+											))}
+										</ul>
+									</div>
+								) : null}
+								<Button onClick={getRecommendation} disabled={loading}>
+									{loading
+										? "Getting recommendation..."
+										: "Get Recommendations"}
+								</Button>
+							</div>
 						</>
 					)}
 				</CardContent>

@@ -14,6 +14,34 @@ type AIHandler struct {
 	mu        sync.Mutex
 }
 
+// ListModels returns a list of available AI models
+func (h *AIHandler) ListModels(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	if h.aiService == nil {
+		http.Error(w, "AI service not configured", http.StatusServiceUnavailable)
+		return
+	}
+
+	models, err := h.aiService.ListModels(r.Context())
+	if err != nil {
+		http.Error(w, "Failed to list models: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(models); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 // NewAIHandler creates a new AIHandler
 func NewAIHandler() *AIHandler {
 	return &AIHandler{}
