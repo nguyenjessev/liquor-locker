@@ -51,6 +51,7 @@ func (r *Repository) RunMigrations() error {
 
 var (
 	ErrNilBottle     = errors.New("bottle cannot be nil")
+	ErrNilMixer      = errors.New("mixer cannot be nil")
 	ErrNilFresh      = errors.New("fresh item cannot be nil")
 	ErrFreshNotFound = errors.New("fresh item not found")
 )
@@ -59,7 +60,6 @@ func (r *Repository) CreateBottle(ctx context.Context, bottle *models.Bottle) (*
 	if bottle == nil {
 		return nil, ErrNilBottle
 	}
-
 	query := `
 		INSERT INTO bottles (name, opened, open_date, purchase_date, created_at, updated_at)
 		VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
@@ -71,6 +71,39 @@ func (r *Repository) CreateBottle(ctx context.Context, bottle *models.Bottle) (*
 	}
 
 	return bottle, nil
+}
+
+func (r *Repository) CreateMixer(ctx context.Context, mixer *models.Mixer) (*models.Mixer, error) {
+	if mixer == nil {
+		return nil, ErrNilMixer
+	}
+	query := `
+		INSERT INTO mixers (name, opened, open_date, purchase_date, created_at, updated_at)
+		VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
+		RETURNING id, created_at, updated_at`
+	err := r.DB.QueryRowContext(ctx, query, mixer.Name, mixer.Opened, mixer.OpenDate, mixer.PurchaseDate).Scan(&mixer.ID, &mixer.CreatedAt, &mixer.UpdatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create mixer: %v", err)
+	}
+	return mixer, nil
+}
+
+var ErrMixerNotFound = errors.New("mixer not found")
+
+func (r *Repository) GetMixerByID(ctx context.Context, id int) (*models.Mixer, error) {
+	query := `
+		SELECT id, name, opened, open_date, purchase_date, created_at, updated_at
+		FROM mixers
+		WHERE id = ?`
+	var mixer models.Mixer
+	err := r.DB.QueryRowContext(ctx, query, id).Scan(&mixer.ID, &mixer.Name, &mixer.Opened, &mixer.OpenDate, &mixer.PurchaseDate, &mixer.CreatedAt, &mixer.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrMixerNotFound
+		}
+		return nil, fmt.Errorf("failed to get mixer by ID: %v", err)
+	}
+	return &mixer, nil
 }
 
 var ErrBottleNotFound = errors.New("bottle not found")
@@ -101,16 +134,29 @@ func (r *Repository) DeleteBottleByID(ctx context.Context, id int) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete bottle: %v", err)
 	}
-
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("failed to get rows affected: %v", err)
 	}
-
 	if rowsAffected == 0 {
 		return ErrBottleNotFound
 	}
+	return nil
+}
 
+func (r *Repository) DeleteMixerByID(ctx context.Context, id int) error {
+	query := `DELETE FROM mixers WHERE id = ?`
+	result, err := r.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete mixer: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %v", err)
+	}
+	if rowsAffected == 0 {
+		return ErrMixerNotFound
+	}
 	return nil
 }
 
@@ -119,7 +165,6 @@ func (r *Repository) GetAllBottles(ctx context.Context) ([]*models.Bottle, error
 		SELECT id, name, opened, open_date, purchase_date, created_at, updated_at
 		FROM bottles
 		ORDER BY created_at DESC`
-
 	rows, err := r.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get bottles: %v", err)
@@ -136,7 +181,6 @@ func (r *Repository) GetAllBottles(ctx context.Context) ([]*models.Bottle, error
 
 		bottles = append(bottles, &bottle)
 	}
-
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error iterating over bottles: %v", err)
 	}
@@ -144,11 +188,36 @@ func (r *Repository) GetAllBottles(ctx context.Context) ([]*models.Bottle, error
 	return bottles, nil
 }
 
+func (r *Repository) GetAllMixers(ctx context.Context) ([]*models.Mixer, error) {
+	query := `
+		SELECT id, name, opened, open_date, purchase_date, created_at, updated_at
+		FROM mixers
+		ORDER BY created_at DESC`
+	rows, err := r.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get mixers: %v", err)
+	}
+	defer rows.Close()
+
+	var mixers []*models.Mixer
+	for rows.Next() {
+		var mixer models.Mixer
+		err := rows.Scan(&mixer.ID, &mixer.Name, &mixer.Opened, &mixer.OpenDate, &mixer.PurchaseDate, &mixer.CreatedAt, &mixer.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan mixer: %v", err)
+		}
+		mixers = append(mixers, &mixer)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over mixers: %v", err)
+	}
+	return mixers, nil
+}
+
 func (r *Repository) UpdateBottle(ctx context.Context, id int, updates *models.Bottle) (*models.Bottle, error) {
 	if updates == nil {
 		return nil, ErrNilBottle
 	}
-
 	query := `
 		UPDATE bottles
 		SET name = ?, opened = ?, open_date = ?, purchase_date = ?, updated_at = datetime('now')
@@ -173,6 +242,35 @@ func (r *Repository) UpdateBottle(ctx context.Context, id int, updates *models.B
 	}
 
 	return &bottle, nil
+}
+
+func (r *Repository) UpdateMixer(ctx context.Context, id int, updates *models.Mixer) (*models.Mixer, error) {
+	if updates == nil {
+		return nil, ErrNilMixer
+	}
+	query := `
+		UPDATE mixers
+		SET name = ?, opened = ?, open_date = ?, purchase_date = ?, updated_at = datetime('now')
+		WHERE id = ?
+		RETURNING id, name, opened, open_date, purchase_date, created_at, updated_at`
+
+	var mixer models.Mixer
+	err := r.DB.QueryRowContext(ctx, query, updates.Name, updates.Opened, updates.OpenDate, updates.PurchaseDate, id).Scan(
+		&mixer.ID,
+		&mixer.Name,
+		&mixer.Opened,
+		&mixer.OpenDate,
+		&mixer.PurchaseDate,
+		&mixer.CreatedAt,
+		&mixer.UpdatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrMixerNotFound
+		}
+		return nil, fmt.Errorf("failed to update mixer: %v", err)
+	}
+	return &mixer, nil
 }
 
 func (r *Repository) CreateFresh(ctx context.Context, fresh *models.Fresh) (*models.Fresh, error) {

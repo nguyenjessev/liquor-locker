@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { BottleManager } from "./BottleManager";
 import { FreshManager } from "./FreshManager";
+import { MixerManager } from "./MixerManager";
 import { Settings } from "./Settings";
 import { BottomNav } from "./BottomNav";
 import { MagicBartender } from "./MagicBartender";
@@ -16,6 +17,8 @@ export function Layout() {
 				return <BottleManager />;
 			case "fresh":
 				return <FreshManager />;
+			case "mixers":
+				return <MixerManager />;
 			case "magic-bartender":
 				return <MagicBartender />;
 			case "settings":

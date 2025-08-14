@@ -61,7 +61,7 @@ func (s *OpenAIService) SendPrompt(ctx context.Context, model, prompt string) (s
 func (s *OpenAIService) RecommendCocktail(ctx context.Context, repo *repository.Repository, model string) (string, error) {
 	params := openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.UserMessage("Recommend a cocktail based on the user's inventory, including bottles and fresh ingredients."),
+			openai.UserMessage("Recommend a cocktail based on the user's inventory, including bottles, fresh ingredients, and mixers. Prefer using open ingredients if possible, but you can use sealed ingredients if necessary."),
 		},
 		Tools: []openai.ChatCompletionToolUnionParam{
 			openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
@@ -71,6 +71,10 @@ func (s *OpenAIService) RecommendCocktail(ctx context.Context, repo *repository.
 			openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
 				Name:        "list_fresh_ingredients",
 				Description: openai.String("Get list of fresh ingredients in the user's bar inventory"),
+			}),
+			openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
+				Name:        "list_mixers",
+				Description: openai.String("Get list of mixers in the user's bar inventory"),
 			}),
 		},
 		Model: model,
@@ -114,6 +118,17 @@ func (s *OpenAIService) RecommendCocktail(ctx context.Context, repo *repository.
 				return "", err
 			}
 			params.Messages = append(params.Messages, openai.ToolMessage(string(freshIngredientsJSON), toolCall.ID))
+		case "list_mixers":
+			mixers, err := repo.GetAllMixers(ctx)
+			if err != nil {
+				return "", err
+			}
+
+			mixersJSON, err := json.Marshal(mixers)
+			if err != nil {
+				return "", err
+			}
+			params.Messages = append(params.Messages, openai.ToolMessage(string(mixersJSON), toolCall.ID))
 		default:
 			return "", fmt.Errorf("unknown function name: %s", toolCall.Function.Name)
 		}

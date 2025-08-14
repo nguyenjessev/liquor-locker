@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useAI } from "@/hooks/useAI";
 import { toast } from "sonner";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -27,48 +27,24 @@ export function MagicBartender() {
 		selectedModel,
 		setSelectedModel,
 		configureService,
-		lastConfigured,
 		isConfigured: serviceConfigured,
 		configError,
 	} = useAI();
-
-	const hasAttemptedConfig = useRef(false);
-	const configAttemptTimestamp = useRef<number>(0);
 
 	useEffect(() => {
 		const apiUrl = localStorage.getItem("apiUrl");
 		const apiKey = localStorage.getItem("apiKey");
 
 		if (!apiUrl || !apiKey) {
-			if (!hasAttemptedConfig.current) {
-				toast.error("Missing API settings", {
-					description:
-						"Please configure your API URL and key in the settings page.",
-				});
-				hasAttemptedConfig.current = true;
-			}
+			toast.error("Missing API settings", {
+				description:
+					"Please configure your API URL and key in the settings page.",
+			});
 			return;
 		}
 
-		// Store current settings to detect changes
-		const currentSettings = JSON.stringify({ apiUrl, apiKey });
-		const lastSettings = localStorage.getItem("lastAISettings");
-
-		// Prevent rapid retries on failure
-		const now = Date.now();
-		const timeSinceLastAttempt = now - configAttemptTimestamp.current;
-		const minimumRetryInterval = 5000; // 5 seconds
-
-		// Reconfigure if settings have changed or service isn't configured
-		if (
-			(!serviceConfigured || currentSettings !== lastSettings) &&
-			timeSinceLastAttempt >= minimumRetryInterval
-		) {
-			configAttemptTimestamp.current = now;
-			configureService().catch(() => {});
-			localStorage.setItem("lastAISettings", currentSettings);
-		}
-	}, [configureService, serviceConfigured, lastConfigured]);
+		configureService().catch(() => {});
+	}, [configureService]);
 
 	const getRecommendation = async () => {
 		if (!serviceConfigured || !selectedModel) {

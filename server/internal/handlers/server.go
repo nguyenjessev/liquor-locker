@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/nguyenjessev/liquor-locker/internal/repository"
@@ -14,6 +15,7 @@ type Server struct {
 	repo           *repository.Repository
 	bottleHandler  *BottleHandler
 	freshHandler   *FreshHandler
+	mixerHandler   *MixerHandler
 	aiHandler      *AIHandler
 	allowedOrigins []string
 	apiKey         string
@@ -36,6 +38,7 @@ func NewServer(repo *repository.Repository) *Server {
 		repo:           repo,
 		bottleHandler:  NewBottleHandler(repo),
 		freshHandler:   NewFreshHandler(repo),
+		mixerHandler:   NewMixerHandler(repo),
 		aiHandler:      NewAIHandler(),
 		allowedOrigins: allowedOrigins,
 		apiKey:         apiKey,
@@ -62,6 +65,18 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.bottleHandler.DeleteBottle(w, r)
 	case strings.HasPrefix(path, "/bottles/") && r.Method == http.MethodPut:
 		s.bottleHandler.UpdateBottle(w, r)
+
+	case path == "/mixers" && r.Method == http.MethodPost:
+		s.mixerHandler.CreateMixer(w, r)
+	case path == "/mixers" && r.Method == http.MethodGet:
+		s.mixerHandler.GetAllMixers(w, r)
+	case strings.HasPrefix(path, "/mixers/") && r.Method == http.MethodGet:
+		s.mixerHandler.GetMixer(w, r)
+	case strings.HasPrefix(path, "/mixers/") && r.Method == http.MethodDelete:
+		s.mixerHandler.DeleteMixer(w, r)
+	case strings.HasPrefix(path, "/mixers/") && r.Method == http.MethodPut:
+		s.mixerHandler.UpdateMixer(w, r)
+
 	case path == "/fresh" && r.Method == http.MethodPost:
 		s.freshHandler.CreateFresh(w, r)
 	case path == "/fresh" && r.Method == http.MethodGet:
@@ -140,11 +155,10 @@ func (s *Server) isAllowedOrigin(origin string) bool {
 		return true // Allow requests without Origin header (e.g., same-origin, Postman)
 	}
 
-	for _, allowed := range s.allowedOrigins {
-		if origin == allowed {
-			return true
-		}
+	if slices.Contains(s.allowedOrigins, origin) {
+		return true
 	}
+
 	return false
 }
 
