@@ -2,12 +2,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 export function MagicBartender() {
 	const [loading, setLoading] = useState(false);
 	const [recommendation, setRecommendation] = useState<string | null>(null);
 	const [settingsValid, setSettingsValid] = useState<boolean | null>(null);
 	const [models, setModels] = useState<string[]>([]);
+	const [selectedModel, setSelectedModel] = useState<string>();
 	const [loadingModels, setLoadingModels] = useState(false);
 	const hasShownToast = useRef(false);
 	const hasConfigured = useRef(false);
@@ -98,21 +106,22 @@ export function MagicBartender() {
 	};
 
 	const getRecommendation = async () => {
-		if (!settingsValid) {
+		if (!settingsValid || !selectedModel) {
 			return;
 		}
 
 		setLoading(true);
 		try {
-			const response = await fetch(
-				`${settings.apiUrl}/api/cocktail/recommend`,
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${settings.apiKey}`,
-					},
+			const response = await fetch("http://localhost:8080/ai/recommend", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"X-API-Key": localStorage.getItem("apiKey") || "",
 				},
-			);
+				body: JSON.stringify({
+					model: selectedModel,
+				}),
+			});
 
 			if (!response.ok) {
 				throw new Error("Failed to get recommendation");
@@ -167,17 +176,30 @@ export function MagicBartender() {
 									<p>Loading available models...</p>
 								) : models.length > 0 ? (
 									<div>
-										<p className="text-sm font-medium mb-2">
-											Available Models:
-										</p>
-										<ul className="list-disc list-inside text-sm text-muted-foreground">
-											{models.map((model) => (
-												<li key={model}>{model}</li>
-											))}
-										</ul>
+										<div className="space-y-2">
+											<p className="text-sm font-medium">Select a Model:</p>
+											<Select
+												value={selectedModel}
+												onValueChange={setSelectedModel}
+											>
+												<SelectTrigger className="w-full">
+													<SelectValue placeholder="Select a model" />
+												</SelectTrigger>
+												<SelectContent>
+													{models.map((model) => (
+														<SelectItem key={model} value={model}>
+															{model}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										</div>
 									</div>
 								) : null}
-								<Button onClick={getRecommendation} disabled={loading}>
+								<Button
+									onClick={getRecommendation}
+									disabled={loading || !selectedModel}
+								>
 									{loading
 										? "Getting recommendation..."
 										: "Get Recommendations"}
