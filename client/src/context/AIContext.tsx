@@ -60,6 +60,13 @@ export function AIProvider({ children }: { children: ReactNode }) {
 		}
 	}, [setModels]);
 
+	// Ensure models are fetched on initial load if service is already configured
+	useEffect(() => {
+		if (isConfigured && models.length === 0) {
+			fetchModels().catch(() => {});
+		}
+	}, [isConfigured, models.length, fetchModels]);
+
 	const configureService = useCallback(async () => {
 		const apiUrl = localStorage.getItem("apiUrl");
 		const apiKey = localStorage.getItem("apiKey");

@@ -83,23 +83,26 @@ export function MagicBartender() {
 
 		setLoading(true);
 		try {
-			const response = await fetch("http://localhost:8080/ai/recommend", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					"X-API-Key": localStorage.getItem("apiKey") || "",
+			const response = await fetch(
+				"http://localhost:8080/cocktails/recommendation",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"X-API-Key": localStorage.getItem("apiKey") || "",
+					},
+					body: JSON.stringify({
+						model: selectedModel,
+					}),
 				},
-				body: JSON.stringify({
-					model: selectedModel,
-				}),
-			});
+			);
 
 			if (!response.ok) {
 				throw new Error("Failed to get recommendation");
 			}
 
-			const data = await response.text();
-			setRecommendation(data);
+			const data = await response.json();
+			setRecommendation(data.recommendation || "");
 		} catch (error) {
 			toast.error("Error getting recommendation", {
 				description:
@@ -128,86 +131,82 @@ export function MagicBartender() {
 							Please configure your API settings in the settings page to use the
 							Magic Bartender.
 						</p>
-					) : recommendation ? (
-						<>
-							<p className="whitespace-pre-wrap mb-4">{recommendation}</p>
-							<Button onClick={getRecommendation} disabled={loading}>
-								{loading
-									? "Getting new recommendation..."
-									: "Get Another Recommendation"}
-							</Button>
-						</>
 					) : (
-						<>
-							<div className="space-y-4">
-								<p className="text-muted-foreground">
-									Ready to discover new cocktails? Click below to get started.
-								</p>
-								{models.length > 0 ? (
-									<div>
-										<div className="space-y-2">
-											<p className="text-sm font-medium">Select a Model:</p>
-											<Popover>
-												<PopoverTrigger asChild>
-													<Button
-														variant="outline"
-														role="combobox"
-														className="w-full justify-between"
-													>
-														{selectedModel
-															? models.find((model) => model === selectedModel)
-															: "Select model..."}
-														<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-													</Button>
-												</PopoverTrigger>
-												<PopoverContent className="w-full p-0">
-													<Command>
-														<CommandInput placeholder="Search models..." />
-														<CommandEmpty>No model found.</CommandEmpty>
-														<CommandGroup>
-															{models.map((model) => (
-																<CommandItem
-																	key={model}
-																	value={model}
-																	onSelect={(currentValue) => {
-																		setSelectedModel(
-																			currentValue === selectedModel
-																				? undefined
-																				: currentValue,
-																		);
-																	}}
-																>
-																	<Check
-																		className={cn(
-																			"mr-2 h-4 w-4",
-																			selectedModel === model
-																				? "opacity-100"
-																				: "opacity-0",
-																		)}
-																	/>
-																	{model}
-																</CommandItem>
-															))}
-														</CommandGroup>
-													</Command>
-												</PopoverContent>
-											</Popover>
-										</div>
+						<div className="space-y-4">
+							<p className="text-muted-foreground">
+								Ready to discover new cocktails? Click below to get started.
+							</p>
+							{models.length > 0 && (
+								<div className="mb-6">
+									<div className="space-y-2">
+										<p className="text-sm font-medium">Select a Model:</p>
+										<Popover>
+											<PopoverTrigger asChild>
+												<Button
+													variant="outline"
+													role="combobox"
+													className="w-full justify-between"
+												>
+													{selectedModel
+														? models.find((model) => model === selectedModel)
+														: "Select model..."}
+													<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+												</Button>
+											</PopoverTrigger>
+											<PopoverContent className="w-full p-0">
+												<Command>
+													<CommandInput placeholder="Search models..." />
+													<CommandEmpty>No model found.</CommandEmpty>
+													<CommandGroup>
+														{models.map((model) => (
+															<CommandItem
+																key={model}
+																value={model}
+																onSelect={(currentValue) => {
+																	setSelectedModel(
+																		currentValue === selectedModel
+																			? undefined
+																			: currentValue,
+																	);
+																}}
+															>
+																<Check
+																	className={cn(
+																		"mr-2 h-4 w-4",
+																		selectedModel === model
+																			? "opacity-100"
+																			: "opacity-0",
+																	)}
+																/>
+																{model}
+															</CommandItem>
+														))}
+													</CommandGroup>
+												</Command>
+											</PopoverContent>
+										</Popover>
 									</div>
-								) : null}
-								<Button
-									onClick={getRecommendation}
-									disabled={loading || !selectedModel}
-								>
-									{loading
-										? "Getting recommendation..."
-										: "Get Recommendations"}
-								</Button>
-							</div>
-						</>
+								</div>
+							)}
+							<Button
+								onClick={getRecommendation}
+								disabled={loading || !selectedModel}
+							>
+								{loading ? "Getting recommendation..." : "Get Recommendations"}
+							</Button>
+						</div>
 					)}
 				</CardContent>
 			</Card>
+
+			{/* Recommendation Card below main card */}
+			{recommendation && (
+				<Card className="mt-6">
+					<CardContent>
+						<p className="whitespace-pre-wrap mb-4">{recommendation}</p>
+					</CardContent>
+				</Card>
+			)}
 		</div>
 	);
 }

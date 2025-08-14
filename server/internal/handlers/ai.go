@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/nguyenjessev/liquor-locker/internal/repository"
 	"github.com/nguyenjessev/liquor-locker/internal/services"
 )
 
@@ -45,6 +46,45 @@ func (h *AIHandler) ListModels(w http.ResponseWriter, r *http.Request) {
 // NewAIHandler creates a new AIHandler
 func NewAIHandler() *AIHandler {
 	return &AIHandler{}
+}
+
+// RecommendCocktailHandler handles POST /cocktails/recommendation requests
+func (h *AIHandler) RecommendCocktailHandler(repo *repository.Repository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req struct {
+			Model string `json:"model"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		if req.Model == "" {
+			http.Error(w, "Missing required field: model", http.StatusBadRequest)
+			return
+		}
+
+		h.mu.Lock()
+		defer h.mu.Unlock()
+
+		if h.aiService == nil {
+			http.Error(w, "AI service not configured", http.StatusServiceUnavailable)
+			return
+		}
+
+		resp, err := h.aiService.RecommendCocktail(r.Context(), repo, req.Model)
+		if err != nil {
+			http.Error(w, "Failed to recommend cocktail: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"recommendation": resp})
+	}
 }
 
 // ConfigureRequest represents the request body for configuring the AI service
