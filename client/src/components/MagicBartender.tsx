@@ -25,6 +25,37 @@ export function MagicBartender() {
 	const [loading, setLoading] = useState(true);
 	const [models, setModels] = useState<string[]>([]);
 	const [modelsLoading, setModelsLoading] = useState(false);
+	const [selectedModel, setSelectedModel] = useState<string>("");
+	const [recommendation, setRecommendation] = useState<string | null>(null);
+	const [recommendLoading, setRecommendLoading] = useState(false);
+	const [recommendError, setRecommendError] = useState<string | null>(null);
+
+	// Persist selected model in localStorage
+	const LOCAL_STORAGE_KEY = "selectedModel";
+
+	// On mount, load selected model from localStorage (before models are loaded)
+	useEffect(() => {
+		const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+		if (stored) {
+			setSelectedModel(stored);
+		}
+	}, []);
+
+	// After models are loaded, validate selectedModel
+	useEffect(() => {
+		if (models.length > 0 && selectedModel && !models.includes(selectedModel)) {
+			setSelectedModel("");
+		}
+	}, [models, selectedModel]);
+
+	// When selectedModel changes, persist to localStorage
+	useEffect(() => {
+		if (selectedModel && models.includes(selectedModel)) {
+			localStorage.setItem(LOCAL_STORAGE_KEY, selectedModel);
+		} else if (selectedModel === "") {
+			localStorage.removeItem(LOCAL_STORAGE_KEY);
+		}
+	}, [selectedModel, models]);
 
 	useEffect(() => {
 		const fetchStatus = async () => {
@@ -139,14 +170,54 @@ export function MagicBartender() {
 									{modelsLoading ? (
 										<p className="text-muted-foreground">Loading models...</p>
 									) : models.length > 0 ? (
-										<ModelCombobox models={models} />
+										<ModelCombobox
+											models={models}
+											value={selectedModel}
+											setValue={setSelectedModel}
+										/>
 									) : (
 										<p className="text-muted-foreground">
 											No models available.
 										</p>
 									)}
 								</div>
-								<Button>Get Recommendations</Button>
+								<Button
+									disabled={!selectedModel || recommendLoading}
+									onClick={async () => {
+										setRecommendLoading(true);
+										setRecommendation(null);
+										setRecommendError(null);
+										try {
+											const res = await fetch(
+												`${API_BASE_URL}/cocktails/recommendation`,
+												{
+													method: "POST",
+													headers: {
+														"Content-Type": "application/json",
+													},
+													body: JSON.stringify({ model: selectedModel }),
+												},
+											);
+											if (!res.ok) {
+												const errText = await res.text();
+												setRecommendError(`Error: ${errText}`);
+											} else {
+												const data = await res.json();
+												setRecommendation(
+													data.recommendation || "No recommendation received.",
+												);
+											}
+										} catch {
+											setRecommendError("Failed to fetch recommendation.");
+										} finally {
+											setRecommendLoading(false);
+										}
+									}}
+								>
+									{recommendLoading
+										? "Getting Recommendations..."
+										: "Get Recommendations"}
+								</Button>
 							</>
 						) : (
 							<p className="text-muted-foreground">
@@ -157,39 +228,43 @@ export function MagicBartender() {
 					</div>
 				</CardContent>
 			</Card>
+			{(recommendation || recommendError) && (
+				<Card className="mt-8">
+					<CardContent>
+						{recommendation && (
+							<>
+								<h3 className="text-lg font-semibold mb-2">
+									Recommended Cocktail
+								</h3>
+								<div className="bg-muted p-4 rounded">{recommendation}</div>
+							</>
+						)}
+						{recommendError && (
+							<div className="text-destructive">{recommendError}</div>
+						)}
+					</CardContent>
+				</Card>
+			)}
 		</div>
 	);
 }
 
 // Combobox for models
-function ModelCombobox({ models }: { models: string[] }) {
+function ModelCombobox({
+	models,
+	value,
+	setValue,
+}: {
+	models: string[];
+	value: string;
+	setValue: (v: string) => void;
+}) {
 	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState("");
 
 	const options = models.map((model) => ({
 		value: model,
 		label: model,
 	}));
-
-	// Persist selected model in localStorage
-	const LOCAL_STORAGE_KEY = "selectedModel";
-
-	// On mount, load selected model from localStorage if valid
-	useEffect(() => {
-		const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-		if (stored && models.includes(stored)) {
-			setValue(stored);
-		}
-	}, [models]);
-
-	// When value changes, persist to localStorage
-	useEffect(() => {
-		if (value && models.includes(value)) {
-			localStorage.setItem(LOCAL_STORAGE_KEY, value);
-		} else if (value === "") {
-			localStorage.removeItem(LOCAL_STORAGE_KEY);
-		}
-	}, [value, models]);
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
