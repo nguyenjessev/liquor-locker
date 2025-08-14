@@ -2,13 +2,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+} from "@/components/ui/command";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function MagicBartender() {
 	const [loading, setLoading] = useState(false);
@@ -178,21 +185,51 @@ export function MagicBartender() {
 									<div>
 										<div className="space-y-2">
 											<p className="text-sm font-medium">Select a Model:</p>
-											<Select
-												value={selectedModel}
-												onValueChange={setSelectedModel}
-											>
-												<SelectTrigger className="w-full">
-													<SelectValue placeholder="Select a model" />
-												</SelectTrigger>
-												<SelectContent>
-													{models.map((model) => (
-														<SelectItem key={model} value={model}>
-															{model}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
+											<Popover>
+												<PopoverTrigger asChild>
+													<Button
+														variant="outline"
+														role="combobox"
+														className="w-full justify-between"
+													>
+														{selectedModel
+															? models.find((model) => model === selectedModel)
+															: "Select model..."}
+														<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+													</Button>
+												</PopoverTrigger>
+												<PopoverContent className="w-full p-0">
+													<Command>
+														<CommandInput placeholder="Search models..." />
+														<CommandEmpty>No model found.</CommandEmpty>
+														<CommandGroup>
+															{models.map((model) => (
+																<CommandItem
+																	key={model}
+																	value={model}
+																	onSelect={(currentValue) => {
+																		setSelectedModel(
+																			currentValue === selectedModel
+																				? undefined
+																				: currentValue,
+																		);
+																	}}
+																>
+																	<Check
+																		className={cn(
+																			"mr-2 h-4 w-4",
+																			selectedModel === model
+																				? "opacity-100"
+																				: "opacity-0",
+																		)}
+																	/>
+																	{model}
+																</CommandItem>
+															))}
+														</CommandGroup>
+													</Command>
+												</PopoverContent>
+											</Popover>
 										</div>
 									</div>
 								) : null}
