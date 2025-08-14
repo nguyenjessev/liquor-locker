@@ -13,6 +13,7 @@ import (
 // OpenAIService provides methods to interact with OpenAI-style APIs.
 type OpenAIService struct {
 	Client *openai.Client
+	closed bool
 }
 
 // NewOpenAIService creates a new OpenAIService with the given base URL and API key.
@@ -21,6 +22,7 @@ func NewOpenAIService(baseURL, apiKey string) *OpenAIService {
 
 	return &OpenAIService{
 		Client: &client,
+		closed: false,
 	}
 }
 
@@ -126,4 +128,17 @@ func (s *OpenAIService) RecommendCocktail(ctx context.Context, repo *repository.
 	}
 
 	return resp.Choices[0].Message.Content, nil
+}
+
+// Close cleans up any resources used by the OpenAI service
+func (s *OpenAIService) Close() error {
+	if s.closed {
+		return nil
+	}
+
+	// Set client to nil to allow garbage collection
+	s.Client = nil
+	s.closed = true
+
+	return nil
 }

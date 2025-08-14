@@ -1,6 +1,106 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { toast } from "sonner";
 
 export function MagicBartender() {
+	const [loading, setLoading] = useState(false);
+	const [recommendation, setRecommendation] = useState<string | null>(null);
+	const [settingsValid, setSettingsValid] = useState<boolean | null>(null);
+	const hasShownToast = useRef(false);
+	const hasConfigured = useRef(false);
+
+	const settings = useMemo(() => {
+		const apiUrl = localStorage.getItem("apiUrl");
+		const apiKey = localStorage.getItem("apiKey");
+		return { apiUrl, apiKey };
+	}, []);
+
+	useEffect(() => {
+		if (!settings.apiUrl || !settings.apiKey) {
+			setSettingsValid(false);
+			if (!hasShownToast.current) {
+				toast.error("Missing API settings", {
+					description:
+						"Please configure your API URL and key in the settings page.",
+				});
+				hasShownToast.current = true;
+			}
+			return;
+		}
+
+		const configureAI = async () => {
+			if (hasConfigured.current) return;
+			try {
+				const response = await fetch("http://localhost:8080/ai/configure", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"X-API-Key": localStorage.getItem("apiKey") || "",
+					},
+					body: JSON.stringify({
+						base_url: settings.apiUrl,
+						api_key: settings.apiKey,
+					}),
+				});
+
+				if (!response.ok) {
+					throw new Error("Failed to configure AI service");
+				}
+
+				setSettingsValid(true);
+				if (!hasConfigured.current) {
+					toast.success("AI service configured successfully", {
+						description: "Ready to provide cocktail recommendations!",
+					});
+					hasConfigured.current = true;
+				}
+			} catch (error) {
+				toast.error("Error configuring AI service", {
+					description:
+						error instanceof Error
+							? error.message
+							: "An unknown error occurred",
+				});
+				setSettingsValid(false);
+			}
+		};
+
+		configureAI();
+	}, [settings]);
+
+	const getRecommendation = async () => {
+		if (!settingsValid) {
+			return;
+		}
+
+		setLoading(true);
+		try {
+			const response = await fetch(
+				`${settings.apiUrl}/api/cocktail/recommend`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${settings.apiKey}`,
+					},
+				},
+			);
+
+			if (!response.ok) {
+				throw new Error("Failed to get recommendation");
+			}
+
+			const data = await response.text();
+			setRecommendation(data);
+		} catch (error) {
+			toast.error("Error getting recommendation", {
+				description:
+					error instanceof Error ? error.message : "An unknown error occurred",
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
 	return (
 		<div className="container mx-auto max-w-4xl p-4 md:p-6 mt-0">
 			<div className="mb-8">
@@ -13,12 +113,32 @@ export function MagicBartender() {
 				</p>
 			</div>
 
-			{/* Initially display a placeholder card */}
 			<Card>
-				<CardContent className="pt-6">
-					<p className="text-muted-foreground">
-						Ready to discover new cocktails? Click below to get started.
-					</p>
+				<CardContent>
+					{!settingsValid ? (
+						<p className="text-muted-foreground mb-4">
+							Please configure your API settings in the settings page to use the
+							Magic Bartender.
+						</p>
+					) : recommendation ? (
+						<>
+							<p className="whitespace-pre-wrap mb-4">{recommendation}</p>
+							<Button onClick={getRecommendation} disabled={loading}>
+								{loading
+									? "Getting new recommendation..."
+									: "Get Another Recommendation"}
+							</Button>
+						</>
+					) : (
+						<>
+							<p className="text-muted-foreground mb-4">
+								Ready to discover new cocktails? Click below to get started.
+							</p>
+							<Button onClick={getRecommendation} disabled={loading}>
+								{loading ? "Getting recommendation..." : "Get Recommendations"}
+							</Button>
+						</>
+					)}
 				</CardContent>
 			</Card>
 		</div>

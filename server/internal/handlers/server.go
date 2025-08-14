@@ -14,6 +14,7 @@ type Server struct {
 	repo           *repository.Repository
 	bottleHandler  *BottleHandler
 	freshHandler   *FreshHandler
+	aiHandler      *AIHandler
 	allowedOrigins []string
 	apiKey         string
 }
@@ -35,6 +36,7 @@ func NewServer(repo *repository.Repository) *Server {
 		repo:           repo,
 		bottleHandler:  NewBottleHandler(repo),
 		freshHandler:   NewFreshHandler(repo),
+		aiHandler:      NewAIHandler(),
 		allowedOrigins: allowedOrigins,
 		apiKey:         apiKey,
 	}
@@ -72,6 +74,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.freshHandler.UpdateFresh(w, r)
 	case path == "/health":
 		s.handleHealth(w, r)
+	case path == "/ai/configure":
+		s.aiHandler.Configure(w, r)
 	default:
 		http.NotFound(w, r)
 	}
