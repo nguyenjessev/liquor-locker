@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 
-import type {
-	CocktailRecommendation,
-	Ingredient,
-	Step,
-} from "@/types/cocktail";
+import type { CocktailRecommendation } from "@/types/cocktail";
+import { CocktailCard } from "./CocktailCard";
 
 const API_BASE_URL =
 	import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
@@ -248,37 +245,11 @@ export function MagicBartender() {
 								</h3>
 								<div className="space-y-4">
 									{recommendations.map((cocktail, idx) => (
-										<Card key={idx} className="mb-2">
-											<CardContent>
-												<h4 className="font-bold">{cocktail.name}</h4>
-												<p className="mb-2">{cocktail.description}</p>
-												{cocktail.ingredients && (
-													<div>
-														<strong>Ingredients:</strong>
-														<ul className="list-disc ml-6">
-															{cocktail.ingredients.map(
-																(ing: Ingredient, i: number) => (
-																	<li key={i}>
-																		{ing.quantity ? `${ing.quantity} ` : ""}
-																		{ing.name}
-																	</li>
-																),
-															)}
-														</ul>
-													</div>
-												)}
-												{cocktail.steps && (
-													<div className="mt-2">
-														<strong>Steps:</strong>
-														<ol className="list-decimal ml-6">
-															{cocktail.steps.map((step: Step, i: number) => (
-																<li key={i}>{step.text}</li>
-															))}
-														</ol>
-													</div>
-												)}
-											</CardContent>
-										</Card>
+										<CocktailCard
+											key={idx}
+											cocktail={cocktail}
+											className="mb-2"
+										/>
 									))}
 								</div>
 							</>
