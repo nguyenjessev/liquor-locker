@@ -317,11 +317,13 @@ function ModelCombobox({
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
-					className={cn("w-auto justify-between")}
+					className={cn("w-auto max-w-full justify-between overflow-hidden")}
 				>
-					{value
-						? options.find((option) => option.value === value)?.label
-						: "Select model..."}
+					<span className="flex-grow overflow-hidden text-ellipsis whitespace-nowrap">
+						{value
+							? options.find((option) => option.value === value)?.label
+							: "Select model..."}
+					</span>
 					<ChevronsUpDown className="opacity-50 ml-2 h-4 w-4 shrink-0" />
 				</Button>
 			</PopoverTrigger>

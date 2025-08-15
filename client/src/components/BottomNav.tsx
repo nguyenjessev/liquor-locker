@@ -15,14 +15,14 @@ export function BottomNav({ activeSection, onSectionChange }: BottomNavProps) {
 			icon: BottleWine,
 		},
 		{
-			id: "fresh",
-			label: "Fresh",
-			icon: Apple,
-		},
-		{
 			id: "mixers",
 			label: "Mixers",
 			icon: Blend,
+		},
+		{
+			id: "fresh",
+			label: "Fresh",
+			icon: Apple,
 		},
 		{
 			id: "magic-bartender",
@@ -37,7 +37,7 @@ export function BottomNav({ activeSection, onSectionChange }: BottomNavProps) {
 	];
 
 	return (
-		<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t md:border-t-0 shadow-lg">
+		<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t md:border-t-0 shadow-lg overflow-scroll">
 			<div className="flex items-center justify-around p-1">
 				{sections.map((section) => {
 					const Icon = section.icon;

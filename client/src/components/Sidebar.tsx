@@ -15,14 +15,14 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 			icon: BottleWine,
 		},
 		{
-			id: "fresh",
-			label: "Fresh",
-			icon: Apple,
-		},
-		{
 			id: "mixers",
 			label: "Mixers",
 			icon: Blend,
+		},
+		{
+			id: "fresh",
+			label: "Fresh",
+			icon: Apple,
 		},
 		{
 			id: "magic-bartender",
