@@ -32,6 +32,36 @@ export function MagicBartender() {
 	const [recommendations, setRecommendations] = useState<
 		CocktailRecommendation[] | null
 	>(null);
+
+	// Persist recommendations in localStorage
+	const RECOMMENDATIONS_KEY = "magicBartenderRecommendations";
+
+	// On mount, load recommendations from localStorage
+	useEffect(() => {
+		const saved = localStorage.getItem(RECOMMENDATIONS_KEY);
+		if (saved) {
+			try {
+				const parsed = JSON.parse(saved);
+				if (Array.isArray(parsed)) {
+					setRecommendations(parsed);
+				}
+			} catch {
+				// Ignore parse errors
+			}
+		}
+	}, []);
+
+	// Whenever recommendations change, persist them
+	useEffect(() => {
+		if (recommendations) {
+			localStorage.setItem(
+				RECOMMENDATIONS_KEY,
+				JSON.stringify(recommendations),
+			);
+		} else {
+			localStorage.removeItem(RECOMMENDATIONS_KEY);
+		}
+	}, [recommendations]);
 	const [recommendLoading, setRecommendLoading] = useState(false);
 	const [recommendError, setRecommendError] = useState<string | null>(null);
 
