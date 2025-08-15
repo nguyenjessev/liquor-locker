@@ -266,29 +266,23 @@ export function MagicBartender() {
 				</CardContent>
 			</Card>
 			{(recommendations && recommendations.length > 0) || recommendError ? (
-				<Card className="mt-8">
-					<CardContent>
-						{recommendations && recommendations.length > 0 && (
-							<>
-								<h3 className="text-lg font-semibold mb-2">
-									Recommended Cocktails
-								</h3>
-								<div className="space-y-4">
-									{recommendations.map((cocktail, idx) => (
-										<CocktailCard
-											key={idx}
-											cocktail={cocktail}
-											className="mb-2"
-										/>
-									))}
-								</div>
-							</>
-						)}
-						{recommendError && (
-							<p className="text-destructive">{recommendError}</p>
-						)}
-					</CardContent>
-				</Card>
+				<div className="mt-8">
+					{recommendations && recommendations.length > 0 && (
+						<>
+							<h3 className="text-lg font-semibold mb-2">
+								Recommended Cocktails
+							</h3>
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+								{recommendations.map((cocktail, idx) => (
+									<CocktailCard key={idx} cocktail={cocktail} className="" />
+								))}
+							</div>
+						</>
+					)}
+					{recommendError && (
+						<p className="text-destructive">{recommendError}</p>
+					)}
+				</div>
 			) : null}
 		</div>
 	);

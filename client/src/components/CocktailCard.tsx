@@ -15,11 +15,13 @@ export function CocktailCard({ cocktail, className }: CocktailCardProps) {
 		<Card className={className}>
 			<CardContent>
 				<h4 className="font-bold">{cocktail.name}</h4>
-				<p className="mb-2">{cocktail.description}</p>
+				<p className="mb-3 text-muted-foreground text-sm italic">
+					{cocktail.description}
+				</p>
 				{cocktail.ingredients && cocktail.ingredients.length > 0 && (
 					<div>
 						<strong>Ingredients:</strong>
-						<ul className="list-disc ml-6">
+						<ul className="ml-2 text-muted-foreground text-sm space-y-1 list-none">
 							{cocktail.ingredients.map((ing: Ingredient, i: number) => (
 								<li key={i}>
 									{ing.quantity ? `${ing.quantity} ` : ""}
@@ -31,10 +33,18 @@ export function CocktailCard({ cocktail, className }: CocktailCardProps) {
 				)}
 				{cocktail.steps && cocktail.steps.length > 0 && (
 					<div className="mt-2">
-						<strong>Steps:</strong>
-						<ol className="list-decimal ml-6">
+						<strong>Instructions:</strong>
+						<ol className="mt-1 space-y-2 ml-2">
 							{cocktail.steps.map((step: Step, i: number) => (
-								<li key={i}>{step.text}</li>
+								<li
+									key={i}
+									className="flex items-start text-muted-foreground text-sm"
+								>
+									<span className="inline-block min-w-[1.5em] font-semibold text-primary">
+										{i + 1}.
+									</span>
+									<span className="ml-2">{step.text}</span>
+								</li>
 							))}
 						</ol>
 					</div>
