@@ -46,12 +46,27 @@ func setupTestRepository(t *testing.T) *repository.Repository {
 		t.Fatalf("Failed to create fresh table: %v", err)
 	}
 
+	createMixersTableSQL := `
+		CREATE TABLE mixers (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			opened BOOLEAN NOT NULL DEFAULT FALSE,
+			created_at DATETIME NOT NULL,
+			updated_at DATETIME NOT NULL,
+			open_date DATETIME,
+			purchase_date DATETIME
+		)`
+
+	if _, err := db.Exec(createMixersTableSQL); err != nil {
+		t.Fatalf("Failed to create mixers table: %v", err)
+	}
+
 	_, err = db.Exec(`
 		INSERT INTO bottles (name, opened, created_at, updated_at)
 		VALUES ('Citadelle Jardin d Ete Gin', FALSE, datetime('now'), datetime('now')),
 			   ('Hendricks Gin', FALSE, datetime('now'), datetime('now'))`)
 	if err != nil {
-		t.Fatalf("Failed to insert test data: %v", err)
+		t.Fatalf("Failed to insert test bottles data: %v", err)
 	}
 
 	_, err = db.Exec(`
@@ -62,7 +77,15 @@ func setupTestRepository(t *testing.T) *repository.Repository {
 			   ('Lime Juice', datetime('now'), datetime('now'), datetime('now'), datetime('now')),
 			   ('Oranges', datetime('now'), datetime('now'), datetime('now'), datetime('now'))`)
 	if err != nil {
-		t.Fatalf("Failed to insert test data: %v", err)
+		t.Fatalf("Failed to insert test fresh data: %v", err)
+	}
+
+	_, err = db.Exec(`
+		INSERT INTO mixers (name, created_at, updated_at, open_date, purchase_date)
+		VALUES ('Simple Syrup', datetime('now'), datetime('now'), datetime('now'), datetime('now')),
+			   ('Seltzer Water', datetime('now'), datetime('now'), datetime('now'), datetime('now'))`)
+	if err != nil {
+		t.Fatalf("Failed to insert test mixers data: %v", err)
 	}
 
 	return &repository.Repository{DB: db}
@@ -139,7 +162,7 @@ func TestRecommendCocktail(t *testing.T) {
 	if err != nil {
 		t.Errorf("RecommendCocktail() error = %v", err)
 	}
-	if resp == "" {
+	if resp == nil {
 		t.Errorf("RecommendCocktail() returned empty response")
 	}
 

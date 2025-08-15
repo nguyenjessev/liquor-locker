@@ -25,7 +25,7 @@ func NewServer(repo *repository.Repository) *Server {
 	// Get allowed origins from environment, default to localhost for development
 	allowedOrigins := strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",")
 	if len(allowedOrigins) == 1 && allowedOrigins[0] == "" {
-		allowedOrigins = []string{"http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"}
+		allowedOrigins = []string{"http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "http://localhost:8080"}
 	}
 
 	// Get API key from environment

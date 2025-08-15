@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 
+import type {
+	CocktailRecommendation,
+	Ingredient,
+	Step,
+} from "@/types/cocktail";
+
 const API_BASE_URL =
 	import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +32,9 @@ export function MagicBartender() {
 	const [models, setModels] = useState<string[]>([]);
 	const [modelsLoading, setModelsLoading] = useState(false);
 	const [selectedModel, setSelectedModel] = useState<string>("");
-	const [recommendation, setRecommendation] = useState<string | null>(null);
+	const [recommendations, setRecommendations] = useState<
+		CocktailRecommendation[] | null
+	>(null);
 	const [recommendLoading, setRecommendLoading] = useState(false);
 	const [recommendError, setRecommendError] = useState<string | null>(null);
 
@@ -185,7 +193,7 @@ export function MagicBartender() {
 									disabled={!selectedModel || recommendLoading}
 									onClick={async () => {
 										setRecommendLoading(true);
-										setRecommendation(null);
+										setRecommendations(null);
 										setRecommendError(null);
 										try {
 											const res = await fetch(
@@ -203,9 +211,11 @@ export function MagicBartender() {
 												setRecommendError(`Error: ${errText}`);
 											} else {
 												const data = await res.json();
-												setRecommendation(
-													data.recommendation || "No recommendation received.",
-												);
+												if (Array.isArray(data.cocktails)) {
+													setRecommendations(data.cocktails);
+												} else {
+													setRecommendations([]);
+												}
 											}
 										} catch {
 											setRecommendError("Failed to fetch recommendation.");
@@ -228,23 +238,57 @@ export function MagicBartender() {
 					</div>
 				</CardContent>
 			</Card>
-			{(recommendation || recommendError) && (
+			{(recommendations && recommendations.length > 0) || recommendError ? (
 				<Card className="mt-8">
 					<CardContent>
-						{recommendation && (
+						{recommendations && recommendations.length > 0 && (
 							<>
 								<h3 className="text-lg font-semibold mb-2">
-									Recommended Cocktail
+									Recommended Cocktails
 								</h3>
-								<div className="bg-muted p-4 rounded">{recommendation}</div>
+								<div className="space-y-4">
+									{recommendations.map((cocktail, idx) => (
+										<Card key={idx} className="mb-2">
+											<CardContent>
+												<h4 className="font-bold">{cocktail.name}</h4>
+												<p className="mb-2">{cocktail.description}</p>
+												{cocktail.ingredients && (
+													<div>
+														<strong>Ingredients:</strong>
+														<ul className="list-disc ml-6">
+															{cocktail.ingredients.map(
+																(ing: Ingredient, i: number) => (
+																	<li key={i}>
+																		{ing.quantity ? `${ing.quantity} ` : ""}
+																		{ing.name}
+																	</li>
+																),
+															)}
+														</ul>
+													</div>
+												)}
+												{cocktail.steps && (
+													<div className="mt-2">
+														<strong>Steps:</strong>
+														<ol className="list-decimal ml-6">
+															{cocktail.steps.map((step: Step, i: number) => (
+																<li key={i}>{step.text}</li>
+															))}
+														</ol>
+													</div>
+												)}
+											</CardContent>
+										</Card>
+									))}
+								</div>
 							</>
 						)}
 						{recommendError && (
-							<div className="text-destructive">{recommendError}</div>
+							<p className="text-destructive">{recommendError}</p>
 						)}
 					</CardContent>
 				</Card>
-			)}
+			) : null}
 		</div>
 	);
 }

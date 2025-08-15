@@ -83,7 +83,7 @@ func (h *AIHandler) RecommendCocktailHandler(repo *repository.Repository) http.H
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"recommendation": resp})
+		json.NewEncoder(w).Encode(resp)
 	}
 }
 
@@ -106,8 +106,8 @@ func (h *AIHandler) Configure(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.BaseURL == "" || req.APIKey == "" {
-		http.Error(w, "Base URL and API key are required", http.StatusBadRequest)
+	if req.BaseURL == "" {
+		http.Error(w, "Base URL is required", http.StatusBadRequest)
 		return
 	}
 

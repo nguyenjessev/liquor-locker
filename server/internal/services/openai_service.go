@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/invopop/jsonschema"
+	"github.com/nguyenjessev/liquor-locker/internal/models"
 	"github.com/nguyenjessev/liquor-locker/internal/repository"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
@@ -58,7 +60,21 @@ func (s *OpenAIService) SendPrompt(ctx context.Context, model, prompt string) (s
 	return resp.Choices[0].Message.Content, nil
 }
 
-func (s *OpenAIService) RecommendCocktail(ctx context.Context, repo *repository.Repository, model string) (string, error) {
+func GenerateSchema[T any]() any {
+	reflector := jsonschema.Reflector{
+		AllowAdditionalProperties: false,
+		DoNotReference:            true,
+	}
+
+	var v T
+
+	schema := reflector.Reflect(v)
+	return schema
+}
+
+var CocktailRecommendationResponseSchema = GenerateSchema[models.CocktailRecommendationResponse]()
+
+func (s *OpenAIService) RecommendCocktail(ctx context.Context, repo *repository.Repository, model string) (*models.CocktailRecommendationResponse, error) {
 	params := openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("Recommend a cocktail based on the user's inventory, including bottles, fresh ingredients, and mixers. Prefer using open ingredients if possible, but you can use sealed ingredients if necessary."),
@@ -82,15 +98,15 @@ func (s *OpenAIService) RecommendCocktail(ctx context.Context, repo *repository.
 
 	resp, err := s.Client.Chat.Completions.New(ctx, params)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(resp.Choices) == 0 {
-		return "", nil
+		return nil, nil
 	}
 
 	toolCalls := resp.Choices[0].Message.ToolCalls
 	if len(toolCalls) == 0 {
-		return "", nil
+		return nil, nil
 	}
 
 	params.Messages = append(params.Messages, resp.Choices[0].Message.ToParam())
@@ -99,50 +115,66 @@ func (s *OpenAIService) RecommendCocktail(ctx context.Context, repo *repository.
 		case "list_bottles":
 			bottles, err := repo.GetAllBottles(ctx)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 
 			bottlesJSON, err := json.Marshal(bottles)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 			params.Messages = append(params.Messages, openai.ToolMessage(string(bottlesJSON), toolCall.ID))
 		case "list_fresh_ingredients":
 			freshIngredients, err := repo.GetAllFresh(ctx)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 
 			freshIngredientsJSON, err := json.Marshal(freshIngredients)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 			params.Messages = append(params.Messages, openai.ToolMessage(string(freshIngredientsJSON), toolCall.ID))
 		case "list_mixers":
 			mixers, err := repo.GetAllMixers(ctx)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 
 			mixersJSON, err := json.Marshal(mixers)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 			params.Messages = append(params.Messages, openai.ToolMessage(string(mixersJSON), toolCall.ID))
 		default:
-			return "", fmt.Errorf("unknown function name: %s", toolCall.Function.Name)
+			return nil, fmt.Errorf("unknown function name: %s", toolCall.Function.Name)
 		}
+	}
+
+	schemaParam := openai.ResponseFormatJSONSchemaJSONSchemaParam{
+		Name:        "cocktail_recommendations",
+		Description: openai.String("A list of recommended cocktails"),
+		Schema:      CocktailRecommendationResponseSchema,
+		Strict:      openai.Bool(true),
+	}
+
+	params.ResponseFormat = openai.ChatCompletionNewParamsResponseFormatUnion{
+		OfJSONSchema: &openai.ResponseFormatJSONSchemaParam{
+			JSONSchema: schemaParam,
+		},
 	}
 
 	resp, err = s.Client.Chat.Completions.New(ctx, params)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(resp.Choices) == 0 {
-		return "", nil
+		return nil, nil
 	}
 
-	return resp.Choices[0].Message.Content, nil
+	var cocktailRecommendations models.CocktailRecommendationResponse
+	_ = json.Unmarshal([]byte(resp.Choices[0].Message.Content), &cocktailRecommendations)
+
+	return &cocktailRecommendations, nil
 }
 
 // Close cleans up any resources used by the OpenAI service
