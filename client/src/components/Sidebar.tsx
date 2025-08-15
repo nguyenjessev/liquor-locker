@@ -67,7 +67,9 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 
 			{/* Version number at bottom */}
 			<div className="border-t mt-4 pt-4">
-				<div className="text-xs text-muted-foreground">Liquor Locker v1.0</div>
+				<div className="text-xs text-muted-foreground">
+					Liquor Locker v{__APP_VERSION__}
+				</div>
 			</div>
 		</Card>
 	);
