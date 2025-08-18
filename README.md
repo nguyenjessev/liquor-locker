@@ -32,6 +32,9 @@ services:
     image: ghcr.io/nguyenjessev/liquor-locker:latest
     ports:
       - "8080:8080" # You can change the first port if needed.
+	environment:
+      # This MUST be set to the URL that you will be accessing the app from, such as https://localhost:8080, https://mysubdomain.mydomain.com, etc. (I.e. the URL in your address bar when you use the app)
+      - ALLOWED_ORIGINS=http://localhost:8080
     volumes:
       - ./data:/app/internal/database/data # This is where the SQLite database will be stored.
 ```
