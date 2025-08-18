@@ -55,50 +55,50 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Route handling
 	switch {
-	case path == "/bottles" && r.Method == http.MethodPost:
+	case path == "/api/bottles" && r.Method == http.MethodPost:
 		s.bottleHandler.CreateBottle(w, r)
-	case path == "/bottles" && r.Method == http.MethodGet:
+	case path == "/api/bottles" && r.Method == http.MethodGet:
 		s.bottleHandler.GetAllBottles(w, r)
-	case strings.HasPrefix(path, "/bottles/") && r.Method == http.MethodGet:
+	case strings.HasPrefix(path, "/api/bottles/") && r.Method == http.MethodGet:
 		s.bottleHandler.GetBottle(w, r)
-	case strings.HasPrefix(path, "/bottles/") && r.Method == http.MethodDelete:
+	case strings.HasPrefix(path, "/api/bottles/") && r.Method == http.MethodDelete:
 		s.bottleHandler.DeleteBottle(w, r)
-	case strings.HasPrefix(path, "/bottles/") && r.Method == http.MethodPut:
+	case strings.HasPrefix(path, "/api/bottles/") && r.Method == http.MethodPut:
 		s.bottleHandler.UpdateBottle(w, r)
 
-	case path == "/mixers" && r.Method == http.MethodPost:
+	case path == "/api/mixers" && r.Method == http.MethodPost:
 		s.mixerHandler.CreateMixer(w, r)
-	case path == "/mixers" && r.Method == http.MethodGet:
+	case path == "/api/mixers" && r.Method == http.MethodGet:
 		s.mixerHandler.GetAllMixers(w, r)
-	case strings.HasPrefix(path, "/mixers/") && r.Method == http.MethodGet:
+	case strings.HasPrefix(path, "/api/mixers/") && r.Method == http.MethodGet:
 		s.mixerHandler.GetMixer(w, r)
-	case strings.HasPrefix(path, "/mixers/") && r.Method == http.MethodDelete:
+	case strings.HasPrefix(path, "/api/mixers/") && r.Method == http.MethodDelete:
 		s.mixerHandler.DeleteMixer(w, r)
-	case strings.HasPrefix(path, "/mixers/") && r.Method == http.MethodPut:
+	case strings.HasPrefix(path, "/api/mixers/") && r.Method == http.MethodPut:
 		s.mixerHandler.UpdateMixer(w, r)
 
-	case path == "/fresh" && r.Method == http.MethodPost:
+	case path == "/api/fresh" && r.Method == http.MethodPost:
 		s.freshHandler.CreateFresh(w, r)
-	case path == "/fresh" && r.Method == http.MethodGet:
+	case path == "/api/fresh" && r.Method == http.MethodGet:
 		s.freshHandler.GetAllFresh(w, r)
-	case strings.HasPrefix(path, "/fresh/") && r.Method == http.MethodGet:
+	case strings.HasPrefix(path, "/api/fresh/") && r.Method == http.MethodGet:
 		s.freshHandler.GetFresh(w, r)
-	case strings.HasPrefix(path, "/fresh/") && r.Method == http.MethodDelete:
+	case strings.HasPrefix(path, "/api/fresh/") && r.Method == http.MethodDelete:
 		s.freshHandler.DeleteFresh(w, r)
-	case strings.HasPrefix(path, "/fresh/") && r.Method == http.MethodPut:
+	case strings.HasPrefix(path, "/api/fresh/") && r.Method == http.MethodPut:
 		s.freshHandler.UpdateFresh(w, r)
 	case path == "/health":
 		s.handleHealth(w, r)
-	case path == "/ai/configure":
+	case path == "/api/ai/configure":
 		s.aiHandler.Configure(w, r)
-	case path == "/ai/models":
+	case path == "/api/ai/models":
 		s.aiHandler.ListModels(w, r)
-	case path == "/ai/service" && r.Method == http.MethodGet:
+	case path == "/api/ai/service" && r.Method == http.MethodGet:
 		s.aiHandler.ServiceStatusHandler(w, r)
-	case path == "/cocktails/recommendation" && r.Method == http.MethodPost:
+	case path == "/api/cocktails/recommendation" && r.Method == http.MethodPost:
 		s.aiHandler.RecommendCocktailHandler(s.repo)(w, r)
 	default:
-		http.NotFound(w, r)
+		http.FileServer(http.Dir("dist")).ServeHTTP(w, r)
 	}
 }
 
