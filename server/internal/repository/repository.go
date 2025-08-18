@@ -19,7 +19,7 @@ type Repository struct {
 }
 
 func New() *Repository {
-	db, err := sql.Open("sqlite3", "./internal/database/app.db")
+	db, err := sql.Open("sqlite3", "./internal/database/data/app.db")
 	if err != nil {
 		panic(err)
 	}
