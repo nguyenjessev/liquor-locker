@@ -76,7 +76,7 @@ func (h *FreshHandler) GetFresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	path := strings.TrimPrefix(r.URL.Path, "/fresh/")
+	path := strings.TrimPrefix(r.URL.Path, "/api/fresh/")
 	if path == "" {
 		http.Error(w, "Fresh ID is required", http.StatusBadRequest)
 		return
@@ -119,7 +119,7 @@ func (h *FreshHandler) DeleteFresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	path := strings.TrimPrefix(r.URL.Path, "/fresh/")
+	path := strings.TrimPrefix(r.URL.Path, "/api/fresh/")
 	if path == "" {
 		http.Error(w, "Fresh ID is required", http.StatusBadRequest)
 		return
@@ -151,7 +151,7 @@ func (h *FreshHandler) UpdateFresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	path := strings.TrimPrefix(r.URL.Path, "/fresh/")
+	path := strings.TrimPrefix(r.URL.Path, "/api/fresh/")
 	if path == "" {
 		http.Error(w, "Fresh ID is required", http.StatusBadRequest)
 		return

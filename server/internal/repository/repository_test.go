@@ -23,7 +23,7 @@ func setupTestRepository(t *testing.T) *Repository {
 			opened BOOLEAN NOT NULL DEFAULT FALSE,
 			created_at DATETIME NOT NULL,
 			updated_at DATETIME NOT NULL,
-			open_date DATETIME
+			open_date DATETIME,
 			purchase_date DATETIME
 		)`
 
