@@ -51,6 +51,7 @@ docker compose up -d
 
 ## Configuration
 
+- If you will be using a reverse proxy or otherwise serving the client from a URL other than `localhost`, you must set the `ALLOWED_ORIGINS` environment variable to the URL that your frontend will be accessed from. (E.g. `http://reverse_proxy_url.com:8081`)
 - If you want to use the AI recommendations feature, deploy the app and then visit the web client. From there, go to the settings page and enter an API URL and your API key for your chosen service.
 	- The API must support the OpenAI API standard. This includes OpenAI, Anthropic, and others. OpenRouter is also supported.
 	- When choosing a model in the Magic Bartender, the model must support tool-calling and structured responses.
