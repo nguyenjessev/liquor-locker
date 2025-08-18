@@ -1,7 +1,10 @@
 # Liquor Locker
 Liquor Locker is a home bar management app to track your bottles and other ingredients.
 
-Liquor Locker also offers the ability to bring your own API key to an OpenAI-compatible LLM provider in order to get AI-powered recommendations based on your available inventory.
+Liquor Locker also offers the ability to bring your own API key to an OpenAI-compatible LLM provider in order to get AI-powered recommendations based on your available inventory. Depending on what you have (or don't have) available, you might get some interesting spins on the classics!
+
+<img width="2672" height="1521" alt="image" src="https://github.com/user-attachments/assets/127ff63a-f02a-4d08-8c23-977a62f3f0a5" />
+<img width="2628" height="1477" alt="image" src="https://github.com/user-attachments/assets/c1c859b9-788a-443d-af83-d498565bda70" />
 
 ## Features
 
@@ -57,5 +60,7 @@ docker compose up -d
 	- When choosing a model in the Magic Bartender, the model must support tool-calling and structured responses.
 
 ## Planned Features
-- Adding custom recipes
+- Tracking of garnishes
 - Saving recommended recipes
+- Adding custom recipes
+- Various Magic Bartender "personalities," including `Classic`, `Modern`, and `Experimental`
