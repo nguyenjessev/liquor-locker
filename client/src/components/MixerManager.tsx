@@ -6,8 +6,7 @@ import { MixerEditModal } from "./MixerEditModal";
 import type { Mixer } from "@/types/mixer";
 import { Card, CardContent } from "@/components/ui/card";
 
-const API_BASE_URL =
-	import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 const API_KEY = import.meta.env.VITE_API_KEY || "";
 
 export function MixerManager() {
