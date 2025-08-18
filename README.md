@@ -29,7 +29,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-    	# This MUST match the URL that your frontend will be accessed from. (E.g. http://localhost:8081, http://reverse_proxy_url.com:8081, etc.)
+      # This MUST match the URL that your frontend will be accessed from. (E.g. http://localhost:8081, http://reverse_proxy_url.com:8081, etc.)
       - ALLOWED_ORIGINS=http://localhost:8081
     volumes:
       - ./data:/app/internal/database/data # This is where the SQLite database will be stored.
