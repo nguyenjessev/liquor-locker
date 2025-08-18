@@ -24,7 +24,7 @@ Liquor Locker also offers the ability to bring your own API key to an OpenAI-com
 
 ### Docker Compose (recommended)
 
-`. Create a `docker-compose.yml` file with the following content:
+1. Create a `docker-compose.yml` file with the following content:
 
 ```yaml
 services:
