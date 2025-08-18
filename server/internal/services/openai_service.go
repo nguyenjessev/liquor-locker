@@ -77,7 +77,7 @@ var CocktailRecommendationResponseSchema = GenerateSchema[models.CocktailRecomme
 func (s *OpenAIService) RecommendCocktail(ctx context.Context, repo *repository.Repository, model string) (*models.CocktailRecommendationResponse, error) {
 	params := openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.UserMessage("Recommend a cocktail based on the user's inventory, including bottles, fresh ingredients, and mixers. Prefer using open ingredients if possible, but you can use sealed ingredients if necessary."),
+			openai.UserMessage("Recommend a cocktail based on the user's inventory, including bottles, fresh ingredients, and mixers. Prefer using open ingredients if possible, but you can use sealed ingredients if necessary. You may also assume that the user has common ingredients on hand, such as water and ice."),
 		},
 		Tools: []openai.ChatCompletionToolUnionParam{
 			openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
