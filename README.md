@@ -29,7 +29,7 @@ Liquor Locker also offers the ability to bring your own API key to an OpenAI-com
 ```yaml
 services:
   liquor-locker:
-    image: ghcr.io/nguyenjessev/liquor-locker-server:latest
+    image: ghcr.io/nguyenjessev/liquor-locker:latest
     ports:
       - "8080:8080" # You can change the first port if needed.
     volumes:
