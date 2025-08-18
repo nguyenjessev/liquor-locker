@@ -67,7 +67,7 @@ func (h *MixerHandler) GetMixer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	path := strings.TrimPrefix(r.URL.Path, "/mixers/")
+	path := strings.TrimPrefix(r.URL.Path, "/api/mixers/")
 	if path == "" {
 		http.Error(w, "Mixer ID is required", http.StatusBadRequest)
 		return
@@ -106,7 +106,7 @@ func (h *MixerHandler) DeleteMixer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	path := strings.TrimPrefix(r.URL.Path, "/mixers/")
+	path := strings.TrimPrefix(r.URL.Path, "/api/mixers/")
 	if path == "" {
 		http.Error(w, "Mixer ID is required", http.StatusBadRequest)
 		return
@@ -136,7 +136,7 @@ func (h *MixerHandler) UpdateMixer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	path := strings.TrimPrefix(r.URL.Path, "/mixers/")
+	path := strings.TrimPrefix(r.URL.Path, "/api/mixers/")
 	if path == "" {
 		http.Error(w, "Mixer ID is required", http.StatusBadRequest)
 		return

@@ -79,7 +79,7 @@ func (h *BottleHandler) GetBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract ID from URL path
-	path := strings.TrimPrefix(r.URL.Path, "/bottles/")
+	path := strings.TrimPrefix(r.URL.Path, "/api/bottles/")
 	if path == "" {
 		http.Error(w, "Bottle ID is required", http.StatusBadRequest)
 		return
@@ -124,7 +124,7 @@ func (h *BottleHandler) DeleteBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract ID from URL path
-	path := strings.TrimPrefix(r.URL.Path, "/bottles/")
+	path := strings.TrimPrefix(r.URL.Path, "/api/bottles/")
 	if path == "" {
 		http.Error(w, "Bottle ID is required", http.StatusBadRequest)
 		return
@@ -157,7 +157,7 @@ func (h *BottleHandler) UpdateBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract ID from URL path
-	path := strings.TrimPrefix(r.URL.Path, "/bottles/")
+	path := strings.TrimPrefix(r.URL.Path, "/api/bottles/")
 	if path == "" {
 		http.Error(w, "Bottle ID is required", http.StatusBadRequest)
 		return
