@@ -3,11 +3,19 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/nguyenjessev/liquor-locker/internal/handlers"
 	"github.com/nguyenjessev/liquor-locker/internal/repository"
 )
+// loggingMiddleware logs all incoming HTTP requests
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+	})
+}
 
 func main() {
 	repo := repository.New()
@@ -43,8 +51,21 @@ func main() {
 	fmt.Println("  DELETE /api/mixers/{id} - Delete mixer by ID")
 	fmt.Println("  PUT /api/mixers/{id} - Update mixer by ID")
 	fmt.Println("  GET /health - Health check")
+	fmt.Println("  POST /api/favorites - Create a new favorite")
+	fmt.Println("  GET /api/favorites - Get all favorites")
+	fmt.Println("  GET /api/favorites/{id} - Get favorite by ID")
+	fmt.Println("  DELETE /api/favorites/{id} - Delete favorite by ID")
+	fmt.Println("  PUT /api/favorites/{id} - Update favorite by ID")
 
-	if err := server.Start(port); err != nil {
+	// Wrap the server (which implements http.Handler) with logging middleware
+	handlerWithLogging := loggingMiddleware(server)
+
+	srv := &http.Server{
+		Addr: ":" + port,
+		Handler: handlerWithLogging,
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal("Server failed to start:", err)
 	}
 }
