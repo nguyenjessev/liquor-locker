@@ -63,5 +63,8 @@ docker compose up -d
 - "Strict Mode" for the Magic Bartender
 - Various Magic Bartender "personalities," including `Classic`, `Modern`, and `Experimental`
 - Ability to select specific ingredients that you would like to be used by the Magic Bartender
+- Support for local Ollama(?)
+- Tracking of bottle/ingredient prices
+- UPC scanning
 
 <a href='https://ko-fi.com/M4M71JWKLX' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
