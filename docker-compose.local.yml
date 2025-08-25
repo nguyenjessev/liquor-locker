@@ -8,6 +8,7 @@ services:
       - "8080:8080"
     volumes:
       - ./server:/app/server
+    working_dir: /app/server
     command: bash -c "cd /app/server && mkdir -p ./internal/database/data && touch ./internal/database/data/app.db && go run ."
 
   web:
