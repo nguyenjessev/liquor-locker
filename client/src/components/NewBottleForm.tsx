@@ -116,6 +116,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 													setPurchaseDate(date ? startOfDay(date) : undefined);
 													setPurchaseDateOpen(false);
 												}}
+												weekStart={localStorage.getItem("weekStart") || "0"}
 												autoFocus
 											/>
 										</PopoverContent>
@@ -222,6 +223,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 														setOpenDate(date ? startOfDay(date) : undefined);
 														setOpenDateOpen(false);
 													}}
+													weekStart={localStorage.getItem("weekStart") || "0"}
 													autoFocus
 												/>
 											</PopoverContent>
