@@ -129,6 +129,7 @@ export function FreshEditModal({
 												setHasChanges(true);
 												setPurchaseDateOpen(false);
 											}}
+											weekStart={localStorage.getItem("weekStart") || "0"}
 											autoFocus
 										/>
 									</PopoverContent>
@@ -185,6 +186,7 @@ export function FreshEditModal({
 														setHasChanges(true);
 														setPreparedDateOpen(false);
 													}}
+													weekStart={localStorage.getItem("weekStart") || "0"}
 													autoFocus
 												/>
 											</PopoverContent>

@@ -11,10 +11,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 export function Settings() {
 	const [apiUrl, setApiUrl] = useState("");
 	const [apiKey, setApiKey] = useState("");
+	const [weekStart, setWeekStart] = useState(
+		() => localStorage.getItem("weekStart") || "0", // Default to Sunday
+	);
 
 	useEffect(() => {
 		const savedApiUrl = localStorage.getItem("apiUrl");
@@ -23,7 +33,7 @@ export function Settings() {
 		if (savedApiKey) setApiKey(savedApiKey);
 	}, []);
 
-	const saveSettings = async () => {
+	const saveAPISettings = async () => {
 		const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 		try {
 			const sanitizedApiUrl = apiUrl.replace(/\/+$/, "");
@@ -89,6 +99,29 @@ export function Settings() {
 							<Label htmlFor="theme-toggle">Theme</Label>
 							<ThemeToggle />
 						</div>
+						<div className="flex items-center justify-between">
+							<Label htmlFor="week-start">Week Start Day</Label>
+							<Select
+								value={weekStart}
+								onValueChange={(value) => {
+									setWeekStart(value);
+									localStorage.setItem("weekStart", value);
+								}}
+							>
+								<SelectTrigger className="w-[180px]">
+									<SelectValue placeholder="Select day" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="0">Sunday</SelectItem>
+									<SelectItem value="1">Monday</SelectItem>
+									<SelectItem value="2">Tuesday</SelectItem>
+									<SelectItem value="3">Wednesday</SelectItem>
+									<SelectItem value="4">Thursday</SelectItem>
+									<SelectItem value="5">Friday</SelectItem>
+									<SelectItem value="6">Saturday</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
 					</div>
 				</CardContent>
 			</Card>
@@ -123,7 +156,7 @@ export function Settings() {
 									onChange={(e) => setApiKey(e.target.value)}
 								/>
 							</div>
-							<Button onClick={saveSettings} className="w-auto">
+							<Button onClick={saveAPISettings} className="w-auto">
 								Save Settings
 							</Button>
 						</div>
