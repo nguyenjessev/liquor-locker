@@ -133,6 +133,7 @@ export function MixerEditModal({
 												setHasChanges(true);
 												setPurchaseDateOpen(false);
 											}}
+											weekStart={localStorage.getItem("weekStart") || "0"}
 											autoFocus
 										/>
 									</PopoverContent>
@@ -250,6 +251,7 @@ export function MixerEditModal({
 															setHasChanges(true);
 															setOpenDateOpen(false);
 														}}
+														weekStart={localStorage.getItem("weekStart") || "0"}
 														autoFocus
 													/>
 												</PopoverContent>
