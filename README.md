@@ -51,6 +51,7 @@ docker compose logs -f
 - The API must support the OpenAI API standard. This includes OpenAI, Anthropic, and others. OpenRouter is also supported.
 - When choosing a model in the Magic Bartender, the model must support tool-calling and structured responses.
 
+
 ## Planned Features
 
 - Tracking of garnishes
