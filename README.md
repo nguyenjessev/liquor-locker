@@ -66,9 +66,11 @@ docker compose logs -f
 
 ## Local Development
 
-- There is a specially crafted docker-compose file `docker-compose.local.yml` that you can use to run the local code without having to install any dependencies on your local machine
-- The "server" written in GoLang has Swaggo installed which will automatically update with new endpoint documentation as they are created. There is some special syntax that will help extend those docs. You can read about those [here](https://github.com/swaggo/swag/?tab=readme-ov-file#general-api-info).
+- There is a specially crafted docker-compose file `docker-compose.local.yml` that you can use to run the local code without having to install any dependencies on your local machine.
+  - Run `docker compose -f docker-compose.local.yml up` to start the application. Add `-d` to the end to run it in the background. 
+- The "server" written in GoLang has Swaggo installed which documents endpoints for easier testing. There is some special syntax that will help extend those docs. You can read about those [here](https://github.com/swaggo/swag/?tab=readme-ov-file#general-api-info).
   - Swagger docs are accessible at http://localhost:8080/swagger/index.html#/
   - You must run `swag init` after updating the godoc comments.
+    - Docker environment: `docker compose -f docker-compose.local.yml exec api swag init`
 
 <a href='https://ko-fi.com/M4M71JWKLX' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
