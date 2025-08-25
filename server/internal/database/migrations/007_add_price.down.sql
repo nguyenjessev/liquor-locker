@@ -1,0 +1,3 @@
+ALTER TABLE bottles DROP COLUMN price;
+ALTER TABLE mixers DROP COLUMN price;
+ALTER TABLE fresh DROP COLUMN price;
