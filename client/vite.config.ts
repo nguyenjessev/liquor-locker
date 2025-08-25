@@ -15,4 +15,8 @@ export default defineConfig({
 	define: {
 		__APP_VERSION__: JSON.stringify(pkg.version),
 	},
+	build: {
+		outDir: path.resolve(__dirname, "../server/dist"),
+		emptyOutDir: true,
+	},
 });

@@ -19,9 +19,9 @@ COPY client/package*.json ./
 
 RUN npm ci
 
-COPY client/ .
+COPY client/ ./client
 
-RUN npm run build
+RUN cd client && npm run build
 
 FROM debian:bookworm-slim
 
@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 COPY server/internal/database/migrations ./internal/database/migrations
 
 COPY --from=builder-backend /app/liquor-locker .
-COPY --from=builder-frontend /app/dist /app/dist
+COPY --from=builder-frontend /app/server/dist /app/dist
 
 RUN mkdir -p internal/database/data
 
