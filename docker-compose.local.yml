@@ -3,6 +3,7 @@ services:
     image: golang:1.24
     environment:
       - ALLOWED_ORIGINS=http://localhost:5173
+      - API_KEY=test-api-key
     ports:
       - "8080:8080"
     volumes:
@@ -18,7 +19,7 @@ services:
     working_dir: /app
     command: bash -c "npm i && npm run dev"
     environment:
-      - VITE_API_BASE_URL=http://localhost:8080
+      - VITE_API_BASE_URL=http://localhost:8080/api
       - VITE_API_KEY=test-api-key
     depends_on:
       - api
