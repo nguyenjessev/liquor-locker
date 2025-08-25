@@ -7,6 +7,7 @@ import { Settings } from "./Settings";
 import { BottomNav } from "./BottomNav";
 import { MagicBartender } from "./MagicBartender";
 import { Toaster } from "sonner";
+import FavoritesManager from "./FavoritesManager";
 
 export function Layout() {
 	const [activeSection, setActiveSection] = useState("bottles");
@@ -23,6 +24,8 @@ export function Layout() {
 				return <MagicBartender />;
 			case "settings":
 				return <Settings />;
+			case "favorites":
+				return <FavoritesManager />;
 			default:
 				return <BottleManager />;
 		}

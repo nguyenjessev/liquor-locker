@@ -1,0 +1,28 @@
+services:
+  api:
+    image: golang:1.24
+    environment:
+      - ALLOWED_ORIGINS=http://localhost:5173
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
+    volumes:
+      - ./server:/app/server
+    command: bash -c "cd /app/server && mkdir -p ./internal/database/data && touch ./internal/database/data/app.db && go run ."
+
+  liquor-locker-web:
+    image: node:24
+    ports:
+      - "5173:5173"
+    expose:
+      - 5173
+    volumes:
+      - ./client:/app
+    working_dir: /app
+    command: bash -c "npm i && npm run dev"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8080
+      - VITE_API_KEY=test-api-key
+    depends_on:
+      - api

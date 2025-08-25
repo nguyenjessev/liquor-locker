@@ -13,4 +13,5 @@ export interface CocktailRecommendation {
 	description: string;
 	ingredients: Ingredient[];
 	steps: Step[];
+	id?: number;
 }

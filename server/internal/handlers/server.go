@@ -16,6 +16,7 @@ type Server struct {
 	bottleHandler  *BottleHandler
 	freshHandler   *FreshHandler
 	mixerHandler   *MixerHandler
+	favoriteHandler *FavoriteHandler
 	aiHandler      *AIHandler
 	allowedOrigins []string
 	apiKey         string
@@ -39,6 +40,7 @@ func NewServer(repo *repository.Repository) *Server {
 		bottleHandler:  NewBottleHandler(repo),
 		freshHandler:   NewFreshHandler(repo),
 		mixerHandler:   NewMixerHandler(repo),
+		favoriteHandler: &FavoriteHandler{Repo: repo},
 		aiHandler:      NewAIHandler(),
 		allowedOrigins: allowedOrigins,
 		apiKey:         apiKey,
@@ -55,6 +57,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Route handling
 	switch {
+	// --- Favorites endpoints ---
+	case path == "/api/favorites" && r.Method == http.MethodPost:
+		s.favoriteHandler.CreateFavorite(w, r)
+	case path == "/api/favorites" && r.Method == http.MethodGet:
+		s.favoriteHandler.GetFavoritesByUser(w, r)
+	case path == "/api/favorites" && r.Method == http.MethodPut:
+		s.favoriteHandler.UpdateFavorite(w, r)
+	case path == "/api/favorites" && r.Method == http.MethodDelete:
+		s.favoriteHandler.DeleteFavorite(w, r)
 	case path == "/api/bottles" && r.Method == http.MethodPost:
 		s.bottleHandler.CreateBottle(w, r)
 	case path == "/api/bottles" && r.Method == http.MethodGet:
