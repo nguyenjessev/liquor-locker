@@ -32,3 +32,5 @@ go.work.sum
 # .vscode/
 
 app.db
+
+server/dist
