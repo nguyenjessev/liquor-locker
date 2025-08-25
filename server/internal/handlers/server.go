@@ -8,6 +8,8 @@ import (
 	"slices"
 	"strings"
 
+	httpSwagger "github.com/swaggo/http-swagger"
+
 	"github.com/nguyenjessev/liquor-locker/internal/repository"
 )
 
@@ -55,6 +57,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Route handling
 	switch {
+	// Serve Swagger UI at /swagger/*
+	case strings.HasPrefix(path, "/swagger/"):
+		httpSwagger.WrapHandler(w, r)
+
 	case path == "/api/bottles" && r.Method == http.MethodPost:
 		s.bottleHandler.CreateBottle(w, r)
 	case path == "/api/bottles" && r.Method == http.MethodGet:

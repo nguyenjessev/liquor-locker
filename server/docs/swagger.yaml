@@ -1,0 +1,681 @@
+definitions:
+  handlers.ConfigureRequest:
+    properties:
+      api_key:
+        type: string
+      base_url:
+        type: string
+    type: object
+  models.BottleResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      open_date:
+        type: string
+      opened:
+        type: boolean
+      purchase_date:
+        type: string
+    type: object
+  models.CreateBottleRequest:
+    properties:
+      name:
+        type: string
+      open_date:
+        type: string
+      opened:
+        type: boolean
+      purchase_date:
+        type: string
+    type: object
+  models.CreateFreshRequest:
+    properties:
+      name:
+        type: string
+      prepared_date:
+        type: string
+      purchase_date:
+        type: string
+    type: object
+  models.FreshResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      prepared_date:
+        type: string
+      purchase_date:
+        type: string
+    type: object
+  models.Mixer:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      open_date:
+        type: string
+      opened:
+        type: boolean
+      purchase_date:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.UpdateBottleRequest:
+    properties:
+      name:
+        type: string
+      open_date:
+        type: string
+      opened:
+        type: boolean
+      purchase_date:
+        type: string
+    type: object
+  models.UpdateFreshRequest:
+    properties:
+      name:
+        type: string
+      prepared_date:
+        type: string
+      purchase_date:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /ai/configure:
+    post:
+      consumes:
+      - application/json
+      description: Configure the OpenAI service with base URL and API key
+      parameters:
+      - description: AI service configuration
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ConfigureRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "405":
+          description: Method Not Allowed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Configure the AI service
+      tags:
+      - ai
+  /ai/models:
+    get:
+      description: Returns a list of available AI models
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "405":
+          description: Method Not Allowed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List available AI models
+      tags:
+      - ai
+  /ai/service:
+    get:
+      description: Check if the AI service is initialized
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "405":
+          description: Method Not Allowed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get AI service status
+      tags:
+      - ai
+  /api/bottles:
+    get:
+      description: Returns a list of all bottles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.BottleResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all bottles
+      tags:
+      - bottles
+    post:
+      consumes:
+      - application/json
+      description: Adds a new bottle to the collection
+      parameters:
+      - description: Bottle to add
+        in: body
+        name: bottle
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateBottleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.BottleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new bottle
+      tags:
+      - bottles
+  /api/bottles/{id}:
+    delete:
+      description: Deletes a bottle from the collection by its ID
+      parameters:
+      - description: Bottle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a bottle by ID
+      tags:
+      - bottles
+    get:
+      description: Returns a single bottle by its ID
+      parameters:
+      - description: Bottle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BottleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a bottle by ID
+      tags:
+      - bottles
+    put:
+      consumes:
+      - application/json
+      description: Updates a bottle's information by its ID
+      parameters:
+      - description: Bottle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Bottle update info
+        in: body
+        name: bottle
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateBottleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BottleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a bottle by ID
+      tags:
+      - bottles
+  /cocktails/recommendation:
+    post:
+      consumes:
+      - application/json
+      description: Get a cocktail recommendation from the AI
+      parameters:
+      - description: Model selection
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "405":
+          description: Method Not Allowed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Recommend a cocktail
+      tags:
+      - ai
+  /fresh:
+    get:
+      description: Get a list of all fresh items
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.FreshResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all fresh items
+      tags:
+      - fresh
+    post:
+      consumes:
+      - application/json
+      description: Add a new fresh item to the collection
+      parameters:
+      - description: Fresh item to create
+        in: body
+        name: fresh
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateFreshRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.FreshResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new fresh item
+      tags:
+      - fresh
+  /fresh/{id}:
+    delete:
+      description: Delete a fresh item by ID
+      parameters:
+      - description: Fresh ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a fresh item
+      tags:
+      - fresh
+    get:
+      description: Get details of a specific fresh item
+      parameters:
+      - description: Fresh ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FreshResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a fresh item by ID
+      tags:
+      - fresh
+    put:
+      consumes:
+      - application/json
+      description: Update an existing fresh item by ID
+      parameters:
+      - description: Fresh ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fresh item to update
+        in: body
+        name: fresh
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateFreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FreshResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a fresh item
+      tags:
+      - fresh
+  /mixers:
+    get:
+      description: Get a list of all mixers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Mixer'
+            type: array
+      summary: Get all mixers
+      tags:
+      - mixers
+    post:
+      consumes:
+      - application/json
+      description: Add a new mixer to the collection
+      parameters:
+      - description: Mixer to create
+        in: body
+        name: mixer
+        required: true
+        schema:
+          $ref: '#/definitions/models.Mixer'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Mixer'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new mixer
+      tags:
+      - mixers
+  /mixers/{id}:
+    delete:
+      description: Delete a mixer by ID
+      parameters:
+      - description: Mixer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a mixer
+      tags:
+      - mixers
+    get:
+      description: Get details of a specific mixer
+      parameters:
+      - description: Mixer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Mixer'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a mixer by ID
+      tags:
+      - mixers
+    put:
+      consumes:
+      - application/json
+      description: Update an existing mixer by ID
+      parameters:
+      - description: Mixer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Mixer to update
+        in: body
+        name: mixer
+        required: true
+        schema:
+          $ref: '#/definitions/models.Mixer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Mixer'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a mixer
+      tags:
+      - mixers
+swagger: "2.0"

@@ -20,6 +20,17 @@ func NewFreshHandler(repo *repository.Repository) *FreshHandler {
 	return &FreshHandler{repo: repo}
 }
 
+// CreateFresh godoc
+// @Summary Create a new fresh item
+// @Description Add a new fresh item to the collection
+// @Tags fresh
+// @Accept json
+// @Produce json
+// @Param fresh body models.CreateFreshRequest true "Fresh item to create"
+// @Success 201 {object} models.FreshResponse
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /fresh [post]
 func (h *FreshHandler) CreateFresh(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -70,6 +81,17 @@ func (h *FreshHandler) CreateFresh(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetFresh godoc
+// @Summary Get a fresh item by ID
+// @Description Get details of a specific fresh item
+// @Tags fresh
+// @Produce json
+// @Param id path int true "Fresh ID"
+// @Success 200 {object} models.FreshResponse
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /fresh/{id} [get]
 func (h *FreshHandler) GetFresh(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -113,6 +135,17 @@ func (h *FreshHandler) GetFresh(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeleteFresh godoc
+// @Summary Delete a fresh item
+// @Description Delete a fresh item by ID
+// @Tags fresh
+// @Produce json
+// @Param id path int true "Fresh ID"
+// @Success 204 {object} nil
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /fresh/{id} [delete]
 func (h *FreshHandler) DeleteFresh(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -145,6 +178,19 @@ func (h *FreshHandler) DeleteFresh(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// UpdateFresh godoc
+// @Summary Update a fresh item
+// @Description Update an existing fresh item by ID
+// @Tags fresh
+// @Accept json
+// @Produce json
+// @Param id path int true "Fresh ID"
+// @Param fresh body models.UpdateFreshRequest true "Fresh item to update"
+// @Success 200 {object} models.FreshResponse
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /fresh/{id} [put]
 func (h *FreshHandler) UpdateFresh(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -210,6 +256,14 @@ func (h *FreshHandler) UpdateFresh(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetAllFresh godoc
+// @Summary Get all fresh items
+// @Description Get a list of all fresh items
+// @Tags fresh
+// @Produce json
+// @Success 200 {array} models.FreshResponse
+// @Failure 500 {object} map[string]string
+// @Router /fresh [get]
 func (h *FreshHandler) GetAllFresh(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

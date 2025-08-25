@@ -3,11 +3,21 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
+	_ "github.com/nguyenjessev/liquor-locker/docs"
 	"github.com/nguyenjessev/liquor-locker/internal/handlers"
 	"github.com/nguyenjessev/liquor-locker/internal/repository"
 )
+
+// loggingMiddleware logs all incoming HTTP requests
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+	})
+}
 
 func main() {
 	repo := repository.New()
@@ -44,7 +54,14 @@ func main() {
 	fmt.Println("  PUT /api/mixers/{id} - Update mixer by ID")
 	fmt.Println("  GET /health - Health check")
 
-	if err := server.Start(port); err != nil {
+	handlerWithLogging := loggingMiddleware(server)
+
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: handlerWithLogging,
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal("Server failed to start:", err)
 	}
 }
