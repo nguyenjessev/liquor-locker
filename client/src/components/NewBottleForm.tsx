@@ -161,7 +161,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 											setPrice(value);
 										}
 									}}
-									className="pl-6"
+									className="pl-6 w-32"
 									disabled={loading}
 									id="price-input"
 									placeholder="0.00"
