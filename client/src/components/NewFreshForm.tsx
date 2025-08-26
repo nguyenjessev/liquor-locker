@@ -24,6 +24,7 @@ interface NewFreshFormProps {
 		name: string;
 		prepared_date?: Date;
 		purchase_date?: Date;
+		price?: number;
 	}) => Promise<void>;
 	loading: boolean;
 }
@@ -34,6 +35,7 @@ export function NewFreshForm({ onSubmit, loading }: NewFreshFormProps) {
 	const [purchaseDate, setPurchaseDate] = useState<Date | undefined>(undefined);
 	const [purchaseDateOpen, setPurchaseDateOpen] = useState(false);
 	const [preparedDateOpen, setPreparedDateOpen] = useState(false);
+	const [price, setPrice] = useState<string>("");
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -43,12 +45,14 @@ export function NewFreshForm({ onSubmit, loading }: NewFreshFormProps) {
 			name: newFreshName.trim(),
 			prepared_date: preparedDate,
 			purchase_date: purchaseDate,
+			price: price ? parseFloat(price) : undefined,
 		});
 
 		// Reset form
 		setNewFreshName("");
 		setPreparedDate(undefined);
 		setPurchaseDate(undefined);
+		setPrice("");
 	};
 
 	return (
@@ -81,56 +85,84 @@ export function NewFreshForm({ onSubmit, loading }: NewFreshFormProps) {
 						</div>
 					</div>
 
-					{/* Purchase date */}
-					<div className="space-y-2">
-						<Label htmlFor="purchase-date-input" className="block">
-							Purchase date (optional)
-						</Label>
-						<div className="flex gap-2">
-							<Popover
-								open={purchaseDateOpen}
-								onOpenChange={setPurchaseDateOpen}
-							>
-								<PopoverTrigger asChild>
-									<Button
-										variant="outline"
-										className={`shrink-1 max-w-full overflow-hidden justify-start ${!purchaseDate && "text-muted-foreground"}`}
-										disabled={loading}
-										id="purchase-date-input"
-									>
-										<CalendarIcon />
-										<span>
-											{purchaseDate ? format(purchaseDate, "PPP") : "No date"}
-										</span>
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										mode="single"
-										selected={
-											purchaseDate ? startOfDay(purchaseDate) : undefined
-										}
-										onSelect={(date) => {
-											setPurchaseDate(date ? startOfDay(date) : undefined);
-											setPurchaseDateOpen(false);
-										}}
-										autoFocus
-									/>
-								</PopoverContent>
-							</Popover>
-							{purchaseDate && (
-								<Button
-									variant="ghost"
-									size="icon"
-									className="text-muted-foreground hover:text-destructive"
-									onClick={() => {
-										setPurchaseDate(undefined);
-									}}
-									disabled={loading}
+					{/* Purchase date and price */}
+					<div className="flex gap-4">
+						<div className="space-y-2">
+							<Label htmlFor="purchase-date-input" className="block">
+								Purchase date (optional)
+							</Label>
+							<div className="flex gap-2">
+								<Popover
+									open={purchaseDateOpen}
+									onOpenChange={setPurchaseDateOpen}
 								>
-									<X />
-								</Button>
-							)}
+									<PopoverTrigger asChild>
+										<Button
+											variant="outline"
+											className={`shrink-1 max-w-full overflow-hidden justify-start ${!purchaseDate && "text-muted-foreground"}`}
+											disabled={loading}
+											id="purchase-date-input"
+										>
+											<CalendarIcon />
+											<span>
+												{purchaseDate ? format(purchaseDate, "PPP") : "No date"}
+											</span>
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent className="w-auto p-0" align="start">
+										<Calendar
+											mode="single"
+											selected={
+												purchaseDate ? startOfDay(purchaseDate) : undefined
+											}
+											onSelect={(date) => {
+												setPurchaseDate(date ? startOfDay(date) : undefined);
+												setPurchaseDateOpen(false);
+											}}
+											autoFocus
+										/>
+									</PopoverContent>
+								</Popover>
+								{purchaseDate && (
+									<Button
+										variant="ghost"
+										size="icon"
+										className="text-muted-foreground hover:text-destructive"
+										onClick={() => {
+											setPurchaseDate(undefined);
+										}}
+										disabled={loading}
+									>
+										<X />
+									</Button>
+								)}
+							</div>
+						</div>
+
+						{/* Price */}
+						<div className="space-y-2">
+							<Label htmlFor="price-input" className="block">
+								Price
+							</Label>
+							<div className="relative">
+								<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+									$
+								</span>
+								<Input
+									type="text"
+									value={price}
+									onChange={(e) => {
+										const value = e.target.value;
+										if (value === "" || /^\d*\.?\d*$/.test(value)) {
+											setPrice(value);
+										}
+									}}
+									className="pl-6"
+									disabled={loading}
+									id="price-input"
+									placeholder="0.00"
+								/>
+							</div>
 						</div>
 					</div>
 
