@@ -29,7 +29,7 @@ export function FreshCard({ fresh, onEdit }: FreshCardProps) {
 					<div className="text-sm">
 						Price:{" "}
 						<span className="text-sm text-muted-foreground">
-							{fresh.price.toFixed(2)}
+							${fresh.price.toFixed(2)}
 						</span>
 					</div>
 				)}
