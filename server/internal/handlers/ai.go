@@ -15,7 +15,16 @@ type AIHandler struct {
 	mu        sync.Mutex
 }
 
-// ListModels returns a list of available AI models
+// ListModels godoc
+// @Summary List available AI models
+// @Description Returns a list of available AI models
+// @Tags ai
+// @Produce json
+// @Success 200 {array} string
+// @Failure 405 {object} map[string]string
+// @Failure 503 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /ai/models [get]
 func (h *AIHandler) ListModels(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -48,7 +57,19 @@ func NewAIHandler() *AIHandler {
 	return &AIHandler{}
 }
 
-// RecommendCocktailHandler handles POST /cocktails/recommendation requests
+// RecommendCocktailHandler godoc
+// @Summary Recommend a cocktail
+// @Description Get a cocktail recommendation from the AI
+// @Tags ai
+// @Accept json
+// @Produce json
+// @Param request body object true "Model selection"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 405 {object} map[string]string
+// @Failure 503 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /cocktails/recommendation [post]
 func (h *AIHandler) RecommendCocktailHandler(repo *repository.Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -93,7 +114,18 @@ type ConfigureRequest struct {
 	APIKey  string `json:"api_key"`
 }
 
-// Configure handles the configuration of the OpenAI service
+// Configure godoc
+// @Summary Configure the AI service
+// @Description Configure the OpenAI service with base URL and API key
+// @Tags ai
+// @Accept json
+// @Produce json
+// @Param config body ConfigureRequest true "AI service configuration"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 405 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /ai/configure [post]
 func (h *AIHandler) Configure(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -134,7 +166,14 @@ func (h *AIHandler) GetAIService() *services.OpenAIService {
 	return h.aiService
 }
 
-// ServiceStatusHandler handles GET /ai/service requests to check if AI service is initialized
+// ServiceStatusHandler godoc
+// @Summary Get AI service status
+// @Description Check if the AI service is initialized
+// @Tags ai
+// @Produce json
+// @Success 200 {object} map[string]bool
+// @Failure 405 {object} map[string]string
+// @Router /ai/service [get]
 func (h *AIHandler) ServiceStatusHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
