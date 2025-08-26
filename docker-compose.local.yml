@@ -2,7 +2,7 @@ services:
   api:
     image: golang:1.24
     environment:
-      - ALLOWED_ORIGINS=http://web:5173
+      - ALLOWED_ORIGINS=http://web:5173,http://localhost:5173
       - API_KEY=test-api-key
     ports:
       - "8080:8080"

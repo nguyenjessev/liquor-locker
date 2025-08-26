@@ -4,6 +4,7 @@ export interface Bottle {
 	opened: boolean;
 	open_date?: Date | null;
 	purchase_date?: Date | null;
+	price?: number | null;
 }
 
 export interface CreateBottleRequest {
@@ -11,4 +12,5 @@ export interface CreateBottleRequest {
 	opened: boolean;
 	open_date?: Date;
 	purchase_date?: Date;
+	price?: number | null;
 }
