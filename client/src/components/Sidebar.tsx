@@ -1,4 +1,4 @@
-import { Apple, Blend, BottleWine, Settings, Wand2 } from "lucide-react";
+import { Apple, Blend, BottleWine, Settings, Star, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -28,6 +28,11 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 			id: "magic-bartender",
 			label: "Magic Bartender",
 			icon: Wand2,
+		},
+		{
+			id: "favorites",
+			label: "Favorites",
+			icon: Star,
 		},
 		{
 			id: "settings",

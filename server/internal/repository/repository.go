@@ -14,6 +14,95 @@ import (
 	"github.com/nguyenjessev/liquor-locker/internal/models"
 )
 
+var (
+	ErrNilFavorite     = errors.New("favorite cannot be nil")
+	ErrFavoriteNotFound = errors.New("favorite not found")
+)
+
+// CreateFavorite inserts a new favorite cocktail for a user.
+func (r *Repository) CreateFavorite(ctx context.Context, favorite *models.Favorite) (*models.Favorite, error) {
+	if favorite == nil {
+		return nil, ErrNilFavorite
+	}
+	query := `
+		INSERT INTO favorites (name, ingredients, instructions, created_at, updated_at)
+		VALUES (?, ?, ?, strftime('%s','now'), strftime('%s','now'))
+		RETURNING id, created_at, updated_at`
+	err := r.DB.QueryRowContext(ctx, query, favorite.Name, favorite.Ingredients, favorite.Instructions).Scan(&favorite.ID, &favorite.CreatedAt, &favorite.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return favorite, nil
+}
+
+// GetFavoritesByUser returns all favorites for a user.
+func (r *Repository) GetFavoritesByUser(ctx context.Context) ([]*models.Favorite, error) {
+	query := `
+		SELECT id, name, ingredients, instructions, created_at, updated_at
+		FROM favorites
+		ORDER BY created_at DESC`
+	rows, err := r.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var favorites []*models.Favorite
+	for rows.Next() {
+		var fav models.Favorite
+		err := rows.Scan(&fav.ID, &fav.Name, &fav.Ingredients, &fav.Instructions, &fav.CreatedAt, &fav.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		favorites = append(favorites, &fav)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return favorites, nil
+}
+
+// UpdateFavorite updates a favorite cocktail by id.
+func (r *Repository) UpdateFavorite(ctx context.Context, id int, updates *models.Favorite) (*models.Favorite, error) {
+	if updates == nil {
+		return nil, ErrNilFavorite
+	}
+	query := `
+		UPDATE favorites
+		SET name = ?, ingredients = ?, instructions = ?, updated_at = strftime('%s','now')
+		WHERE id = ? AND user_id = ?
+		RETURNING id, name, ingredients, instructions, created_at, updated_at`
+	var fav models.Favorite
+	err := r.DB.QueryRowContext(ctx, query, updates.Name, updates.Ingredients, updates.Instructions, id).Scan(
+		&fav.ID, &fav.Name, &fav.Ingredients, &fav.Instructions, &fav.CreatedAt, &fav.UpdatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrFavoriteNotFound
+		}
+		return nil, err
+	}
+	return &fav, nil
+}
+
+// DeleteFavorite deletes a favorite cocktail by id.
+func (r *Repository) DeleteFavorite(ctx context.Context, id int) error {
+	query := `DELETE FROM favorites WHERE id = ?`
+	result, err := r.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return ErrFavoriteNotFound
+	}
+	return nil
+}
+
+
+
 type Repository struct {
 	DB *sql.DB
 }
