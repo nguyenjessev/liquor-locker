@@ -247,7 +247,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 												}}
 												disabled={loading}
 											>
-												<X className="h-4 w-4" />
+												<X />
 											</Button>
 										)}
 									</div>
