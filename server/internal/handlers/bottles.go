@@ -56,6 +56,10 @@ func (h *BottleHandler) CreateBottle(w http.ResponseWriter, r *http.Request) {
 		bottle.PurchaseDate = req.PurchaseDate
 	}
 
+	if req.Price != nil {
+		bottle.Price = req.Price
+	}
+
 	createdBottle, err := h.repo.CreateBottle(r.Context(), bottle)
 	if err != nil {
 		log.Printf("ERROR: CreateBottle failed - bottle=%+v, error=%v", bottle, err)
@@ -73,6 +77,7 @@ func (h *BottleHandler) CreateBottle(w http.ResponseWriter, r *http.Request) {
 		Opened:       createdBottle.Opened,
 		OpenDate:     createdBottle.OpenDate,
 		PurchaseDate: createdBottle.PurchaseDate,
+		Price:        createdBottle.Price,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -129,6 +134,7 @@ func (h *BottleHandler) GetBottle(w http.ResponseWriter, r *http.Request) {
 		Opened:       bottle.Opened,
 		OpenDate:     bottle.OpenDate,
 		PurchaseDate: bottle.PurchaseDate,
+		Price:        bottle.Price,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -230,6 +236,10 @@ func (h *BottleHandler) UpdateBottle(w http.ResponseWriter, r *http.Request) {
 		updates.PurchaseDate = req.PurchaseDate
 	}
 
+	if req.Price != nil {
+		updates.Price = req.Price
+	}
+
 	updatedBottle, err := h.repo.UpdateBottle(r.Context(), id, updates)
 	if err != nil {
 		log.Printf("ERROR: UpdateBottle failed - id=%d, updates=%+v, error=%v", id, updates, err)
@@ -251,6 +261,7 @@ func (h *BottleHandler) UpdateBottle(w http.ResponseWriter, r *http.Request) {
 		Opened:       updatedBottle.Opened,
 		OpenDate:     updatedBottle.OpenDate,
 		PurchaseDate: updatedBottle.PurchaseDate,
+		Price:        updatedBottle.Price,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -289,6 +300,7 @@ func (h *BottleHandler) GetAllBottles(w http.ResponseWriter, r *http.Request) {
 			Opened:       bottle.Opened,
 			OpenDate:     bottle.OpenDate,
 			PurchaseDate: bottle.PurchaseDate,
+			Price:        bottle.Price,
 		})
 	}
 
