@@ -44,15 +44,10 @@ func (h *FreshHandler) CreateFresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fresh := &models.Fresh{
-		Name: req.Name,
-	}
-
-	if req.PreparedDate != nil {
-		fresh.PreparedDate = req.PreparedDate
-	}
-
-	if req.PurchaseDate != nil {
-		fresh.PurchaseDate = req.PurchaseDate
+		Name:         req.Name,
+		PreparedDate: req.PreparedDate,
+		PurchaseDate: req.PurchaseDate,
+		Price:        req.Price,
 	}
 
 	createdFresh, err := h.repo.CreateFresh(r.Context(), fresh)
@@ -71,6 +66,7 @@ func (h *FreshHandler) CreateFresh(w http.ResponseWriter, r *http.Request) {
 		Name:         createdFresh.Name,
 		PreparedDate: createdFresh.PreparedDate,
 		PurchaseDate: createdFresh.PurchaseDate,
+		Price:        createdFresh.Price,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -126,6 +122,7 @@ func (h *FreshHandler) GetFresh(w http.ResponseWriter, r *http.Request) {
 		Name:         fresh.Name,
 		PreparedDate: fresh.PreparedDate,
 		PurchaseDate: fresh.PurchaseDate,
+		Price:        fresh.Price,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -216,15 +213,10 @@ func (h *FreshHandler) UpdateFresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updates := &models.Fresh{
-		Name: req.Name,
-	}
-
-	if req.PreparedDate != nil {
-		updates.PreparedDate = req.PreparedDate
-	}
-
-	if req.PurchaseDate != nil {
-		updates.PurchaseDate = req.PurchaseDate
+		Name:         req.Name,
+		PurchaseDate: req.PurchaseDate,
+		PreparedDate: req.PreparedDate,
+		Price:        req.Price,
 	}
 
 	updatedFresh, err := h.repo.UpdateFresh(r.Context(), id, updates)
@@ -247,6 +239,7 @@ func (h *FreshHandler) UpdateFresh(w http.ResponseWriter, r *http.Request) {
 		Name:         updatedFresh.Name,
 		PreparedDate: updatedFresh.PreparedDate,
 		PurchaseDate: updatedFresh.PurchaseDate,
+		Price:        updatedFresh.Price,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -284,6 +277,7 @@ func (h *FreshHandler) GetAllFresh(w http.ResponseWriter, r *http.Request) {
 			Name:         fresh.Name,
 			PreparedDate: fresh.PreparedDate,
 			PurchaseDate: fresh.PurchaseDate,
+			Price:        fresh.Price,
 		})
 	}
 

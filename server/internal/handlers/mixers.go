@@ -70,6 +70,7 @@ func (h *MixerHandler) CreateMixer(w http.ResponseWriter, r *http.Request) {
 		PurchaseDate: createdMixer.PurchaseDate,
 		Price:        createdMixer.Price,
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
