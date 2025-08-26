@@ -81,16 +81,20 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 								disabled={loading}
 								id="bottle-name-input"
 							/>
-							<Button type="submit" disabled={loading || !newBottleName.trim()}>
+							<Button
+								type="submit"
+								className="max-w-full"
+								disabled={loading || !newBottleName.trim()}
+							>
 								{loading ? "Adding..." : "Add Bottle"}
 							</Button>
 						</div>
 					</div>
 
 					{/* Purchase date and price */}
-					<div className="flex gap-4">
+					<div className="flex flex-wrap gap-4">
 						{/* Purchase date */}
-						<div className="space-y-2">
+						<div className="space-y-2 max-w-full">
 							<Label htmlFor="purchase-date-input" className="block">
 								Purchase date (optional)
 							</Label>
@@ -102,7 +106,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 									<PopoverTrigger asChild>
 										<Button
 											variant="outline"
-											className={`shrink-1 max-w-full overflow-hidden justify-start ${!purchaseDate && "text-muted-foreground"}`}
+											className={`w-full max-w-full overflow-hidden justify-start ${!purchaseDate && "text-muted-foreground"}`}
 											disabled={loading}
 											id="purchase-date-input"
 										>
@@ -144,7 +148,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 						</div>
 
 						{/* Price */}
-						<div className="space-y-2">
+						<div className="space-y-2 max-w-full">
 							<Label htmlFor="price-input" className="block">
 								Price
 							</Label>
@@ -161,7 +165,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 											setPrice(value);
 										}
 									}}
-									className="pl-6 w-32"
+									className="pl-6 w-32 max-w-full"
 									disabled={loading}
 									id="price-input"
 									placeholder="0.00"

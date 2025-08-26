@@ -81,15 +81,20 @@ export function NewMixerForm({ onSubmit, loading }: NewMixerFormProps) {
 								disabled={loading}
 								id="mixer-name-input"
 							/>
-							<Button type="submit" disabled={loading || !newMixerName.trim()}>
+							<Button
+								type="submit"
+								className="max-w-full"
+								disabled={loading || !newMixerName.trim()}
+							>
 								{loading ? "Adding..." : "Add Mixer"}
 							</Button>
 						</div>
 					</div>
 
 					{/* Purchase date and price */}
-					<div className="flex gap-4">
-						<div className="space-y-2">
+					<div className="flex flex-wrap gap-4">
+						{/* Purchase date */}
+						<div className="space-y-2 max-w-full">
 							<Label htmlFor="purchase-date-input" className="block">
 								Purchase date (optional)
 							</Label>
@@ -101,7 +106,7 @@ export function NewMixerForm({ onSubmit, loading }: NewMixerFormProps) {
 									<PopoverTrigger asChild>
 										<Button
 											variant="outline"
-											className={`shrink-1 max-w-full overflow-hidden justify-start ${!purchaseDate && "text-muted-foreground"}`}
+											className={`w-full max-w-full overflow-hidden justify-start ${!purchaseDate && "text-muted-foreground"}`}
 											disabled={loading}
 										>
 											<CalendarIcon />

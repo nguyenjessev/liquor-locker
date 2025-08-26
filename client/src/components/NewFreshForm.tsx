@@ -79,15 +79,20 @@ export function NewFreshForm({ onSubmit, loading }: NewFreshFormProps) {
 								disabled={loading}
 								id="fresh-name-input"
 							/>
-							<Button type="submit" disabled={loading || !newFreshName.trim()}>
+							<Button
+								type="submit"
+								className="max-w-full"
+								disabled={loading || !newFreshName.trim()}
+							>
 								{loading ? "Adding..." : "Add Ingredient"}
 							</Button>
 						</div>
 					</div>
 
 					{/* Purchase date and price */}
-					<div className="flex gap-4">
-						<div className="space-y-2">
+					<div className="flex flex-wrap gap-4">
+						{/* Purchase date */}
+						<div className="space-y-2 max-w-full">
 							<Label htmlFor="purchase-date-input" className="block">
 								Purchase date (optional)
 							</Label>
@@ -99,7 +104,7 @@ export function NewFreshForm({ onSubmit, loading }: NewFreshFormProps) {
 									<PopoverTrigger asChild>
 										<Button
 											variant="outline"
-											className={`shrink-1 max-w-full overflow-hidden justify-start ${!purchaseDate && "text-muted-foreground"}`}
+											className={`w-full max-w-full overflow-hidden justify-start ${!purchaseDate && "text-muted-foreground"}`}
 											disabled={loading}
 											id="purchase-date-input"
 										>
