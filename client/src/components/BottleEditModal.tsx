@@ -122,7 +122,10 @@ export function BottleEditModal({
 											</span>
 										</Button>
 									</PopoverTrigger>
-									<PopoverContent className="w-auto p-0" align="start">
+									<PopoverContent
+										className="w-auto p-0 pointer-events-auto"
+										align="start"
+									>
 										<Calendar
 											mode="single"
 											selected={
@@ -240,7 +243,10 @@ export function BottleEditModal({
 														</span>
 													</Button>
 												</PopoverTrigger>
-												<PopoverContent className="w-auto p-0" align="start">
+												<PopoverContent
+													className="w-auto p-0 pointer-events-auto"
+													align="start"
+												>
 													<Calendar
 														mode="single"
 														selected={
