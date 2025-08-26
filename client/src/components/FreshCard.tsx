@@ -24,10 +24,10 @@ export function FreshCard({ fresh, onEdit }: FreshCardProps) {
 			<CardHeader>
 				<CardTitle className="text-lg break-words">{fresh.name}</CardTitle>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="space-y-1">
 				{fresh.price && (
-					<div className="text-sm">
-						Price:{" "}
+					<div className="text-sm flex flex-wrap gap-x-2">
+						<span>Price:</span>
 						<span className="text-sm text-muted-foreground">
 							${fresh.price.toFixed(2)}
 						</span>
@@ -35,8 +35,8 @@ export function FreshCard({ fresh, onEdit }: FreshCardProps) {
 				)}
 
 				{fresh.purchase_date && (
-					<div className="text-sm">
-						Purchased:{" "}
+					<div className="text-sm flex flex-wrap gap-x-2">
+						<span>Purchased:</span>
 						<span className="text-sm text-muted-foreground">
 							{formatDate(fresh.purchase_date)}
 						</span>
@@ -44,8 +44,8 @@ export function FreshCard({ fresh, onEdit }: FreshCardProps) {
 				)}
 
 				{fresh.prepared_date && (
-					<div className="text-sm">
-						Prepared:{" "}
+					<div className="text-sm flex flex-wrap gap-x-2">
+						<span>Prepared:</span>
 						<span className="text-sm text-muted-foreground">
 							{formatDate(fresh.prepared_date)}
 						</span>

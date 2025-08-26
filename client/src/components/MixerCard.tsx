@@ -35,10 +35,10 @@ export function MixerCard({ mixer, onEdit }: MixerCardProps) {
 					</span>
 				</div>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="space-y-1">
 				{mixer.price && (
-					<div className="text-sm">
-						Price:{" "}
+					<div className="text-sm flex flex-wrap gap-x-2">
+						<span>Price:</span>
 						<span className="text-sm text-muted-foreground">
 							${mixer.price.toFixed(2)}
 						</span>
@@ -46,8 +46,8 @@ export function MixerCard({ mixer, onEdit }: MixerCardProps) {
 				)}
 
 				{mixer.purchase_date && (
-					<div className="text-sm">
-						Purchased:{" "}
+					<div className="text-sm flex flex-wrap gap-x-2">
+						<span>Purchased:</span>
 						<span className="text-sm text-muted-foreground">
 							{formatDate(mixer.purchase_date)}
 						</span>
@@ -55,8 +55,8 @@ export function MixerCard({ mixer, onEdit }: MixerCardProps) {
 				)}
 
 				{mixer.opened && mixer.open_date && (
-					<div className="text-sm">
-						Opened:{" "}
+					<div className="text-sm flex flex-wrap gap-x-2">
+						<span>Opened:</span>
 						<span className="text-sm text-muted-foreground">
 							{formatDate(mixer.open_date)}
 						</span>
