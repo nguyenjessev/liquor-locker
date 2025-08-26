@@ -20,13 +20,17 @@ func NewMixerHandler(repo *repository.Repository) *MixerHandler {
 	return &MixerHandler{repo: repo}
 }
 
-// GetMixers godoc
-// @Summary Get all mixers
-// @Description Get a list of all mixers
-// @Tags mixers
-// @Produce json
-// @Success 200 {array} models.Mixer
-// @Router /mixers [get]
+// CreateMixers godoc
+// @Summary      Create a new mixer
+// @Description  Add a new mixer to the collection
+// @Tags         mixer
+// @Accept       json
+// @Produce      json
+// @Param        mixer body models.CreateMixerRequest true "Mixer item to create"
+// @Success      201 {object} models.MixerResponse
+// @Failure      400 {object} map[string]string
+// @Failure      500 {object} map[string]string
+// @Router       /mixers [post]
 func (h *MixerHandler) CreateMixer(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
