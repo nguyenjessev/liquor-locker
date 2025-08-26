@@ -20,6 +20,13 @@ func NewMixerHandler(repo *repository.Repository) *MixerHandler {
 	return &MixerHandler{repo: repo}
 }
 
+// GetMixers godoc
+// @Summary Get all mixers
+// @Description Get a list of all mixers
+// @Tags mixers
+// @Produce json
+// @Success 200 {array} models.Mixer
+// @Router /mixers [get]
 func (h *MixerHandler) CreateMixer(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -61,6 +68,15 @@ func (h *MixerHandler) CreateMixer(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// GetMixer godoc
+// @Summary Get a mixer by ID
+// @Description Get details of a specific mixer
+// @Tags mixers
+// @Produce json
+// @Param id path int true "Mixer ID"
+// @Success 200 {object} models.Mixer
+// @Failure 404 {object} map[string]string
+// @Router /mixers/{id} [get]
 func (h *MixerHandler) GetMixer(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -100,6 +116,17 @@ func (h *MixerHandler) GetMixer(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+
+// CreateMixer godoc
+// @Summary Create a new mixer
+// @Description Add a new mixer to the collection
+// @Tags mixers
+// @Accept json
+// @Produce json
+// @Param mixer body models.Mixer true "Mixer to create"
+// @Success 201 {object} models.Mixer
+// @Failure 400 {object} map[string]string
+// @Router /mixers [post]
 func (h *MixerHandler) DeleteMixer(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -130,6 +157,19 @@ func (h *MixerHandler) DeleteMixer(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+
+// UpdateMixer godoc
+// @Summary Update a mixer
+// @Description Update an existing mixer by ID
+// @Tags mixers
+// @Accept json
+// @Produce json
+// @Param id path int true "Mixer ID"
+// @Param mixer body models.Mixer true "Mixer to update"
+// @Success 200 {object} models.Mixer
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /mixers/{id} [put]
 func (h *MixerHandler) UpdateMixer(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -186,6 +226,16 @@ func (h *MixerHandler) UpdateMixer(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+
+// DeleteMixer godoc
+// @Summary Delete a mixer
+// @Description Delete a mixer by ID
+// @Tags mixers
+// @Produce json
+// @Param id path int true "Mixer ID"
+// @Success 204 {object} nil
+// @Failure 404 {object} map[string]string
+// @Router /mixers/{id} [delete]
 func (h *MixerHandler) GetAllMixers(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
