@@ -72,23 +72,14 @@ export function NewMixerForm({ onSubmit, loading }: NewMixerFormProps) {
 						<Label htmlFor="mixer-name-input" className="block">
 							Mixer Name
 						</Label>
-						<div className="flex flex-wrap gap-2">
-							<Input
-								type="text"
-								value={newMixerName}
-								onChange={(e) => setNewMixerName(e.target.value)}
-								className="w-auto min-w-0"
-								disabled={loading}
-								id="mixer-name-input"
-							/>
-							<Button
-								type="submit"
-								className="max-w-full"
-								disabled={loading || !newMixerName.trim()}
-							>
-								{loading ? "Adding..." : "Add Mixer"}
-							</Button>
-						</div>
+						<Input
+							type="text"
+							value={newMixerName}
+							onChange={(e) => setNewMixerName(e.target.value)}
+							className="w-auto min-w-0"
+							disabled={loading}
+							id="mixer-name-input"
+						/>
 					</div>
 
 					{/* Purchase date and price */}
@@ -146,7 +137,7 @@ export function NewMixerForm({ onSubmit, loading }: NewMixerFormProps) {
 						</div>
 
 						{/* Price */}
-						<div className="space-y-2">
+						<div className="space-y-2 max-w-full">
 							<Label htmlFor="price-input" className="block">
 								Price
 							</Label>
@@ -163,7 +154,7 @@ export function NewMixerForm({ onSubmit, loading }: NewMixerFormProps) {
 											setPrice(value);
 										}
 									}}
-									className="pl-6 w-32"
+									className="pl-6 w-32 max-w-full"
 									disabled={loading}
 									id="price-input"
 									placeholder="0.00"
@@ -289,6 +280,14 @@ export function NewMixerForm({ onSubmit, loading }: NewMixerFormProps) {
 							</div>
 						</div>
 					</div>
+
+					<Button
+						type="submit"
+						className="max-w-full"
+						disabled={loading || !newMixerName.trim()}
+					>
+						{loading ? "Adding..." : "Add Mixer"}
+					</Button>
 				</form>
 			</CardContent>
 		</Card>

@@ -72,23 +72,14 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 						<Label htmlFor="bottle-name-input" className="block">
 							Bottle Name
 						</Label>
-						<div className="flex flex-wrap gap-2">
-							<Input
-								type="text"
-								value={newBottleName}
-								onChange={(e) => setNewBottleName(e.target.value)}
-								className="w-auto min-w-0"
-								disabled={loading}
-								id="bottle-name-input"
-							/>
-							<Button
-								type="submit"
-								className="max-w-full"
-								disabled={loading || !newBottleName.trim()}
-							>
-								{loading ? "Adding..." : "Add Bottle"}
-							</Button>
-						</div>
+						<Input
+							type="text"
+							value={newBottleName}
+							onChange={(e) => setNewBottleName(e.target.value)}
+							className="w-auto min-w-0"
+							disabled={loading}
+							id="bottle-name-input"
+						/>
 					</div>
 
 					{/* Purchase date and price */}
@@ -292,6 +283,14 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 							</div>
 						</div>
 					</div>
+
+					<Button
+						type="submit"
+						className="max-w-full"
+						disabled={loading || !newBottleName.trim()}
+					>
+						{loading ? "Adding..." : "Add Bottle"}
+					</Button>
 				</form>
 			</CardContent>
 		</Card>

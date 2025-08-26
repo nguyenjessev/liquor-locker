@@ -70,23 +70,14 @@ export function NewFreshForm({ onSubmit, loading }: NewFreshFormProps) {
 						<Label htmlFor="fresh-name-input" className="block">
 							Fresh Ingredient Name
 						</Label>
-						<div className="flex flex-wrap gap-2">
-							<Input
-								type="text"
-								value={newFreshName}
-								onChange={(e) => setNewFreshName(e.target.value)}
-								className="w-auto min-w-0"
-								disabled={loading}
-								id="fresh-name-input"
-							/>
-							<Button
-								type="submit"
-								className="max-w-full"
-								disabled={loading || !newFreshName.trim()}
-							>
-								{loading ? "Adding..." : "Add Ingredient"}
-							</Button>
-						</div>
+						<Input
+							type="text"
+							value={newFreshName}
+							onChange={(e) => setNewFreshName(e.target.value)}
+							className="w-auto min-w-0"
+							disabled={loading}
+							id="fresh-name-input"
+						/>
 					</div>
 
 					{/* Purchase date and price */}
@@ -145,7 +136,7 @@ export function NewFreshForm({ onSubmit, loading }: NewFreshFormProps) {
 						</div>
 
 						{/* Price */}
-						<div className="space-y-2">
+						<div className="space-y-2 max-w-full">
 							<Label htmlFor="price-input" className="block">
 								Price
 							</Label>
@@ -162,7 +153,7 @@ export function NewFreshForm({ onSubmit, loading }: NewFreshFormProps) {
 											setPrice(value);
 										}
 									}}
-									className="pl-6 w-32"
+									className="pl-6 w-32 max-w-full"
 									disabled={loading}
 									id="price-input"
 									placeholder="0.00"
@@ -223,6 +214,14 @@ export function NewFreshForm({ onSubmit, loading }: NewFreshFormProps) {
 							)}
 						</div>
 					</div>
+
+					<Button
+						type="submit"
+						className="max-w-full"
+						disabled={loading || !newFreshName.trim()}
+					>
+						{loading ? "Adding..." : "Add Ingredient"}
+					</Button>
 				</form>
 			</CardContent>
 		</Card>
