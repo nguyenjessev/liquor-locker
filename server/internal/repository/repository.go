@@ -61,11 +61,11 @@ func (r *Repository) CreateBottle(ctx context.Context, bottle *models.Bottle) (*
 		return nil, ErrNilBottle
 	}
 	query := `
-		INSERT INTO bottles (name, opened, open_date, purchase_date, created_at, updated_at)
-		VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
+		INSERT INTO bottles (name, opened, open_date, purchase_date, price, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))
 		RETURNING id, created_at, updated_at`
 
-	err := r.DB.QueryRowContext(ctx, query, bottle.Name, bottle.Opened, bottle.OpenDate, bottle.PurchaseDate).Scan(&bottle.ID, &bottle.CreatedAt, &bottle.UpdatedAt)
+	err := r.DB.QueryRowContext(ctx, query, bottle.Name, bottle.Opened, bottle.OpenDate, bottle.PurchaseDate, bottle.Price).Scan(&bottle.ID, &bottle.CreatedAt, &bottle.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create bottle: %v", err)
 	}
@@ -78,10 +78,10 @@ func (r *Repository) CreateMixer(ctx context.Context, mixer *models.Mixer) (*mod
 		return nil, ErrNilMixer
 	}
 	query := `
-		INSERT INTO mixers (name, opened, open_date, purchase_date, created_at, updated_at)
-		VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
+		INSERT INTO mixers (name, opened, open_date, purchase_date, price, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))
 		RETURNING id, created_at, updated_at`
-	err := r.DB.QueryRowContext(ctx, query, mixer.Name, mixer.Opened, mixer.OpenDate, mixer.PurchaseDate).Scan(&mixer.ID, &mixer.CreatedAt, &mixer.UpdatedAt)
+	err := r.DB.QueryRowContext(ctx, query, mixer.Name, mixer.Opened, mixer.OpenDate, mixer.PurchaseDate, mixer.Price).Scan(&mixer.ID, &mixer.CreatedAt, &mixer.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create mixer: %v", err)
 	}
@@ -92,11 +92,11 @@ var ErrMixerNotFound = errors.New("mixer not found")
 
 func (r *Repository) GetMixerByID(ctx context.Context, id int) (*models.Mixer, error) {
 	query := `
-		SELECT id, name, opened, open_date, purchase_date, created_at, updated_at
+		SELECT id, name, opened, open_date, purchase_date, price, created_at, updated_at
 		FROM mixers
 		WHERE id = ?`
 	var mixer models.Mixer
-	err := r.DB.QueryRowContext(ctx, query, id).Scan(&mixer.ID, &mixer.Name, &mixer.Opened, &mixer.OpenDate, &mixer.PurchaseDate, &mixer.CreatedAt, &mixer.UpdatedAt)
+	err := r.DB.QueryRowContext(ctx, query, id).Scan(&mixer.ID, &mixer.Name, &mixer.Opened, &mixer.OpenDate, &mixer.PurchaseDate, &mixer.Price, &mixer.CreatedAt, &mixer.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrMixerNotFound
@@ -110,12 +110,12 @@ var ErrBottleNotFound = errors.New("bottle not found")
 
 func (r *Repository) GetBottleByID(ctx context.Context, id int) (*models.Bottle, error) {
 	query := `
-		SELECT id, name, opened, open_date, purchase_date, created_at, updated_at
+		SELECT id, name, opened, open_date, purchase_date, price, created_at, updated_at
 		FROM bottles
 		WHERE id = ?`
 
 	var bottle models.Bottle
-	err := r.DB.QueryRowContext(ctx, query, id).Scan(&bottle.ID, &bottle.Name, &bottle.Opened, &bottle.OpenDate, &bottle.PurchaseDate, &bottle.CreatedAt, &bottle.UpdatedAt)
+	err := r.DB.QueryRowContext(ctx, query, id).Scan(&bottle.ID, &bottle.Name, &bottle.Opened, &bottle.OpenDate, &bottle.PurchaseDate, &bottle.Price, &bottle.CreatedAt, &bottle.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrBottleNotFound
@@ -162,7 +162,7 @@ func (r *Repository) DeleteMixerByID(ctx context.Context, id int) error {
 
 func (r *Repository) GetAllBottles(ctx context.Context) ([]*models.Bottle, error) {
 	query := `
-		SELECT id, name, opened, open_date, purchase_date, created_at, updated_at
+		SELECT id, name, opened, open_date, purchase_date, price, created_at, updated_at
 		FROM bottles
 		ORDER BY created_at DESC`
 	rows, err := r.DB.QueryContext(ctx, query)
@@ -174,7 +174,7 @@ func (r *Repository) GetAllBottles(ctx context.Context) ([]*models.Bottle, error
 	var bottles []*models.Bottle
 	for rows.Next() {
 		var bottle models.Bottle
-		err := rows.Scan(&bottle.ID, &bottle.Name, &bottle.Opened, &bottle.OpenDate, &bottle.PurchaseDate, &bottle.CreatedAt, &bottle.UpdatedAt)
+		err := rows.Scan(&bottle.ID, &bottle.Name, &bottle.Opened, &bottle.OpenDate, &bottle.PurchaseDate, &bottle.Price, &bottle.CreatedAt, &bottle.UpdatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan bottle: %v", err)
 		}
@@ -190,7 +190,7 @@ func (r *Repository) GetAllBottles(ctx context.Context) ([]*models.Bottle, error
 
 func (r *Repository) GetAllMixers(ctx context.Context) ([]*models.Mixer, error) {
 	query := `
-		SELECT id, name, opened, open_date, purchase_date, created_at, updated_at
+		SELECT id, name, opened, open_date, purchase_date, price, created_at, updated_at
 		FROM mixers
 		ORDER BY created_at DESC`
 	rows, err := r.DB.QueryContext(ctx, query)
@@ -202,7 +202,7 @@ func (r *Repository) GetAllMixers(ctx context.Context) ([]*models.Mixer, error) 
 	var mixers []*models.Mixer
 	for rows.Next() {
 		var mixer models.Mixer
-		err := rows.Scan(&mixer.ID, &mixer.Name, &mixer.Opened, &mixer.OpenDate, &mixer.PurchaseDate, &mixer.CreatedAt, &mixer.UpdatedAt)
+		err := rows.Scan(&mixer.ID, &mixer.Name, &mixer.Opened, &mixer.OpenDate, &mixer.PurchaseDate, &mixer.Price, &mixer.CreatedAt, &mixer.UpdatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan mixer: %v", err)
 		}
@@ -220,17 +220,18 @@ func (r *Repository) UpdateBottle(ctx context.Context, id int, updates *models.B
 	}
 	query := `
 		UPDATE bottles
-		SET name = ?, opened = ?, open_date = ?, purchase_date = ?, updated_at = datetime('now')
+		SET name = ?, opened = ?, open_date = ?, purchase_date = ?, price = ?, updated_at = datetime('now')
 		WHERE id = ?
-		RETURNING id, name, opened, open_date, purchase_date, created_at, updated_at`
+		RETURNING id, name, opened, open_date, purchase_date, price, created_at, updated_at`
 
 	var bottle models.Bottle
-	err := r.DB.QueryRowContext(ctx, query, updates.Name, updates.Opened, updates.OpenDate, updates.PurchaseDate, id).Scan(
+	err := r.DB.QueryRowContext(ctx, query, updates.Name, updates.Opened, updates.OpenDate, updates.PurchaseDate, updates.Price, id).Scan(
 		&bottle.ID,
 		&bottle.Name,
 		&bottle.Opened,
 		&bottle.OpenDate,
 		&bottle.PurchaseDate,
+		&bottle.Price,
 		&bottle.CreatedAt,
 		&bottle.UpdatedAt,
 	)
@@ -250,17 +251,18 @@ func (r *Repository) UpdateMixer(ctx context.Context, id int, updates *models.Mi
 	}
 	query := `
 		UPDATE mixers
-		SET name = ?, opened = ?, open_date = ?, purchase_date = ?, updated_at = datetime('now')
+		SET name = ?, opened = ?, open_date = ?, purchase_date = ?, price = ?, updated_at = datetime('now')
 		WHERE id = ?
-		RETURNING id, name, opened, open_date, purchase_date, created_at, updated_at`
+		RETURNING id, name, opened, open_date, purchase_date, price, created_at, updated_at`
 
 	var mixer models.Mixer
-	err := r.DB.QueryRowContext(ctx, query, updates.Name, updates.Opened, updates.OpenDate, updates.PurchaseDate, id).Scan(
+	err := r.DB.QueryRowContext(ctx, query, updates.Name, updates.Opened, updates.OpenDate, updates.PurchaseDate, updates.Price, id).Scan(
 		&mixer.ID,
 		&mixer.Name,
 		&mixer.Opened,
 		&mixer.OpenDate,
 		&mixer.PurchaseDate,
+		&mixer.Price,
 		&mixer.CreatedAt,
 		&mixer.UpdatedAt,
 	)
@@ -279,11 +281,11 @@ func (r *Repository) CreateFresh(ctx context.Context, fresh *models.Fresh) (*mod
 	}
 
 	query := `
-		INSERT INTO fresh (name, prepared_date, purchase_date, created_at, updated_at)
-		VALUES (?, ?, ?, datetime('now'), datetime('now'))
+		INSERT INTO fresh (name, prepared_date, purchase_date, price, created_at, updated_at)
+		VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
 		RETURNING id, created_at, updated_at`
 
-	err := r.DB.QueryRowContext(ctx, query, fresh.Name, fresh.PreparedDate, fresh.PurchaseDate).Scan(&fresh.ID, &fresh.CreatedAt, &fresh.UpdatedAt)
+	err := r.DB.QueryRowContext(ctx, query, fresh.Name, fresh.PreparedDate, fresh.PurchaseDate, fresh.Price).Scan(&fresh.ID, &fresh.CreatedAt, &fresh.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create fresh item: %v", err)
 	}
@@ -293,12 +295,12 @@ func (r *Repository) CreateFresh(ctx context.Context, fresh *models.Fresh) (*mod
 
 func (r *Repository) GetFreshByID(ctx context.Context, id int) (*models.Fresh, error) {
 	query := `
-		SELECT id, name, prepared_date, purchase_date, created_at, updated_at
+		SELECT id, name, prepared_date, purchase_date, price, created_at, updated_at
 		FROM fresh
 		WHERE id = ?`
 
 	var fresh models.Fresh
-	err := r.DB.QueryRowContext(ctx, query, id).Scan(&fresh.ID, &fresh.Name, &fresh.PreparedDate, &fresh.PurchaseDate, &fresh.CreatedAt, &fresh.UpdatedAt)
+	err := r.DB.QueryRowContext(ctx, query, id).Scan(&fresh.ID, &fresh.Name, &fresh.PreparedDate, &fresh.PurchaseDate, &fresh.Price, &fresh.CreatedAt, &fresh.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrFreshNotFound
@@ -332,7 +334,7 @@ func (r *Repository) DeleteFreshByID(ctx context.Context, id int) error {
 
 func (r *Repository) GetAllFresh(ctx context.Context) ([]*models.Fresh, error) {
 	query := `
-		SELECT id, name, prepared_date, purchase_date, created_at, updated_at
+		SELECT id, name, prepared_date, purchase_date, price, created_at, updated_at
 		FROM fresh
 		ORDER BY created_at DESC`
 
@@ -345,7 +347,7 @@ func (r *Repository) GetAllFresh(ctx context.Context) ([]*models.Fresh, error) {
 	var freshItems []*models.Fresh
 	for rows.Next() {
 		var fresh models.Fresh
-		err := rows.Scan(&fresh.ID, &fresh.Name, &fresh.PreparedDate, &fresh.PurchaseDate, &fresh.CreatedAt, &fresh.UpdatedAt)
+		err := rows.Scan(&fresh.ID, &fresh.Name, &fresh.PreparedDate, &fresh.PurchaseDate, &fresh.Price, &fresh.CreatedAt, &fresh.UpdatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan fresh item: %v", err)
 		}
@@ -367,16 +369,17 @@ func (r *Repository) UpdateFresh(ctx context.Context, id int, updates *models.Fr
 
 	query := `
 		UPDATE fresh
-		SET name = ?, prepared_date = ?, purchase_date = ?, updated_at = datetime('now')
+		SET name = ?, prepared_date = ?, purchase_date = ?, price = ?, updated_at = datetime('now')
 		WHERE id = ?
-		RETURNING id, name, prepared_date, purchase_date, created_at, updated_at`
+		RETURNING id, name, prepared_date, purchase_date, price, created_at, updated_at`
 
 	var fresh models.Fresh
-	err := r.DB.QueryRowContext(ctx, query, updates.Name, updates.PreparedDate, updates.PurchaseDate, id).Scan(
+	err := r.DB.QueryRowContext(ctx, query, updates.Name, updates.PreparedDate, updates.PurchaseDate, updates.Price, id).Scan(
 		&fresh.ID,
 		&fresh.Name,
 		&fresh.PreparedDate,
 		&fresh.PurchaseDate,
+		&fresh.Price,
 		&fresh.CreatedAt,
 		&fresh.UpdatedAt,
 	)

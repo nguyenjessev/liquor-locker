@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { Mixer } from "@/types/mixer";
 import { format, startOfDay } from "date-fns";
 import { Calendar as CalendarIcon, X } from "lucide-react";
@@ -29,6 +30,7 @@ interface MixerEditModalProps {
 			opened: boolean;
 			open_date?: Date | null;
 			purchase_date?: Date | null;
+			price?: number | null;
 		},
 	) => Promise<void>;
 	loading?: boolean;
@@ -50,6 +52,7 @@ export function MixerEditModal({
 	const [hasChanges, setHasChanges] = useState(false);
 	const [purchaseDateOpen, setPurchaseDateOpen] = useState(false);
 	const [openDateOpen, setOpenDateOpen] = useState(false);
+	const [price, setPrice] = useState<string>("");
 
 	useEffect(() => {
 		if (open && mixer) {
@@ -57,6 +60,7 @@ export function MixerEditModal({
 			setIsOpened(mixer.opened);
 			setPurchaseDate(mixer.purchase_date || null);
 			setOpenDate(mixer.open_date || null);
+			setPrice(mixer.price?.toFixed(2) || "");
 			setHasChanges(false);
 		}
 	}, [open, mixer]);
@@ -71,6 +75,7 @@ export function MixerEditModal({
 				opened: isOpened,
 				open_date: isOpened ? openDate : null,
 				purchase_date: purchaseDate,
+				price: parseFloat(price) || null,
 			});
 			onOpenChange(false);
 		} catch (error) {
@@ -81,204 +86,238 @@ export function MixerEditModal({
 	};
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="sm:max-w-[540px]">
 				<DialogHeader>
 					<DialogTitle>Edit Mixer: {mixer?.name}</DialogTitle>
 				</DialogHeader>
-				<div className="grid gap-4 py-4 max-w-full">
+				<div className="flex flex-col gap-4">
+					{/* Name */}
 					<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-						<p className="font-medium">Name</p>
-						<div className="sm:col-span-3">
-							<Input
-								className="w-full"
-								value={editedName}
-								onChange={(e) => {
-									setEditedName(e.target.value);
-									setHasChanges(true);
-								}}
-								disabled={loading || isSaving}
-							/>
-						</div>
+						<Label htmlFor="name-input" className="font-medium">
+							Name
+						</Label>
+						<Input
+							className="w-full sm:col-span-3"
+							value={editedName}
+							onChange={(e) => {
+								setEditedName(e.target.value);
+								setHasChanges(true);
+							}}
+							disabled={loading || isSaving}
+							id="name-input"
+						/>
 					</div>
+
+					{/* Purchase date */}
 					<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-						<p className="font-medium">Purchase Date</p>
+						<Label htmlFor="purchase-date-input" className="font-medium">
+							Purchase Date
+						</Label>
 						<div className="sm:col-span-3 flex items-center gap-2">
-							<div className="flex items-center gap-2 min-w-0 flex-1">
-								<Popover
-									open={purchaseDateOpen}
-									onOpenChange={setPurchaseDateOpen}
+							<Popover
+								open={purchaseDateOpen}
+								onOpenChange={setPurchaseDateOpen}
+							>
+								<PopoverTrigger asChild className="min-w-0 flex-1">
+									<Button
+										variant="outline"
+										className={`justify-start overflow-hidden ${!purchaseDate && "text-muted-foreground"}`}
+										disabled={loading || isSaving}
+										id="purchase-date-input"
+									>
+										<CalendarIcon />
+										<span className="truncate">
+											{purchaseDate ? format(purchaseDate, "PPP") : "No date"}
+										</span>
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent
+									className="w-auto p-0 pointer-events-auto"
+									align="start"
 								>
-									<PopoverTrigger asChild className="min-w-0 flex-1">
-										<Button
-											variant="outline"
-											className={`min-w-0 flex-1 justify-start text-left font-normal whitespace-nowrap overflow-hidden ${!purchaseDate && "text-muted-foreground"}`}
-											disabled={loading || isSaving}
-										>
-											<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-											<span className="truncate">
-												{purchaseDate
-													? format(purchaseDate, "PPP")
-													: "No date set"}
-											</span>
-										</Button>
-									</PopoverTrigger>
-									<PopoverContent className="w-auto p-0" align="start">
-										<Calendar
-											mode="single"
-											selected={
-												purchaseDate ? startOfDay(purchaseDate) : undefined
-											}
-											onSelect={(date) => {
-												setPurchaseDate(date ? startOfDay(date) : null);
-												setHasChanges(true);
-												setPurchaseDateOpen(false);
-											}}
-											weekStart={localStorage.getItem("weekStart") || "0"}
-											autoFocus
-										/>
-									</PopoverContent>
-								</Popover>
-							</div>
+									<Calendar
+										mode="single"
+										selected={
+											purchaseDate ? startOfDay(purchaseDate) : undefined
+										}
+										onSelect={(date) => {
+											setPurchaseDate(date ? startOfDay(date) : null);
+											setHasChanges(true);
+											setPurchaseDateOpen(false);
+										}}
+										weekStart={localStorage.getItem("weekStart") || "0"}
+										autoFocus
+									/>
+								</PopoverContent>
+							</Popover>
 							{purchaseDate && (
 								<Button
 									variant="ghost"
 									size="icon"
-									className="h-9 w-9 text-muted-foreground hover:text-destructive shrink-0"
+									className="text-muted-foreground hover:text-destructive"
 									onClick={() => {
 										setPurchaseDate(null);
 										setHasChanges(true);
 									}}
 									disabled={loading || isSaving}
 								>
-									<X className="h-4 w-4" />
+									<X />
 								</Button>
 							)}
 						</div>
 					</div>
-					{mixer && (
-						<>
-							<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-								<p className="font-medium">Status</p>
-								<button
-									onClick={() => {
-										const newOpenedState = !isOpened;
-										setIsOpened(newOpenedState);
-										if (newOpenedState) {
-											setOpenDate(startOfDay(new Date()));
-										} else {
-											setOpenDate(null);
-										}
-										setHasChanges(true);
-									}}
-									disabled={loading || isSaving}
-									className={`col-span-3 relative inline-flex h-9 w-[160px] items-center rounded-full border-2 border-border transition-colors duration-300 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-										isOpened ? "bg-secondary" : "bg-muted"
-									}`}
-									role="switch"
-									aria-checked={isOpened}
-								>
-									{/* Sliding thumb with text */}
-									<div
-										className={`relative z-10 flex h-7 w-[72px] items-center justify-center rounded-full bg-background shadow-md transition-all duration-300 ease-in-out ${
-											isOpened ? "translate-x-[80px]" : "translate-x-1"
-										}`}
-									>
-										<span className="text-xs font-medium">
-											{isOpened ? "Opened" : "Unopened"}
-										</span>
-									</div>
 
-									{/* Background text */}
-									<div className="absolute inset-0 flex items-center justify-between px-4">
-										<span
-											className={`text-xs font-medium transition-opacity duration-300 ${
-												isOpened ? "opacity-50" : "opacity-0"
-											}`}
-										>
-											Unopened
-										</span>
-										<span
-											className={`text-xs font-medium transition-opacity duration-300 ${
-												isOpened ? "opacity-0" : "opacity-50"
-											}`}
-										>
-											Opened
-										</span>
-									</div>
-									<span className="sr-only">
-										{isOpened ? "Mark as unopened" : "Mark as opened"}
-									</span>
-								</button>
-							</div>
-							<div
-								className="overflow-hidden transition-[max-height,opacity,margin] duration-300 ease-in-out"
-								style={{
-									maxHeight: isOpened ? "80px" : "0",
-									marginTop: isOpened ? "1rem" : "0",
-									opacity: isOpened ? 1 : 0,
+					{/* Price */}
+					<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+						<Label htmlFor="price-input" className="font-medium">
+							Price
+						</Label>
+						<div className="relative sm:col-span-3">
+							<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+								$
+							</span>
+							<Input
+								type="text"
+								className="pl-6 max-w-full"
+								value={price}
+								onChange={(e) => {
+									const value = e.target.value;
+									if (value === "" || /^\d*\.?\d*$/.test(value)) {
+										setPrice(value);
+									}
+									setHasChanges(true);
 								}}
+								disabled={loading || isSaving}
+								placeholder="0.00"
+								id="price-input"
+							/>
+						</div>
+					</div>
+
+					{/* Status */}
+					<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+						<Label htmlFor="status-input" className="font-medium">
+							Status
+						</Label>
+						<button
+							onClick={() => {
+								const newOpenedState = !isOpened;
+								setIsOpened(newOpenedState);
+								if (newOpenedState) {
+									setOpenDate(startOfDay(new Date()));
+								} else {
+									setOpenDate(null);
+								}
+								setHasChanges(true);
+							}}
+							disabled={loading || isSaving}
+							className={`col-span-3 relative h-9 w-45 items-center rounded-full border-1 border-border transition-colors duration-100 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+								isOpened ? "bg-secondary" : "bg-muted"
+							}`}
+							role="switch"
+							aria-checked={isOpened}
+							id="status-input"
+						>
+							{/* Sliding thumb with text */}
+							<div
+								className={`grid place-items-center h-full w-1/2 rounded-full bg-background shadow-md transition-all duration-100 ease-in-out ${
+									isOpened ? "translate-x-[100%]" : "translate-x-0"
+								}`}
 							>
-								<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-									<p className="font-medium">Open Date</p>
-									<div className="sm:col-span-3 flex items-center gap-2">
-										<div className="flex items-center gap-2 min-w-0 flex-1">
-											<Popover
-												open={openDateOpen}
-												onOpenChange={setOpenDateOpen}
-											>
-												<PopoverTrigger asChild className="min-w-0 flex-1">
-													<Button
-														variant="outline"
-														className={`min-w-0 flex-1 justify-start text-left font-normal whitespace-nowrap overflow-hidden ${!openDate && "text-muted-foreground"}`}
-														disabled={loading || isSaving}
-													>
-														<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-														<span className="truncate">
-															{openDate
-																? format(openDate, "PPP")
-																: "No date set"}
-														</span>
-													</Button>
-												</PopoverTrigger>
-												<PopoverContent className="w-auto p-0" align="start">
-													<Calendar
-														mode="single"
-														selected={
-															openDate ? startOfDay(openDate) : undefined
-														}
-														onSelect={(date) => {
-															setOpenDate(date ? startOfDay(date) : null);
-															setHasChanges(true);
-															setOpenDateOpen(false);
-														}}
-														weekStart={localStorage.getItem("weekStart") || "0"}
-														autoFocus
-													/>
-												</PopoverContent>
-											</Popover>
-										</div>
-										{openDate && (
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-9 w-9 text-muted-foreground hover:text-destructive shrink-0"
-												onClick={() => {
-													setOpenDate(null);
-													setHasChanges(true);
-												}}
-												disabled={loading || isSaving}
-											>
-												<X className="h-4 w-4" />
-											</Button>
-										)}
-									</div>
-								</div>
+								<span className="text-xs">
+									{isOpened ? "Opened" : "Unopened"}
+								</span>
 							</div>
-						</>
-					)}
+
+							{/* Background text */}
+							<div className="absolute inset-0 flex items-center justify-between px-4">
+								<span
+									className={`text-xs transition-opacity duration-100 ${
+										isOpened ? "opacity-50" : "opacity-0"
+									}`}
+								>
+									Unopened
+								</span>
+								<span
+									className={`text-xs transition-opacity duration-100 ${
+										isOpened ? "opacity-0" : "opacity-50"
+									}`}
+								>
+									Opened
+								</span>
+							</div>
+							<span className="sr-only">
+								{isOpened ? "Mark as unopened" : "Mark as opened"}
+							</span>
+						</button>
+					</div>
+
+					{/* Open date */}
+					<div
+						className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4 overflow-hidden transition-[max-height,opacity] duration-100 ease-in-out"
+						style={{
+							maxHeight: isOpened ? "1000px" : "0",
+							opacity: isOpened ? 1 : 0,
+						}}
+					>
+						<Label htmlFor="open-date-input" className="font-medium">
+							Open Date
+						</Label>
+						<div className="sm:col-span-3 flex items-center gap-2">
+							<div className="flex items-center gap-2 min-w-0 flex-1">
+								<Popover open={openDateOpen} onOpenChange={setOpenDateOpen}>
+									<PopoverTrigger asChild className="min-w-0 flex-1">
+										<Button
+											variant="outline"
+											className={`justify-start overflow-hidden ${!openDate && "text-muted-foreground"}`}
+											disabled={loading || isSaving}
+										>
+											<CalendarIcon />
+											<span className="truncate">
+												{openDate ? format(openDate, "PPP") : "No date"}
+											</span>
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent
+										className="w-auto p-0 pointer-events-auto"
+										align="start"
+									>
+										<Calendar
+											mode="single"
+											selected={openDate ? startOfDay(openDate) : undefined}
+											onSelect={(date) => {
+												setOpenDate(date ? startOfDay(date) : null);
+												setHasChanges(true);
+												setOpenDateOpen(false);
+											}}
+											weekStart={localStorage.getItem("weekStart") || "0"}
+											autoFocus
+										/>
+									</PopoverContent>
+								</Popover>
+								{openDate && (
+									<Button
+										variant="ghost"
+										size="icon"
+										className="text-muted-foreground hover:text-destructive"
+										onClick={() => {
+											setOpenDate(null);
+											setHasChanges(true);
+										}}
+										disabled={loading || isSaving}
+									>
+										<X />
+									</Button>
+								)}
+							</div>
+						</div>
+					</div>
 				</div>
+
+				{/* Control buttons */}
 				{mixer && (
-					<div className="mt-4 flex flex-wrap-reverse justify-end gap-2">
+					<div className="flex flex-wrap-reverse justify-end gap-2">
+						{/* Delete button */}
 						<Button
 							variant="ghost"
 							onClick={() => {
@@ -290,6 +329,8 @@ export function MixerEditModal({
 						>
 							Delete Mixer
 						</Button>
+
+						{/* Save button */}
 						<Button
 							variant="default"
 							onClick={handleSave}

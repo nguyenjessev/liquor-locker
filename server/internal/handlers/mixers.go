@@ -20,13 +20,17 @@ func NewMixerHandler(repo *repository.Repository) *MixerHandler {
 	return &MixerHandler{repo: repo}
 }
 
-// GetMixers godoc
-// @Summary Get all mixers
-// @Description Get a list of all mixers
-// @Tags mixers
-// @Produce json
-// @Success 200 {array} models.Mixer
-// @Router /mixers [get]
+// CreateMixers godoc
+// @Summary      Create a new mixer
+// @Description  Add a new mixer to the collection
+// @Tags         mixer
+// @Accept       json
+// @Produce      json
+// @Param        mixer body models.CreateMixerRequest true "Mixer item to create"
+// @Success      201 {object} models.MixerResponse
+// @Failure      400 {object} map[string]string
+// @Failure      500 {object} map[string]string
+// @Router       /mixers [post]
 func (h *MixerHandler) CreateMixer(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -44,6 +48,7 @@ func (h *MixerHandler) CreateMixer(w http.ResponseWriter, r *http.Request) {
 		Opened:       req.Opened,
 		OpenDate:     req.OpenDate,
 		PurchaseDate: req.PurchaseDate,
+		Price:        req.Price,
 	}
 
 	createdMixer, err := h.repo.CreateMixer(r.Context(), mixer)
@@ -63,9 +68,15 @@ func (h *MixerHandler) CreateMixer(w http.ResponseWriter, r *http.Request) {
 		Opened:       createdMixer.Opened,
 		OpenDate:     createdMixer.OpenDate,
 		PurchaseDate: createdMixer.PurchaseDate,
+		Price:        createdMixer.Price,
 	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // GetMixer godoc
@@ -111,22 +122,25 @@ func (h *MixerHandler) GetMixer(w http.ResponseWriter, r *http.Request) {
 		Opened:       mixer.Opened,
 		OpenDate:     mixer.OpenDate,
 		PurchaseDate: mixer.PurchaseDate,
+		Price:        mixer.Price,
 	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
-
-// CreateMixer godoc
-// @Summary Create a new mixer
-// @Description Add a new mixer to the collection
-// @Tags mixers
-// @Accept json
-// @Produce json
-// @Param mixer body models.Mixer true "Mixer to create"
-// @Success 201 {object} models.Mixer
-// @Failure 400 {object} map[string]string
-// @Router /mixers [post]
+// DeleteMixer godoc
+// @Summary      Delete a mixer
+// @Description  Delete a mixer from the collection by its ID
+// @Tags         mixers
+// @Param        id   path      int  true  "Mixer ID"
+// @Success      204  {object}  nil
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /api/mixers/{id} [delete]
 func (h *MixerHandler) DeleteMixer(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -156,7 +170,6 @@ func (h *MixerHandler) DeleteMixer(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
-
 
 // UpdateMixer godoc
 // @Summary Update a mixer
@@ -198,6 +211,7 @@ func (h *MixerHandler) UpdateMixer(w http.ResponseWriter, r *http.Request) {
 		Opened:       req.Opened,
 		OpenDate:     req.OpenDate,
 		PurchaseDate: req.PurchaseDate,
+		Price:        req.Price,
 	}
 
 	updatedMixer, err := h.repo.UpdateMixer(r.Context(), id, updates)
@@ -221,21 +235,20 @@ func (h *MixerHandler) UpdateMixer(w http.ResponseWriter, r *http.Request) {
 		Opened:       updatedMixer.Opened,
 		OpenDate:     updatedMixer.OpenDate,
 		PurchaseDate: updatedMixer.PurchaseDate,
+		Price:        updatedMixer.Price,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
-
-// DeleteMixer godoc
-// @Summary Delete a mixer
-// @Description Delete a mixer by ID
-// @Tags mixers
-// @Produce json
-// @Param id path int true "Mixer ID"
-// @Success 204 {object} nil
-// @Failure 404 {object} map[string]string
-// @Router /mixers/{id} [delete]
+// GetAllMixers godoc
+// @Summary      Get all mixers
+// @Description  Returns a list of all mixers
+// @Tags         mixers
+// @Produce      json
+// @Success      200 {array} models.MixerResponse
+// @Failure      500 {object} map[string]string
+// @Router       /mixers [get]
 func (h *MixerHandler) GetAllMixers(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -257,8 +270,13 @@ func (h *MixerHandler) GetAllMixers(w http.ResponseWriter, r *http.Request) {
 			Opened:       mixer.Opened,
 			OpenDate:     mixer.OpenDate,
 			PurchaseDate: mixer.PurchaseDate,
+			Price:        mixer.Price,
 		})
 	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(responses)
+	if err := json.NewEncoder(w).Encode(responses); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }

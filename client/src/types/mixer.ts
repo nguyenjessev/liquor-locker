@@ -4,6 +4,7 @@ export interface Mixer {
 	opened: boolean;
 	open_date?: Date | null;
 	purchase_date?: Date | null;
+	price?: number | null;
 }
 
 export interface CreateMixerRequest {
@@ -11,4 +12,5 @@ export interface CreateMixerRequest {
 	opened: boolean;
 	open_date?: Date;
 	purchase_date?: Date;
+	price?: number | null;
 }

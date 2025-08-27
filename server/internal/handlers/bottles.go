@@ -44,16 +44,11 @@ func (h *BottleHandler) CreateBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bottle := &models.Bottle{
-		Name:   req.Name,
-		Opened: req.Opened,
-	}
-
-	if req.OpenDate != nil {
-		bottle.OpenDate = req.OpenDate
-	}
-
-	if req.PurchaseDate != nil {
-		bottle.PurchaseDate = req.PurchaseDate
+		Name:         req.Name,
+		Opened:       req.Opened,
+		OpenDate:     req.OpenDate,
+		PurchaseDate: req.PurchaseDate,
+		Price:        req.Price,
 	}
 
 	createdBottle, err := h.repo.CreateBottle(r.Context(), bottle)
@@ -73,6 +68,7 @@ func (h *BottleHandler) CreateBottle(w http.ResponseWriter, r *http.Request) {
 		Opened:       createdBottle.Opened,
 		OpenDate:     createdBottle.OpenDate,
 		PurchaseDate: createdBottle.PurchaseDate,
+		Price:        createdBottle.Price,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -129,6 +125,7 @@ func (h *BottleHandler) GetBottle(w http.ResponseWriter, r *http.Request) {
 		Opened:       bottle.Opened,
 		OpenDate:     bottle.OpenDate,
 		PurchaseDate: bottle.PurchaseDate,
+		Price:        bottle.Price,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -218,16 +215,11 @@ func (h *BottleHandler) UpdateBottle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updates := &models.Bottle{
-		Name:   req.Name,
-		Opened: req.Opened,
-	}
-
-	if req.OpenDate != nil {
-		updates.OpenDate = req.OpenDate
-	}
-
-	if req.PurchaseDate != nil {
-		updates.PurchaseDate = req.PurchaseDate
+		Name:         req.Name,
+		Opened:       req.Opened,
+		OpenDate:     req.OpenDate,
+		PurchaseDate: req.PurchaseDate,
+		Price:        req.Price,
 	}
 
 	updatedBottle, err := h.repo.UpdateBottle(r.Context(), id, updates)
@@ -251,6 +243,7 @@ func (h *BottleHandler) UpdateBottle(w http.ResponseWriter, r *http.Request) {
 		Opened:       updatedBottle.Opened,
 		OpenDate:     updatedBottle.OpenDate,
 		PurchaseDate: updatedBottle.PurchaseDate,
+		Price:        updatedBottle.Price,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -289,6 +282,7 @@ func (h *BottleHandler) GetAllBottles(w http.ResponseWriter, r *http.Request) {
 			Opened:       bottle.Opened,
 			OpenDate:     bottle.OpenDate,
 			PurchaseDate: bottle.PurchaseDate,
+			Price:        bottle.Price,
 		})
 	}
 
