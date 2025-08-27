@@ -78,6 +78,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 							onChange={(e) => setNewBottleName(e.target.value)}
 							className="w-auto min-w-0"
 							disabled={loading}
+							placeholder="Enter bottle name..."
 							id="bottle-name-input"
 						/>
 					</div>
@@ -141,7 +142,7 @@ export function NewBottleForm({ onSubmit, loading }: NewBottleFormProps) {
 						{/* Price */}
 						<div className="space-y-2 max-w-full">
 							<Label htmlFor="price-input" className="block">
-								Price
+								Price (optional)
 							</Label>
 							<div className="relative">
 								<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">

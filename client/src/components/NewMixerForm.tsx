@@ -78,6 +78,7 @@ export function NewMixerForm({ onSubmit, loading }: NewMixerFormProps) {
 							onChange={(e) => setNewMixerName(e.target.value)}
 							className="w-auto min-w-0"
 							disabled={loading}
+							placeholder="Enter mixer name..."
 							id="mixer-name-input"
 						/>
 					</div>
@@ -139,7 +140,7 @@ export function NewMixerForm({ onSubmit, loading }: NewMixerFormProps) {
 						{/* Price */}
 						<div className="space-y-2 max-w-full">
 							<Label htmlFor="price-input" className="block">
-								Price
+								Price (optional)
 							</Label>
 							<div className="relative">
 								<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">

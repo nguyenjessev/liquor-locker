@@ -76,6 +76,7 @@ export function NewFreshForm({ onSubmit, loading }: NewFreshFormProps) {
 							onChange={(e) => setNewFreshName(e.target.value)}
 							className="w-auto min-w-0"
 							disabled={loading}
+							placeholder="Enter fresh ingredient name..."
 							id="fresh-name-input"
 						/>
 					</div>
@@ -138,7 +139,7 @@ export function NewFreshForm({ onSubmit, loading }: NewFreshFormProps) {
 						{/* Price */}
 						<div className="space-y-2 max-w-full">
 							<Label htmlFor="price-input" className="block">
-								Price
+								Price (optional)
 							</Label>
 							<div className="relative">
 								<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
