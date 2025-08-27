@@ -26,30 +26,44 @@ Liquor Locker also offers the ability to bring your own API key to an OpenAI-com
 
 ### Docker Compose (recommended)
 
-1. Run:
-
-```sh
-docker compose up -d --build
+1. Create a `docker-compose.yml` file (or use the one provided) with the following contents:
+```yaml
+services:
+  liquor-locker:
+    # This project uses SemVer. Check the published packages for available versions.
+    # Available tags as of time of writing are latest, 2, 2.1, and 2.1.0.
+    image: ghcr.io/nguyenjessev/liquor-locker:2
+    ports:
+      # Change host port as needed to avoid collisions with other services.
+      - "8080:8080"
+    environment:
+      # Change as needed. Must match the URL the app will be served on. (E.g. https://subdomain.mydomain.com)
+      - ALLOWED_ORIGINS=https://localhost:8080
+    volumes:
+      # This is where the SQLite database will be stored. Change host directory to be mounted as needed.
+      - ./data:/app/internal/database/data
 ```
 
-2. Run this command to see the live logs of your server
+2. Run (if you need to rebuild the image for some reason, you may append the `--build` flag):
+```sh
+docker compose up -d
+```
 
+3. Run this command to see the live logs of your server
 ```sh
 docker compose logs -f
 ```
 
-3. Go to [http://localhost:8080](http://localhost:8080)
-
-4. (Optional) Configure your reverse proxy to serve the client from a URL other than `localhost`.
-
-5. Fill up your Liquor Locker!
+4. Go to [http://localhost:8080](http://localhost:8080)
+5. (Optional) Configure your reverse proxy to serve the client from a URL other than `localhost`.
+6. Fill up your Liquor Locker!
 
 ## Configuration
 
 - If you will be using a reverse proxy or otherwise serving the client from a URL other than `localhost`, you must set the `ALLOWED_ORIGINS` environment variable to the URL that your frontend will be accessed from. (E.g. `http://subdomain.my_domain.com`)
 - If you want to use the AI recommendations feature, deploy the app and then visit the web client. From there, go to the settings page and enter an API URL and your API key for your chosen service.
-- The API must support the OpenAI API standard. This includes OpenAI, Anthropic, and others. OpenRouter is also supported.
-- When choosing a model in the Magic Bartender, the model must support tool-calling and structured responses.
+  - The chosen API must support the OpenAI API standard. This includes OpenAI, Anthropic, and others. OpenRouter is also supported.
+  - When choosing a model in the Magic Bartender, the chosen model must support tool-calling and structured responses.
 
 
 ## Planned Features
