@@ -52,7 +52,7 @@ export function BottleEditModal({
 	const [hasChanges, setHasChanges] = useState(false);
 	const [purchaseDateOpen, setPurchaseDateOpen] = useState(false);
 	const [openDateOpen, setOpenDateOpen] = useState(false);
-	const [price, setPrice] = useState<number | null>(null);
+	const [price, setPrice] = useState<string>("");
 
 	useEffect(() => {
 		if (open && bottle) {
@@ -60,7 +60,7 @@ export function BottleEditModal({
 			setIsOpened(bottle.opened);
 			setPurchaseDate(bottle.purchase_date || null);
 			setOpenDate(bottle.open_date || null);
-			setPrice(bottle.price || null);
+			setPrice(bottle.price?.toFixed(2) || "");
 			setHasChanges(false);
 		}
 	}, [open, bottle]);
@@ -75,7 +75,7 @@ export function BottleEditModal({
 				opened: isOpened,
 				open_date: isOpened ? openDate : null,
 				purchase_date: purchaseDate,
-				price: price || null,
+				price: parseFloat(price) || null,
 			});
 			onOpenChange(false);
 		} catch (error) {
@@ -91,6 +91,7 @@ export function BottleEditModal({
 					<DialogTitle>Edit Bottle: {bottle?.name}</DialogTitle>
 				</DialogHeader>
 				<div className="flex flex-col gap-4">
+					{/* Name */}
 					<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
 						<Label htmlFor="name-input" className="font-medium">
 							Name
@@ -106,6 +107,8 @@ export function BottleEditModal({
 							id="name-input"
 						/>
 					</div>
+
+					{/* Purchase date */}
 					<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
 						<Label htmlFor="purchase-date-input" className="font-medium">
 							Purchase Date
@@ -163,6 +166,35 @@ export function BottleEditModal({
 							)}
 						</div>
 					</div>
+
+					{/* Price */}
+					<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+						<Label htmlFor="price-input" className="font-medium">
+							Price
+						</Label>
+						<div className="relative sm:col-span-3">
+							<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+								$
+							</span>
+							<Input
+								type="text"
+								className="pl-6 max-w-full"
+								value={price}
+								onChange={(e) => {
+									const value = e.target.value;
+									if (value === "" || /^\d*\.?\d*$/.test(value)) {
+										setPrice(value);
+									}
+									setHasChanges(true);
+								}}
+								disabled={loading || isSaving}
+								placeholder="0.00"
+								id="price-input"
+							/>
+						</div>
+					</div>
+
+					{/* Status */}
 					<div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
 						<Label htmlFor="status-input" className="font-medium">
 							Status
@@ -219,6 +251,8 @@ export function BottleEditModal({
 							</span>
 						</button>
 					</div>
+
+					{/* Open date */}
 					<div
 						className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4 overflow-hidden transition-[max-height,opacity] duration-100 ease-in-out"
 						style={{
