@@ -18,7 +18,7 @@ export function FreshCard({ fresh, onEdit }: FreshCardProps) {
 
 	return (
 		<Card
-			className="hover:shadow-md transition-shadow cursor-pointer gap-1"
+			className="hover:shadow-md transition-shadow cursor-pointer gap-0"
 			onClick={() => onEdit(fresh)}
 		>
 			<CardHeader>
