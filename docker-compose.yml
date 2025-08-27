@@ -1,12 +1,14 @@
 services:
   liquor-locker:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # This project uses SemVer. Check the published packages for available versions.
+    # Available tags as of time of writing are latest, 2, 2.1, and 2.1.0.
+    image: ghcr.io/nguyenjessev/liquor-locker:2
     ports:
+      # Change host port as needed to avoid collisions with other services.
       - "8080:8080"
     environment:
-      # This MUST be set to the URL that you will be accessing the app from, such as https://localhost:8080, https://mysubdomain.mydomain.com, etc. (I.e. the URL in your address bar when you use the app)
-      - ALLOWED_ORIGINS=http://localhost:8080
+      # Change as needed. Must match the URL the app will be served on. (E.g. https://subdomain.mydomain.com)
+      - ALLOWED_ORIGINS=https://localhost:8080
     volumes:
-      - ./data:/app/internal/database/data # This is where the SQLite database will be stored. 
+      # This is where the SQLite database will be stored. Change host directory to be mounted as needed.
+      - ./data:/app/internal/database/data
