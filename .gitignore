@@ -34,3 +34,7 @@ go.work.sum
 app.db
 
 server/dist
+
+.cursor
+.specify
+specs
