@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/invopop/jsonschema"
 	"github.com/nguyenjessev/liquor-locker/internal/models"
 	"github.com/nguyenjessev/liquor-locker/internal/repository"
 	"github.com/openai/openai-go/v2"
@@ -59,20 +58,6 @@ func (s *OpenAIService) SendPrompt(ctx context.Context, model, prompt string) (s
 	}
 	return resp.Choices[0].Message.Content, nil
 }
-
-func GenerateSchema[T any]() any {
-	reflector := jsonschema.Reflector{
-		AllowAdditionalProperties: false,
-		DoNotReference:            true,
-	}
-
-	var v T
-
-	schema := reflector.Reflect(v)
-	return schema
-}
-
-var CocktailRecommendationResponseSchema = GenerateSchema[models.CocktailRecommendationResponse]()
 
 func (s *OpenAIService) RecommendCocktail(ctx context.Context, repo *repository.Repository, model string) (*models.CocktailRecommendationResponse, error) {
 	params := openai.ChatCompletionNewParams{

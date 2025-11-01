@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/nguyenjessev/liquor-locker/internal/repository"
@@ -11,7 +12,7 @@ import (
 
 // AIHandler handles AI-related endpoints
 type AIHandler struct {
-	aiService *services.OpenAIService
+	aiService services.AIService
 	mu        sync.Mutex
 }
 
@@ -110,13 +111,14 @@ func (h *AIHandler) RecommendCocktailHandler(repo *repository.Repository) http.H
 
 // ConfigureRequest represents the request body for configuring the AI service
 type ConfigureRequest struct {
-	BaseURL string `json:"base_url"`
-	APIKey  string `json:"api_key"`
+	BaseURL  string `json:"base_url"`
+	APIKey   string `json:"api_key"`
+	Provider string `json:"provider"`
 }
 
 // Configure godoc
 // @Summary Configure the AI service
-// @Description Configure the OpenAI service with base URL and API key
+// @Description Configure the AI service with base URL, API key, and provider
 // @Tags ai
 // @Accept json
 // @Produce json
@@ -138,13 +140,14 @@ func (h *AIHandler) Configure(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.BaseURL == "" {
-		http.Error(w, "Base URL is required", http.StatusBadRequest)
-		return
-	}
-
 	h.mu.Lock()
 	defer h.mu.Unlock()
+
+	provider := determineProvider(req)
+	if provider == services.ProviderOpenAI && strings.TrimSpace(req.BaseURL) == "" {
+		http.Error(w, "Base URL is required for OpenAI provider", http.StatusBadRequest)
+		return
+	}
 
 	// Clean up old service if it exists
 	if h.aiService != nil {
@@ -154,15 +157,25 @@ func (h *AIHandler) Configure(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	h.aiService = services.NewOpenAIService(req.BaseURL, req.APIKey)
+	switch provider {
+	case services.ProviderAnthropic:
+		if req.BaseURL == "" {
+			// Anthropic defaults to the hosted API when no base URL is supplied.
+			h.aiService = services.NewAnthropicService("", req.APIKey)
+		} else {
+			h.aiService = services.NewAnthropicService(req.BaseURL, req.APIKey)
+		}
+	default:
+		h.aiService = services.NewOpenAIService(req.BaseURL, req.APIKey)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"status": "configured"})
 }
 
-// GetAIService returns the configured OpenAI service
-func (h *AIHandler) GetAIService() *services.OpenAIService {
+// GetAIService returns the configured AI service
+func (h *AIHandler) GetAIService() services.AIService {
 	return h.aiService
 }
 
@@ -191,5 +204,21 @@ func (h *AIHandler) ServiceStatusHandler(w http.ResponseWriter, r *http.Request)
 	if err := json.NewEncoder(w).Encode(status); err != nil {
 		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
 		return
+	}
+}
+
+func determineProvider(req ConfigureRequest) services.Provider {
+	provider := services.Provider(strings.ToLower(strings.TrimSpace(req.Provider)))
+	switch provider {
+	case services.ProviderAnthropic, services.ProviderOpenAI:
+		return provider
+	}
+
+	base := strings.ToLower(req.BaseURL)
+	switch {
+	case strings.Contains(base, "anthropic"):
+		return services.ProviderAnthropic
+	default:
+		return services.ProviderOpenAI
 	}
 }
