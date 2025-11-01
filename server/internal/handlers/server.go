@@ -19,6 +19,7 @@ type Server struct {
 	freshHandler   *FreshHandler
 	mixerHandler   *MixerHandler
 	aiHandler      *AIHandler
+	router         *http.ServeMux
 	allowedOrigins []string
 	apiKey         string
 }
@@ -36,7 +37,7 @@ func NewServer(repo *repository.Repository) *Server {
 		log.Println("WARNING: API_KEY not set. API will be unsecured.")
 	}
 
-	return &Server{
+	server := &Server{
 		repo:           repo,
 		bottleHandler:  NewBottleHandler(repo),
 		freshHandler:   NewFreshHandler(repo),
@@ -44,7 +45,34 @@ func NewServer(repo *repository.Repository) *Server {
 		aiHandler:      NewAIHandler(),
 		allowedOrigins: allowedOrigins,
 		apiKey:         apiKey,
+		router:         http.NewServeMux(),
 	}
+
+	server.registerRoutes()
+
+	return server
+}
+
+func (s *Server) registerRoutes() {
+	s.router.Handle("/swagger/", httpSwagger.WrapHandler)
+
+	s.router.HandleFunc("/api/bottles", s.handleBottlesCollection)
+	s.router.HandleFunc("/api/bottles/", s.handleBottleResource)
+
+	s.router.HandleFunc("/api/mixers", s.handleMixersCollection)
+	s.router.HandleFunc("/api/mixers/", s.handleMixerResource)
+
+	s.router.HandleFunc("/api/fresh", s.handleFreshCollection)
+	s.router.HandleFunc("/api/fresh/", s.handleFreshResource)
+
+	s.router.HandleFunc("/health", s.handleHealth)
+
+	s.router.HandleFunc("/api/ai/configure", s.aiHandler.Configure)
+	s.router.HandleFunc("/api/ai/models", s.aiHandler.ListModels)
+	s.router.HandleFunc("/api/ai/service", s.aiHandler.ServiceStatusHandler)
+	s.router.Handle("/api/cocktails/recommendation", s.aiHandler.RecommendCocktailHandler(s.repo))
+
+	s.router.Handle("/", http.FileServer(http.Dir("dist")))
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -53,59 +81,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	path := r.URL.Path
-
-	// Route handling
-	switch {
-	// Serve Swagger UI at /swagger/*
-	case strings.HasPrefix(path, "/swagger/"):
-		httpSwagger.WrapHandler(w, r)
-
-	case path == "/api/bottles" && r.Method == http.MethodPost:
-		s.bottleHandler.CreateBottle(w, r)
-	case path == "/api/bottles" && r.Method == http.MethodGet:
-		s.bottleHandler.GetAllBottles(w, r)
-	case strings.HasPrefix(path, "/api/bottles/") && r.Method == http.MethodGet:
-		s.bottleHandler.GetBottle(w, r)
-	case strings.HasPrefix(path, "/api/bottles/") && r.Method == http.MethodDelete:
-		s.bottleHandler.DeleteBottle(w, r)
-	case strings.HasPrefix(path, "/api/bottles/") && r.Method == http.MethodPut:
-		s.bottleHandler.UpdateBottle(w, r)
-
-	case path == "/api/mixers" && r.Method == http.MethodPost:
-		s.mixerHandler.CreateMixer(w, r)
-	case path == "/api/mixers" && r.Method == http.MethodGet:
-		s.mixerHandler.GetAllMixers(w, r)
-	case strings.HasPrefix(path, "/api/mixers/") && r.Method == http.MethodGet:
-		s.mixerHandler.GetMixer(w, r)
-	case strings.HasPrefix(path, "/api/mixers/") && r.Method == http.MethodDelete:
-		s.mixerHandler.DeleteMixer(w, r)
-	case strings.HasPrefix(path, "/api/mixers/") && r.Method == http.MethodPut:
-		s.mixerHandler.UpdateMixer(w, r)
-
-	case path == "/api/fresh" && r.Method == http.MethodPost:
-		s.freshHandler.CreateFresh(w, r)
-	case path == "/api/fresh" && r.Method == http.MethodGet:
-		s.freshHandler.GetAllFresh(w, r)
-	case strings.HasPrefix(path, "/api/fresh/") && r.Method == http.MethodGet:
-		s.freshHandler.GetFresh(w, r)
-	case strings.HasPrefix(path, "/api/fresh/") && r.Method == http.MethodDelete:
-		s.freshHandler.DeleteFresh(w, r)
-	case strings.HasPrefix(path, "/api/fresh/") && r.Method == http.MethodPut:
-		s.freshHandler.UpdateFresh(w, r)
-	case path == "/health":
-		s.handleHealth(w, r)
-	case path == "/api/ai/configure":
-		s.aiHandler.Configure(w, r)
-	case path == "/api/ai/models":
-		s.aiHandler.ListModels(w, r)
-	case path == "/api/ai/service" && r.Method == http.MethodGet:
-		s.aiHandler.ServiceStatusHandler(w, r)
-	case path == "/api/cocktails/recommendation" && r.Method == http.MethodPost:
-		s.aiHandler.RecommendCocktailHandler(s.repo)(w, r)
-	default:
-		http.FileServer(http.Dir("dist")).ServeHTTP(w, r)
-	}
+	s.router.ServeHTTP(w, r)
 }
 
 // handleSecurity applies security middleware and returns false if request should be blocked
@@ -174,6 +150,78 @@ func (s *Server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, `{"status": "ok"}`)
+}
+
+func (s *Server) handleBottlesCollection(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		s.bottleHandler.GetAllBottles(w, r)
+	case http.MethodPost:
+		s.bottleHandler.CreateBottle(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (s *Server) handleBottleResource(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		s.bottleHandler.GetBottle(w, r)
+	case http.MethodDelete:
+		s.bottleHandler.DeleteBottle(w, r)
+	case http.MethodPut:
+		s.bottleHandler.UpdateBottle(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (s *Server) handleMixersCollection(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		s.mixerHandler.GetAllMixers(w, r)
+	case http.MethodPost:
+		s.mixerHandler.CreateMixer(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (s *Server) handleMixerResource(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		s.mixerHandler.GetMixer(w, r)
+	case http.MethodDelete:
+		s.mixerHandler.DeleteMixer(w, r)
+	case http.MethodPut:
+		s.mixerHandler.UpdateMixer(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (s *Server) handleFreshCollection(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		s.freshHandler.GetAllFresh(w, r)
+	case http.MethodPost:
+		s.freshHandler.CreateFresh(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (s *Server) handleFreshResource(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		s.freshHandler.GetFresh(w, r)
+	case http.MethodDelete:
+		s.freshHandler.DeleteFresh(w, r)
+	case http.MethodPut:
+		s.freshHandler.UpdateFresh(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
 }
 
 func (s *Server) Start(port string) error {

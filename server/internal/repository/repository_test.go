@@ -3,6 +3,10 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -11,27 +15,46 @@ import (
 )
 
 func setupTestRepository(t *testing.T) *Repository {
+	t.Helper()
+
 	db, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		t.Fatalf("Failed to open test database: %v", err)
 	}
 
-	createTableSQL := `
-		CREATE TABLE bottles (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			opened BOOLEAN NOT NULL DEFAULT FALSE,
-			created_at DATETIME NOT NULL,
-			updated_at DATETIME NOT NULL,
-			open_date DATETIME,
-			purchase_date DATETIME
-		)`
-
-	if _, err := db.Exec(createTableSQL); err != nil {
-		t.Fatalf("Failed to create bottles table: %v", err)
-	}
+	applyMigrations(t, db)
 
 	return &Repository{DB: db}
+}
+
+func applyMigrations(t *testing.T, db *sql.DB) {
+	t.Helper()
+
+	migrationsDir := filepath.Join("..", "database", "migrations")
+	entries, err := os.ReadDir(migrationsDir)
+	if err != nil {
+		t.Fatalf("Failed to read migrations directory: %v", err)
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Name() < entries[j].Name()
+	})
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".up.sql") {
+			continue
+		}
+
+		path := filepath.Join(migrationsDir, entry.Name())
+		content, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("Failed to read migration %s: %v", entry.Name(), err)
+		}
+
+		if _, err := db.Exec(string(content)); err != nil {
+			t.Fatalf("Failed to execute migration %s: %v", entry.Name(), err)
+		}
+	}
 }
 
 func TestCreateBottle_Success(t *testing.T) {
