@@ -74,8 +74,6 @@ docker compose logs -f
 - "Strict Mode" for the Magic Bartender
 - Various Magic Bartender "personalities," including `Classic`, `Modern`, and `Experimental`
 - Ability to select specific ingredients that you would like to be used by the Magic Bartender
-- Support for local Ollama(?)
-- Tracking of bottle/ingredient prices
 - UPC scanning
 
 ## Local Development
