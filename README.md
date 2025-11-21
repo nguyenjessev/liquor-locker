@@ -1,3 +1,6 @@
+> [!NOTE]
+> I recently started a new job, so updates to Liquor Locker may be few and far between as I focus on my new role. However, please continue to raise issues and submit PRs, I still look at those immediately!
+
 # Liquor Locker
 
 Liquor Locker is a home bar management app to track your bottles and other ingredients.
